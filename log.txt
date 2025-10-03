@@ -1,0 +1,18 @@
+Refresh dir 
+Save config
+Refresh dir 
+Refresh dir C:/Users/jatan/AppData/Roaming/XXMI Launcher/WWMI/Mods/Shorekeeper
+Refresh dir 
+Refresh dir C:/Users/jatan/AppData/Roaming/XXMI Launcher/WWMI/Mods/++Uncategorized
+Refresh dir 
+Refresh dir C:/Users/jatan/AppData/Roaming/XXMI Launcher/WWMI/Mods/++Uncategorized
+Refresh dir 
+Quit
+Refresh dir 
+Save config
+Refresh dir 
+Quit
+Refresh dir 
+Save config
+Refresh dir 
+Quit

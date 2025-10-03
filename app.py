@@ -25,7 +25,7 @@ default={
        
     ],
     "categories":[
- { "name": "*Uncategorized", "icon": "/assets/ques.png" },
+        { "name": "*Uncategorized", "icon": "/assets/ques.png" },
 		{ "name": "Alto", "icon": "https://images.gamebanana.com/img/ico/ModCategory/6683c4ff33f3b.png" },
 		{ "name": "Baizhi", "icon": "https://images.gamebanana.com/img/ico/ModCategory/6683c39f41dda.png" },
 		{ "name": "Brant", "icon": "https://images.gamebanana.com/img/ico/ModCategory/67c981a895579.png" },
@@ -278,7 +278,7 @@ if not data["dir"]:
 else:
     refresh_dir()
 
-save_congif()
+save_congif()   
 
 # Flask routes
 
