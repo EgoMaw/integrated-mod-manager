@@ -84,3 +84,71 @@ WuWa Mod Manager is a desktop application that streamlines mod management for Wu
 - **Changelog Access**: View the changelog for each new version
 - **Update Directly**: Download and install the latest version from within the app
 ---
+---
+
+## Development Dependencies
+
+### Windows
+
+Tauri uses the **Microsoft C++ Build Tools** and **Microsoft Edge WebView2** for development on Windows.
+
+1.  Download the **[Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)** installer. During installation, ensure the **“Desktop development with C++”** option is checked.
+2.  Visit the **[WebView2 Runtime download](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section)** section. Download the **“Evergreen Bootstrapper”** and install it.
+
+### Rust
+
+Tauri is built with Rust and requires it for development.
+
+-   Visit **[https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)** to install `rustup`.
+-   Alternatively, use `winget` in PowerShell:
+    ```sh
+    winget install --id Rustlang.Rustup
+    ```
+
+### Node.js
+
+-   Go to the **[Node.js website](https://nodejs.org/)**, download the Long Term Support (LTS) version, and install it.
+-   Check if Node.js was installed successfully by running:
+    ```sh
+    node -v
+    # Expected output similar to: v20.10.0
+    
+    npm -v
+    # Expected output similar to: 10.2.3
+    ```
+
+---
+
+## Getting Started
+
+### Download
+
+Clone the repository using `git`:
+
+```sh
+git clone [https://github.com/jpbhatt21/wuwa-mod-manager.git](https://github.com/jpbhatt21/wuwa-mod-manager.git)
+```
+
+### Install
+
+Navigate into the project directory and install the necessary packages.
+
+```sh
+cd wuwa-mod-manager && npm i
+```
+
+### Run
+
+Run the application in development mode (needs administrator permissions).
+
+```sh
+npx tauri dev
+```
+
+### Build
+
+Build the application for production (needs administrator permissions).
+
+```sh
+npx tauri build
+```
