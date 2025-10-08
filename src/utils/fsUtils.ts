@@ -3,7 +3,7 @@ import { readDir, readTextFile, writeTextFile, rename, exists, mkdir, remove, co
 import { open } from "@tauri-apps/plugin-dialog";
 import { IGNORE, RESTORE, UNCATEGORIZED } from "@/utils/init";
 import { VERSION } from "./consts";
-import { SanitizeOptions, LocalMod, DirRestructureItem, LocalData, ModHotkey, Preset, Settings } from "./types";
+import { SanitizeOptions, LocalMod, DirRestructureItem, LocalData, ModHotkey, Preset, Settings } from "./types";	
 let root = "";
 let completedFiles = 0;
 let totalFiles = 0;
@@ -397,11 +397,11 @@ export async function validateModDownload(path: string) {
 				if (entry.isDirectory) dirs.push(entry.name);
 			}
 			if (!ini && dirs.length == 1) {
-				await copyDir(path + "\\" + dirs[0], path);
-				await removeDirRecursive(path + "\\" + dirs[0]+"\\"+path);
-				try{
-					await remove(path + "\\" + dirs[0]);
-				}catch{}
+				let uuid ="WWMM_TEMP_"+(Math.random()*1000000000)
+				await rename(path + "\\" + dirs[0], path + "\\" + uuid);
+				await copyDir(path + "\\" + uuid,path);
+				await removeDirRecursive(path + "\\" + uuid);
+
 			}
 		}
 	} catch {}
