@@ -1,35 +1,25 @@
 import { path } from "@tauri-apps/api";
-import { check, type Update } from "@tauri-apps/plugin-updater";
-import { exists, writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
-import * as defConfig from "../default.json";
+import { invoke } from "@tauri-apps/api/core";
 import { currentMonitor, PhysicalSize } from "@tauri-apps/api/window";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { getDirResructurePlan, saveConfig, setRoot, updateIni } from "./fsUtils";
-import {
-	categoryListAtom,
-	firstLoadAtom,
-	localDataAtom,
-	localPresetListAtom,
-	modRootDirAtom,
-	onlineTypeAtom,
-	settingsDataAtom,
-	store,
-	updateInfo,
-	updaterOpenAtom,
-	updateWWMMAtom,
-} from "./vars";
-import { setupImageServerListeners } from "./imageServer";
-import { isGameProcessRunning, setHotreload } from "./hotreload";
-import { registerGlobalHotkeys } from "./hotkeyUtils";
-import { invoke } from "@tauri-apps/api/core";
-import { executeWWMI } from "./processUtils";
-import { Settings, OnlineMod } from "./types";
-import { HEALTH_CHECK, VERSION } from "./consts";
+import { exists, writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
+import defConfig from "../default.json";
+import defConfigXX from "../defaultXX.json";
+import { apiClient } from "./api";
+import { CATEGORIES, DATA, GAME, LANG, PRESETS, SETTINGS, SOURCE, store, TARGET } from "./vars";
+import { VERSION } from "./consts";
+import { switchGameTheme } from "./theme";
+// import { v2_0_4_migration } from "./filesys";
+
+let isFirstLoad = false;
+let config: any = { ...defConfig };
+let configXX: any = { ...defConfigXX };
+let dataDir = "";
+export function getDataDir() {
+	return dataDir;
+}
 export const window = getCurrentWebviewWindow();
 invoke("get_username");
-export const RESTORE = "DISABLED_RESTORE";
-export const IGNORE = "IGNORE";
-export const UNCATEGORIZED = "Uncategorized";
 export function setWindowType(type: number) {
 	if (type == 0) {
 		window.setFullscreen(false);
@@ -47,179 +37,200 @@ export function setWindowType(type: number) {
 		window.setFullscreen(true);
 	}
 }
-let firstLoad = false;
-let config = { ...defConfig };
-
-export async function main() {
-	updateInfo("Fetching categories...");
-
-	const fetchWithRetry = async (url: string, timeouts: number[] = [2000, 5000]): Promise<any> => {
-		for (let i = 0; i < timeouts.length; i++) {
-			try {
-				const controller = new AbortController();
-				const timeoutId = setTimeout(() => controller.abort(), timeouts[i]);
-
-				const response = await fetch(url, { signal: controller.signal });
-				clearTimeout(timeoutId);
-
-				if (!response.ok) {
-					throw new Error(`HTTP ${response.status}`);
-				}
-
-				return await response.json();
-			} catch (error) {
-				if (i === timeouts.length - 1) {
-					throw error;
-				}
-
-				updateInfo(`Connection timeout, retrying...`);
-			}
-		}
+ invoke<string>('get_image_server_url').then((url) => {
+	console.log("Image server URL:", url);
+});
+async function updateConfig(oconfig: any) {
+	// await v2_0_4_migration(oconfig.dir);
+	if (oconfig.version >= "2.1.0") return oconfig;
+	let config = {
+		version: VERSION,
+		updatedAt: new Date().toISOString(),
+		bgOpacity: oconfig.settings.opacity || 1,
+		winOpacity: 1,
+		winType: oconfig.settings.type || 0,
+		bgType: oconfig.settings.bgType || 2,
+		listType: 0,
+		nsfw: oconfig.settings.nsfw || 1,
+		toggleClick: oconfig.settings.toggle || 2,
+		ignore: "2.0.4",
+		clientDate: oconfig.settings.clientDate || "",
+		exeXXMI: oconfig.settings.appDir || "",
+		lang: oconfig.settings.lang || "",
+		game: "",
 	};
+	let data = oconfig.data || {};
+	let keys = Object.keys(data);
+	for (let key of keys) {
+		if(key.startsWith("\\")){
+			data[key.substring(1)] = data[key];
+			delete data[key];
+		}
+	}
+	writeTextFile(
+		`configWW.json`,
+		JSON.stringify(
+			{
+				version: VERSION,
+				sourceDir: "",
+				targetDir: "",
+				categories: [],
+				settings: {
+					launch: oconfig.settings.launch || 0,
+					hotReload: oconfig.settings.hotReload || 1,
+					onlineType: oconfig.settings.onlineType || "Mod",
+				},
+				data: oconfig.data || {},
+				presets: oconfig.presets || [],
+				updatedAt: new Date().getTime(),
+			},
+			null,
+			2
+		)
+	);
+	return config;
+}
+export async function initGame(game: string) {
 	try {
-		const data = await fetchWithRetry(
-			"https://gamebanana.com/apiv11/Mod/Categories?_idCategoryRow=29524&_sSort=a_to_z&_bShowEmpty=true"
-		);
-
-		store.set(categoryListAtom, [
-			...data.filter((x: OnlineMod) => x._idRow !== 31838),
-			{
-				_idRow: 31838,
-				_sName: "NPCs & Entities",
-				_nItemCount: 12,
-				_nCategoryCount: 0,
-				_sUrl: "https://gamebanana.com/mods/cats/31838",
-				_sIconUrl: "https://images.gamebanana.com/img/ico/ModCategory/66e0d90771ac5.png",
-			},
-			{
-				_special: true,
-				_idRow: 29493,
-				_sName: "Other",
-				_nItemCount: 75,
-				_nCategoryCount: 0,
-				_sUrl: "https://gamebanana.com/mods/cats/29493",
-				_sIconUrl: "https://images.gamebanana.com/img/ico/ModCategory/6692c90cba314.png",
-			},
-			{
-				_special: true,
-				_idRow: 29496,
-				_sName: "UI",
-				_nItemCount: 55,
-				_nCategoryCount: 0,
-				_sUrl: "https://gamebanana.com/mods/cats/29496",
-				_sIconUrl: "https://images.gamebanana.com/img/ico/ModCategory/6692c913ddf00.png",
-			},
-		]);
-		updateInfo("Categories loaded successfully.");
-	} catch (error: any) {
-		updateInfo("Network error, refresh to try again.", -1);
-		return;
+		configXX = JSON.parse(await readTextFile(`config${game}.json`));
+		switchGameTheme(game == "ZZ" ? "zzz" : "wuwa");
+		dataDir = dataDir.replace("\\__MI", `\\${game}MI`);
+	} finally {
+		writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
+		store.set(DATA, configXX.data || {});
+		store.set(SOURCE, configXX.sourceDir||(dataDir+"\\Mods") || "");
+		store.set(TARGET, configXX.targetDir||dataDir || "");
+		store.set(PRESETS, configXX.presets || []);
+		store.set(SETTINGS, (prev) => ({ global: { ...prev.global, game }, game: { ...prev.game, ...configXX.settings } }));
 	}
-	const apd = (await path.dataDir()) + "\\XXMI Launcher\\WWMI\\Mods";
-	const epd = apd.replace("WWMI\\Mods", "Resources\\Bin\\XXMI Launcher.exe");
-	updateInfo("Checking configuration...");
-	if (await exists("config.json")) config = JSON.parse(await readTextFile("config.json"));
-	else {
-		updateInfo("Config file not found, creating default config.");
-
-		writeTextFile("config.json", JSON.stringify(defConfig, null, 2));
-		firstLoad = true;
-		config = { ...defConfig };
+	return configXX;
+}
+let categories: any[] = [];
+export async function main() {
+	//Try to fetch categories(character list)
+	try {
+		categories = await apiClient.categories();
+		if (!categories || categories.length == 0) throw "No categories found, please verify the directories again";
+	} catch (e) {
+		try {
+			config = JSON.parse(await readTextFile("config.json"));
+			if (config.game) configXX = await initGame(config.game);
+		} finally {
+			categories = configXX.categories || [];
+		}
+	} finally {
+		if (!categories || categories.length == 0) return;
+		store.set(CATEGORIES, categories);
 	}
-	updateInfo("Applying configuration...");
-	setWindowType(config.settings.type);
+	const appData = await path.dataDir();
+	dataDir = `${appData}\\XXMI Launcher\\__MI`;
+	const exeXXMI = `${appData}\\XXMI Launcher\\Resources\\Bin\\XXMI Launcher.exe`;
+
+	//Get config files
+	try {
+		config = JSON.parse(await readTextFile("config.json"));
+	} finally {
+		if (config.version < "2.1.0") {
+			config = await updateConfig(config);
+		}
+		writeTextFile("config.json", JSON.stringify(config, null, 2));
+		if (config.game) configXX = await initGame(config.game);
+	}
+	store.set(SETTINGS, (prev) => ({
+		global: { ...prev.global, ...config },
+		game: { ...prev.game, ...configXX.settings },
+	}));
+	
+	setWindowType(config.winType);
+
 	const bg = document.querySelector("body");
 	if (bg)
-		bg.style.backgroundColor =
-			"color-mix(in oklab, var(--background) " + config.settings.opacity * 100 + "%, transparent)";
-	if (config.dir == "") {
-		firstLoad = true;
-		if (await exists(apd)) {
-			config.dir = apd;
-		}
-		if (await exists(epd)) {
-			config.settings.appDir = epd;
-		}
+		bg.style.backgroundColor = "color-mix(in oklab, var(--background) " + config.bgOpacity * 100 + "%, transparent)";
+	if (configXX.targetDir == "" || configXX.sourceDir == "") {
+		isFirstLoad = true;
+		if (await exists(dataDir)) {
+			configXX.target = dataDir;
+			configXX.source = dataDir;
+		} else dataDir = "";
 	}
-	if (config.settings.launch && config.settings.appDir) {
-		(async () => {
-			if (!(await isGameProcessRunning())) {
-				executeWWMI(config.settings.appDir);
-			}
-		})();
+
+	if (config.exeXXMI == "" && (await exists(exeXXMI))) {
+		config.exeXXMI = exeXXMI;
 	}
-	store.set(firstLoadAtom, firstLoad);
-	store.set(modRootDirAtom, config.dir);
-	setRoot(config.dir);
-	store.set(localPresetListAtom, config.presets);
-	store.set(localDataAtom, config.data);
+		// if (config.settings.launch && config.settings.appDir) {
+	// 	(async () => {
+	// 		if (!(await isGameProcessRunning())) {
+	// 			executeWWMI(config.settings.appDir);
+	// 		}
+	// 	})();
+	// }
 
 	// Check for updates with 2-second timeout
-	let update: Update | null = null;
-	try {
-		const timeoutPromise = new Promise<never>((_, reject) =>
-			setTimeout(() => reject(new Error("Update check timeout")), 2000)
-		);
-		update = await Promise.race([check(), timeoutPromise]);
-	} catch (error) {
-		// If check fails or times out, update remains null
-		update = null;
-	}
+	// let update: Update | null = null;
+	// try {
+	// 	const timeoutPromise = new Promise<never>((_, reject) =>
+	// 		setTimeout(() => reject(new Error("Update check timeout")), 2000)
+	// 	);
+	// 	update = await Promise.race([check(), timeoutPromise]);
+	// } catch (error) {
+	// 	// If check fails or times out, update remains null
+	// 	update = null;
+	// }
+	// if (update) {
+	// 	let lang = config.settings.lang;
+	// 	let parsedBody = {};
+	// 	if (update.body) {
+	// 		try {
+	// 			parsedBody = JSON.parse(update.body);
+	// 			parsedBody = parsedBody[lang as keyof typeof parsedBody] || parsedBody;
+	// 		} catch (e) {
+	// 			parsedBody = {};
+	// 		}
+	// 	}
+	// 	store.set(updateWWMMAtom, {
+	// 		version: update.version,
+	// 		date: update.date || "",
+	// 		body: JSON.stringify(parsedBody) || "{}",
+	// 		status: "available",
+	// 		raw: update,
+	// 	});
+	// 	if (update.version > config.settings.ignore) {
+	// 		store.set(updaterOpenAtom, true);
+	// 		config.settings.ignore = update.version;
+	// 	}
+	// }
 
-	if (update) {
-		let lang = config.settings.lang;
-		let parsedBody = {};
-		if (update.body) {
-			try {
-				parsedBody = JSON.parse(update.body);
-				parsedBody = parsedBody[lang as keyof typeof parsedBody] || parsedBody;
-			} catch (e) {
-				parsedBody = {};
-			}
-		}
-		store.set(updateWWMMAtom, {
-			version: update.version,
-			date: update.date || "",
-			body: JSON.stringify(parsedBody) || "{}",
-			status: "available",
-			raw: update,
-		});
-		if (update.version > config.settings.ignore) {
-			store.set(updaterOpenAtom, true);
-			config.settings.ignore = update.version;
-		}
-	}
-	store.set(settingsDataAtom, config.settings as Settings);
-	if (config.settings.hotReload == 1) {
-		updateIni(0);
-	} else {
-		updateIni(1);
-	}
+	// store.set(settingsDataAtom, config.settings as Settings);
+	// if (config.settings.hotReload == 1) {
+	// 	updateIni(0);
+	// } else {
+	// 	updateIni(1);
+	// }
 
-	store.set(onlineTypeAtom, config.settings.onlineType ?? "Mod");
-	if (!firstLoad) {
-		if (config.settings.clientDate) fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/${config.settings.clientDate}`);
-		else {
-			fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/_${Date.now()}`)
-				.then((res) => res.json())
-				.then((data) => {
-					if (data.client) {
-						config.settings.clientDate = data.client;
-						store.set(settingsDataAtom, config.settings as Settings);
-						saveConfig();
-					}
-				});
-		}
-	}
-	updateInfo("Getting directory info...");
-	if (!firstLoad) {
-		getDirResructurePlan();
-	}
-	updateInfo("Initialization complete.", 2000);
+	// store.set(onlineTypeAtom, config.settings.onlineType ?? "Mod");
+	// if (!firstLoad) {
+	// 	if (config.settings.clientDate) fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/${config.settings.clientDate}`);
+	// 	else {
+	// 		fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/_${Date.now()}`)
+	// 			.then((res) => res.json())
+	// 			.then((data) => {
+	// 				if (data.client) {
+	// 					config.settings.clientDate = data.client;
+	// 					store.set(settingsDataAtom, config.settings as Settings);
+	// 					saveConfig();
+	// 				}
+	// 			});
+	// 	}
+	// }
+	// updateInfo("Getting directory info...");
+	// if (!firstLoad) {
+	// 	getDirResructurePlan();
+	// }
+	// updateInfo("Initialization complete.", 2000);
 
-	setupImageServerListeners();
+	// setupImageServerListeners();
 
-	setHotreload(config.settings.hotReload as 0 | 1 | 2);
+	// setHotreload(config.settings.hotReload as 0 | 1 | 2);
 
-	await registerGlobalHotkeys();
+	// await registerGlobalHotkeys();
 }

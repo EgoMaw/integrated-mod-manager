@@ -3,12 +3,49 @@
 @custom-variant dark (&:is(.dark *));
 @font-face {
 	font-family: wuwa;
-	src: url("./font.TTF");
+	src: url("./fonts/wuwa.ttf");
 }
-.wuwa-ft {
+@font-face {
+	font-family: main;
+	src: url("./fonts/main.ttf");
+}
+@font-face {
+	font-family: zzz-en;
+	src: url("./fonts/zzz/en.ttf");
+}
+@font-face {
+	font-family: zzz-cn;
+	src: url("./fonts/zzz/cn.ttf");
+}
+@font-face {
+	font-family: zzz-ru;
+	src: url("./fonts/zzz/ru.ttf");
+}
+@font-face {
+	font-family: zzz-jp;
+	src: url("./fonts/zzz/jp.ttf");
+}
+@font-face {
+	font-family: zzz-kr;
+	src: url("./fonts/zzz/kr.ttf");
+}
+.game-font {
+	font-family: var(--game-font), var(--game-font-en);
+}
+.game-font-en {
+	font-family: var(--game-font-en);
+}
+.main-font {
+	font-family: main;
+}
+.wuwa-font {
 	font-family: wuwa;
 }
-.selectedCard {
+.zzz-font {
+	font-family: zzz-en;
+}
+
+.selected-card {
 	animation: outliner 1s linear infinite;
 }
 a {
@@ -128,6 +165,8 @@ a {
 	}
 }
 @theme inline {
+	--color-wuwa-accent: var(--wuwa-accent);
+	--color-zzz-accent: var(--zzz-accent);
 	--color-button: var(--button);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -161,41 +200,13 @@ a {
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 }
-.unused:root {
-	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.147 0.004 49.25);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.147 0.004 49.25);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.147 0.004 49.25);
-	--primary: oklch(0.216 0.006 56.043);
-	--primary-foreground: oklch(0.985 0.001 106.423);
-	--secondary: oklch(0.97 0.001 106.424);
-	--secondary-foreground: oklch(0.216 0.006 56.043);
-	--muted: oklch(0.97 0.001 106.424);
-	--muted-foreground: oklch(0.553 0.013 58.071);
-	--accent: #cdb896;
-	--accent-foreground: oklch(0.216 0.006 56.043);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.923 0.003 48.717);
-	--input: oklch(0.923 0.003 48.717);
-	--ring: oklch(0.709 0.01 56.259);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0.001 106.423);
-	--sidebar-foreground: oklch(0.147 0.004 49.25);
-	--sidebar-primary: oklch(0.216 0.006 56.043);
-	--sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-	--sidebar-accent: oklch(0.97 0.001 106.424);
-	--sidebar-accent-foreground: oklch(0.216 0.006 56.043);
-	--sidebar-border: oklch(0.923 0.003 48.717);
-	--sidebar-ring: oklch(0.709 0.01 56.259);
-}
-:root {
+/* WuWa Theme Variables */
+[data-theme="wuwa"] {
+	--game-font-en: wuwa;
+	--game-font-cn: wuwa;
+	--game-font-jp: wuwa;
+	--game-font-kr: wuwa;
+	--game-font-ru: wuwa;
 	--button: #2d2a28;
 	--background: oklch(0.147 0.004 49.25);
 	--foreground: oklch(0.985 0.001 106.423);
@@ -209,7 +220,7 @@ a {
 	--secondary-foreground: oklch(0.985 0.001 106.423);
 	--muted: #837660;
 	--muted-foreground: oklch(0.709 0.01 56.259);
-	--accent: #cdb896;
+	--accent: var(--wuwa-accent);
 	--accent-foreground: oklch(0.985 0.001 106.423);
 	--destructive: oklch(0.704 0.191 22.216);
 	--border: #4e463a;
@@ -228,6 +239,150 @@ a {
 	--sidebar-accent-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.553 0.013 58.071);
+}
+
+/* ZZZ Theme Variables */
+[data-theme="zzz"] {
+	--game-font-en: zzz-en;
+	--game-font-cn: zzz-cn;
+	--game-font-jp: zzz-jp;
+	--game-font-kr: zzz-kr;
+	--game-font-ru: zzz-ru;
+	--button: #2d2a28;
+	--background: oklch(0.147 0.004 49.25);
+	--foreground: oklch(0.985 0.001 106.423);
+	--card: oklch(0.216 0.006 56.043);
+	--card-foreground: oklch(0.985 0.001 106.423);
+	--popover: oklch(0.216 0.006 56.043);
+	--popover-foreground: oklch(0.985 0.001 106.423);
+	--primary: oklch(0.923 0.003 48.717);
+	--primary-foreground: oklch(0.216 0.006 56.043);
+	--secondary: oklch(0.268 0.007 34.298);
+	--secondary-foreground: oklch(0.985 0.001 106.423);
+	--muted: #837660;
+	--muted-foreground: oklch(0.709 0.01 56.259);
+	--accent: var(--zzz-accent);
+	--accent-foreground: oklch(0.985 0.001 106.423);
+	--destructive: oklch(0.704 0.191 22.216);
+	--border: #4e463a;
+	--input: oklch(1 0 0 / 15%);
+	--ring: oklch(0.553 0.013 58.071);
+	--chart-1: oklch(0.488 0.243 264.376);
+	--chart-2: oklch(0.696 0.17 162.48);
+	--chart-3: oklch(0.769 0.188 70.08);
+	--chart-4: oklch(0.627 0.265 303.9);
+	--chart-5: oklch(0.645 0.246 16.439);
+	--sidebar: oklch(0.216 0.006 56.043);
+	--sidebar-foreground: oklch(0.985 0.001 106.423);
+	--sidebar-primary: oklch(0.488 0.243 264.376);
+	--sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+	--sidebar-accent: oklch(0.268 0.007 34.298);
+	--sidebar-accent-foreground: oklch(0.985 0.001 106.423);
+	--sidebar-border: oklch(1 0 0 / 10%);
+	--sidebar-ring: oklch(0.553 0.013 58.071);
+}
+
+/* Theme-specific background images */
+[data-theme="wuwa"] .bg-bgg {
+	background-image: url("/WWmm.png");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: 0 0;
+}
+
+[data-theme="zzz"] .bg-bgg {
+	background-image: url("/ZZmm.png");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: 0 0;
+}
+
+/* Default background (fallback) */
+.bg-bgg {
+	background-image: url("/WWmm.png");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: 0 0;
+}
+
+/* Theme-specific logo */
+[data-theme="wuwa"] .logo {
+	background-image: url("/logoWW.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+[data-theme="zzz"] .logo {
+	background-image: url("/logoZZ.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+.card-grid {
+	grid-template-columns: repeat(auto-fill, minmax(256px, 256px));
+	grid-auto-rows: 288px;
+	row-gap: 32px;
+	justify-items: center;
+}
+.card-local {
+	width: 14rem; /* w-56 */
+	height: 18rem; /* h-72 */
+	cursor: pointer;
+	outline-offset: 0.5rem; /* outline-offset-7 */
+	outline-color: transparent; /* outline-accent/0 */
+	user-select: none; /* select-none */
+	background-color: var(--card); /* bg-card */
+	border-radius: 0.5rem; /* rounded-lg */
+	border: 1px solid var(--border); /* border */
+	transition-duration: 200ms; /* duration-200 */
+	outline: 1px solid transparent; /* outline */
+	overflow: hidden;
+}
+
+.card-local:hover {
+	outline-color: var(--accent); /* hover:outline-accent */
+	transform: scale(1.05); /* hover:scale-105 */
+}
+
+.card-local:active {
+	transform: scale(0.95); /* active:scale-95 */
+}
+/* Default background (fallback) */
+.logo {
+	background-image: url("/logoWW.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+/* Language-specific font variables */
+[data-lang="en"] {
+	--game-font: var(--game-font-en);
+}
+
+[data-lang="cn"] {
+	--game-font: var(--game-font-cn);
+}
+
+[data-lang="jp"] {
+	--game-font: var(--game-font-jp);
+}
+
+[data-lang="kr"] {
+	--game-font: var(--game-font-kr);
+}
+
+[data-lang="ru"] {
+	--game-font: var(--game-font-ru);
+}
+
+/* Default theme (WuWa) */
+:root {
+	--wuwa-accent: #cdb896;
+	--zzz-accent: #f68f36;
 }
 ::-webkit-scrollbar {
 	width: 10px;
@@ -253,13 +408,7 @@ a {
 	border: solid var(--color-background) 1px;
 	border-radius: 10px;
 }
-.bg-bgg {
-	background-image: url("/wwmm.png");
-	background-size: 100px 100px;
-	background-repeat: repeat;
-	background-attachment: fixed;
-	background-position: 0 0;
-}
+
 @keyframes wave {
 	0%,
 	40%,
@@ -292,4 +441,25 @@ a {
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+.label{
+  width: 100%;
+  border-width: 0;	  
+  border-radius: 0;
+  user-select: none;
+  overflow: hidden;
+  min-height: 4rem;
+  background-color: transparent;
+  font-size: 1rem;
+
+}
+.label:focus-within {
+  user-select: auto;
+  border-width: 0;
+}
+.label:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: none;
 }

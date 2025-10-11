@@ -1,0 +1,178 @@
+import { Button } from "@/components/ui/button";
+import { LANG_LIST } from "@/utils/consts";
+import { TEXT } from "@/utils/text";
+import { LANG, SETTINGS } from "@/utils/vars";
+import { useAtom, useAtomValue } from "jotai";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
+let interval: any = null;
+let loadTime = null as any;
+let timer = null as any;
+function Page1({ setPage }: { setPage: (page: number) => void }) {
+	const [selectedIndex, setSelectedIndex] = useState(-1);
+	const [currentLangIndex, setCurrentLangIndex] = useState(-1);
+	const lang = useAtomValue(LANG);
+	const [settings, setSettings] = useAtom(SETTINGS);
+	const languageKeys = ["en", "cn", "ru", "jp", "kr"] as const;
+	useEffect(() => {
+		if (settings.global.lang && !timer) {
+			timer = setTimeout(
+				() => {
+					setPage(1);
+				},
+				loadTime ? Math.max(0, 1500 - (Date.now() - loadTime)) : 1500
+			);
+		}
+	}, [settings.global.lang]);
+	useEffect(() => {
+		loadTime = Date.now();
+		interval = setInterval(() => {
+			setCurrentLangIndex((prev: any) => (prev + 1) % languageKeys.length);
+		}, 2000);
+
+		return () => clearInterval(interval);
+	}, []);
+	return (
+		<div className="text-muted-foreground  gap-2 fixed flex flex-col items-center justify-center w-screen h-screen">
+			<div className="text-6xl flex  text-foreground">
+				{"Integrated".split("").map((letter, index) => (
+					<span
+						key={index}
+						className="wave-letter"
+						style={{
+							animationDelay: `${index * 0.075}s`,
+						}}
+					>
+						{letter}
+					</span>
+				))}
+			</div>
+			<div className=" flex text-accent text-4xl">
+				{"Mod Manager".split("").map((letter, index) => (
+					<span
+						key={index}
+						className="wave-letter"
+						style={{
+							animationDelay: `${(index + "aaaa".length) * 0.075}s`,
+						}}
+					>
+						{letter === " " ? "\u00A0" : letter}
+					</span>
+				))}
+			</div>
+
+			<div className="absolute items-center fade-in bottom-0 h-64 flex flex-col gap-8 justify-evenly">
+				<AnimatePresence mode="wait">
+					{!lang && currentLangIndex > -1 && (
+						<motion.div
+							key={currentLangIndex}
+							initial={{ opacity: 0, y: 0 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 0 }}
+							transition={{ duration: 0.4, ease: "easeInOut" }}
+							className="text-xl text-accent/80 text-center"
+						>
+							{TEXT[languageKeys[currentLangIndex]].generic.SelectLang}
+						</motion.div>
+					)}
+				</AnimatePresence>
+
+				<AnimatePresence>
+					{!lang && currentLangIndex > -1 && (
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.4, ease: "easeInOut" }}
+							className="opacity-0 flex justify-center gap-8"
+						>
+							{LANG_LIST.map((lang, index) => (
+								<div
+									key={lang.Code}
+									className={`hover:brightness-110 group hover:scale-125 bg-accent/20 px-1 rounded-sm -mt-2 flex-col flex items-center justify-center gap-1 text-sm duration-300 cursor-pointer select-none`}
+									style={{
+										background: selectedIndex == index ? "" : "#0000",
+										scale: selectedIndex == index ? "1.25" : "",
+									}}
+									onClick={() => {
+										setSelectedIndex(index);
+										setCurrentLangIndex(index);
+									}}
+								>
+									<img
+										onMouseEnter={() => {
+											if (interval) {
+												clearInterval(interval);
+												interval = null;
+											}
+											setCurrentLangIndex(index);
+										}}
+										onMouseLeave={() => {
+											if (!interval) {
+												if (selectedIndex === -1)
+													interval = setInterval(() => {
+														setCurrentLangIndex((prev) => (prev + 1) % languageKeys.length);
+													}, 2000);
+												else {
+													setCurrentLangIndex(selectedIndex);
+												}
+											}
+										}}
+										src={lang.Flag}
+										alt={lang.Name}
+										className="w-8 h-8 duration-300"
+									/>
+									<span
+										className="overflow-hidden duration-300 mt-16 text-accent group-hover:opacity-50 opacity-0 absolute whitespace-nowrap "
+										style={{
+											opacity: selectedIndex == index ? "1" : "",
+											scale: selectedIndex == index ? "0.8" : "0.7",
+										}}
+									>
+										{lang.Name}
+									</span>
+								</div>
+							))}
+						</motion.div>
+					)}
+				</AnimatePresence>
+				<AnimatePresence mode="wait">
+					{!lang && currentLangIndex > -1 && selectedIndex > 0 && (
+						<motion.div
+							key={selectedIndex}
+							initial={{ opacity: 0, y: 0 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 0 }}
+							transition={{ duration: 0.4, ease: "easeInOut" }}
+							className="text-accent/20 mt-4 fixed bottom-2 right-1 text-sm max-w-1/3 flex flex-col text-center"
+						>
+							<span>{TEXT[languageKeys[selectedIndex]].generic.Warning1}</span>
+							{TEXT[languageKeys[selectedIndex]].generic.Warning2}
+						</motion.div>
+					)}
+				</AnimatePresence>
+
+				<Button
+					className="w-fit "
+					style={{ opacity: !!lang || currentLangIndex < 0 ? 0 : selectedIndex == -1 ? 0.5 : 1 }}
+					disabled={selectedIndex == -1 || !!lang || currentLangIndex < 0}
+					onClick={() => {
+						setSettings((prev) => ({ ...prev, global: { ...prev.global, lang: languageKeys[selectedIndex] } }));
+						// if(isFirstLoad)
+						setPage(1);
+						// if (firstLoad) {
+						// 	setPage(1);
+						// 	clearInterval(interval);
+						// 	interval = null;
+						// } else {
+						// 	saveConfig();
+						// }
+					}}
+				>
+					Confirm
+				</Button>
+			</div>
+		</div>
+	);
+}
+export default Page1;

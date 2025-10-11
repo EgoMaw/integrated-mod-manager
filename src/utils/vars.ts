@@ -1,103 +1,42 @@
-import { FocusEvent, FocusEventHandler } from "react";
 import { atom, createStore } from "jotai";
-import type {
-	TimeoutOrNull,
-	Settings,
-	DirRestructureItem,
-	LocalData,
-	Preset,
-	LocalMod,
-	Category,
-	DownloadItem,
-	OnlineData,
-	InstalledListItem,
-	UpdateInfo,
-} from "./types";
-import { TEXT } from "./consts";
-
-function dontFocus(e: FocusEvent<HTMLInputElement, Element>): FocusEventHandler<HTMLInputElement> {
-	e.preventDefault();
-	e.stopPropagation();
-	e.currentTarget.blur();
-	return () => {};
-}
-const previewUri = "http://127.0.0.1:5000/preview/";
+import { initGame, main } from "./init";
+import { TEXT } from "./text";
+import { VERSION } from "./consts";
+main();
+const init = { settings: true };
 const store = createStore();
-export const languageAtom = atom("jp" as "en" | "cn" | "ru" | "jp" | "kr");
-export const textDataAtom = atom(TEXT["jp"]);
-const firstLoadAtom = atom(false);
-const onlineModeAtom = atom(false);
-const leftSidebarOpenAtom = atom(true);
-const rightSidebarOpenAtom = atom(true);
-const introOpenAtom = atom(true);
-const tutorialPageAtom = atom(0);
-const refreshAppIdAtom = atom(0);
-const modRootDirAtom = atom("");
-const settingsDataAtom = atom({} as Settings);
-const categoryListAtom = atom([] as Category[]);
-const progressOverlayDataAtom = atom({ title: "", open: false, finished: false });
-const consentOverlayDataAtom = atom({
-	title: "",
-	from: [] as DirRestructureItem[],
-	to: [] as DirRestructureItem[],
-	next: false,
+const INIT_DONE = atom(false);
+const GAME = atom("");
+const LANG = atom("en");
+//saved
+const LAST_UPDATED = atom(Date.now());
+const SETTINGS = atom({
+	global: {
+		bgOpacity: 1,
+		winOpacity: 1,
+		winType: 0,
+		bgType: 2,
+		listType: 0,
+		nsfw: 1,
+		toggleClick: 2,
+		ignore: VERSION,
+		clientDate: "1759866302559426603",
+		exeXXMI: "",
+		lang: "",
+		game: "",
+	},
+	game: {
+		launch: 0,
+		hotReload: 1,
+		onlineType: "Mod",
+	},
 });
-const localModListAtom = atom([] as LocalMod[]);
-const localFilteredModListAtom = atom([] as LocalMod[]);
-const localSearchTermAtom = atom("");
-const localPresetListAtom = atom([] as Preset[]);
-const localFilterNameAtom = atom("All");
-const localCategoryNameAtom = atom("All");
-const localSelectedModAtom = atom(0);
-const localSelectedPresetAtom = atom(-1);
-const localPathAtom = atom("");
-const localDataAtom = atom({} as LocalData);
-const installedItemsAtom = atom([] as InstalledListItem[]);
-const updateCacheAtom = atom({} as { [key: string]: number });
-const sortedInstalledItemsAtom = atom((get) => {
-	const items = get(installedItemsAtom);
-	return [...items].sort((a: InstalledListItem, b: InstalledListItem) => {
-		const flagDiff = b.modStatus - a.modStatus;
-		if (flagDiff !== 0) return flagDiff;
-		return a.name
-			.toLocaleLowerCase()
-			.split("\\")
-			.slice(-1)[0]
-			.localeCompare(b.name.toLocaleLowerCase().split("\\").slice(-1)[0]);
-	});
-});
-const onlinePathAtom = atom("home&type=Mod");
-export const apiRoutes = {
-	getCategoryList: () =>
-		"https://gamebanana.com/apiv11/Mod/Categories?_idCategoryRow=29524&_sSort=a_to_z&_bShowEmpty=true",
-	getGenericCategoryList: () =>
-		"https://gamebanana.com/apiv11/Mod/Categories?_idGameRow=20357&_sSort=a_to_z&_bShowEmpty=true",
-	home: ({ sort = "default", page = 1, type = "" }) =>
-		`https://gamebanana.com/apiv11/Game/20357/Subfeed?${
-			type && `_csvModelInclusions=${type}&`
-		}_sSort=${sort}&_nPage=${page}`,
-	category: ({ cat = "Skins", sort = "", page = 1 }) =>
-		`https://gamebanana.com/apiv11/Mod/Index?_nPerpage=15&_aFilters%5BGeneric_Category%5D=${
-			(cat.split("/").length > 1
-				? store.get(categoryListAtom).find((x) => x._sName == cat.split("/")[1])?._idRow
-				: genericCategories.find((x) => x._sName == cat.split("/")[0])?._idRow) || 0
-		}&_sSort=${sort}&_nPage=${page}`,
-	banner: () => "https://gamebanana.com/apiv11/Game/20357/TopSubs",
-	mod: (modTitle = "Mod/0") => `https://gamebanana.com/apiv11/${modTitle}/ProfilePage`,
-	modUpdates: (modTitle = "Mod/0") => `https://gamebanana.com/apiv11/${modTitle}/Updates?_nPage=1&_nPerpage=1`,
-	search: ({ term, page = 1, type = "" }: { term: string; page?: number; type?: string }) =>
-		`https://gamebanana.com/apiv11/Util/Search/Results?_sModelName=${type}&_sOrder=best_match&_idGameRow=20357&_sSearchString=${encodeURIComponent(
-			term
-		)}&_nPage=${page}`,
-};
-const onlineTypeAtom = atom("Mod");
-const onlineSortAtom = atom("");
-const onlineDataAtom = atom({ banner: [] } as OnlineData);
-const onlineDownloadListAtom = atom([] as DownloadItem[]);
-const onlineSelectedItemAtom = atom("-1");
-const tutorialModeAtom = atom(false);
-export const updaterOpenAtom = atom(false);
-const genericCategories = [
+const SOURCE = atom("");
+const TARGET = atom("");
+const DATA = atom<any>({});
+const PRESETS = atom<any[]>([]);
+const CATEGORIES = atom([] as any);
+const TYPES = atom([
 	{
 		_idRow: 29524,
 		_sName: "Skins",
@@ -122,82 +61,68 @@ const genericCategories = [
 		_sUrl: "https://gamebanana.com/mods/cats/29493",
 		_sIconUrl: "https://images.gamebanana.com/img/ico/ModCategory/6692c90cba314.png",
 	},
-];
-function getTimeDifference(startTimestamp: number, endTimestamp: number) {
-	const secInMinute = 60;
-	const secInHour = secInMinute * 60;
-	const secInDay = secInHour * 24;
-	const secInYear = secInDay * 365;
-	const diff = Math.abs(endTimestamp - startTimestamp);
-	if (diff < secInMinute) {
-		return "now";
-	} else if (diff < secInHour) {
-		const minutes = Math.floor(diff / secInMinute);
-		return minutes + "m";
-	} else if (diff < secInDay) {
-		const hours = Math.floor(diff / secInHour);
-		return hours + "h";
-	} else if (diff < secInYear) {
-		const days = Math.floor(diff / secInDay);
-		return days + "d";
-	} else {
-		const years = Math.floor(diff / secInYear);
-		return years + "y";
+]);
+//not-saved
+const LEFT_SIDEBAR_OPEN = atom(true);
+const RIGHT_SIDEBAR_OPEN = atom(true);
+const ONLINE = atom(false);
+
+const MOD_LIST = atom([] as any);
+const SELECTED = atom("");
+const FILTER = atom("All");
+const CATEGORY = atom("All");
+const SEARCH = atom("");
+
+const ONLINE_DATA = atom<any>({});
+const ONLINE_TYPE = atom("Mod");
+const ONLINE_PATH = atom("home&type=Mod");
+const ONLINE_SORT = atom("");
+const ONLINE_SELECTED = atom("");
+
+const CHANGES = atom({} as any);
+const TEXT_DATA = atom(TEXT["en"]);
+store.sub(SETTINGS, async () => {
+	const settings = store.get(SETTINGS);
+	const compare = {
+		src: [settings.global.game, settings.global.lang],
+		to: [GAME, LANG],
+		names: ["game", "lang"],
+	};
+	for (let i = 0; i < compare.src.length; i++) {
+		if (compare.src[i] !== store.get(compare.to[i])) {
+			if (compare.names[i] === "lang" && compare.src[i])
+				store.set(TEXT_DATA, TEXT[compare.src[i] as keyof typeof TEXT] || TEXT["en"]);
+			else if (compare.names[i] === "game" && compare.src[i]) await initGame(compare.src[i]);
+			store.set(compare.to[i], compare.src[i]);
+		}
 	}
-}
-let infoBox = null as HTMLDivElement | null;
-let hideTimeout: TimeoutOrNull = null;
-function hideUpdateInfo() {
-	if (!infoBox) return;
-	infoBox.style.marginBottom = "-1.75rem";
-}
+});
 
-export const updateWWMMAtom = atom(null as null | UpdateInfo);
-
-export function updateInfo(text: string, duration = 5000) {
-	if (!infoBox) infoBox = document.getElementById("update-info") as HTMLDivElement;
-	if (!infoBox) return;
-	infoBox.innerText = text;
-	infoBox.style.marginBottom = "0";
-	if (hideTimeout) clearTimeout(hideTimeout);
-	if (duration > 0) hideTimeout = setTimeout(hideUpdateInfo, duration);
-}
 export {
-	tutorialModeAtom,
-	localSearchTermAtom,
-	onlineTypeAtom,
-	onlineSortAtom,
-	dontFocus,
-	previewUri,
 	store,
-	firstLoadAtom,
-	onlineModeAtom,
-	leftSidebarOpenAtom,
-	rightSidebarOpenAtom,
-	introOpenAtom,
-	tutorialPageAtom,
-	refreshAppIdAtom,
-	modRootDirAtom,
-	settingsDataAtom,
-	categoryListAtom,
-	progressOverlayDataAtom,
-	consentOverlayDataAtom,
-	localModListAtom,
-	localFilteredModListAtom,
-	localPresetListAtom,
-	localFilterNameAtom,
-	localCategoryNameAtom,
-	localSelectedModAtom,
-	localSelectedPresetAtom,
-	localPathAtom,
-	localDataAtom,
-	installedItemsAtom,
-	updateCacheAtom,
-	sortedInstalledItemsAtom,
-	onlinePathAtom,
-	onlineDataAtom,
-	onlineDownloadListAtom,
-	onlineSelectedItemAtom,
-	genericCategories,
-	getTimeDifference,
+	ONLINE_DATA,
+	ONLINE_TYPE,
+	ONLINE_PATH,
+	ONLINE_SORT,
+	ONLINE_SELECTED,
+	CATEGORY,
+	SEARCH,
+	FILTER,
+	GAME,
+	INIT_DONE,
+	LANG,
+	SETTINGS,
+	TEXT_DATA,
+	SOURCE,
+	TARGET,
+	DATA,
+	PRESETS,
+	CATEGORIES,
+	CHANGES,
+	MOD_LIST,
+	ONLINE,
+	LEFT_SIDEBAR_OPEN,
+	RIGHT_SIDEBAR_OPEN,
+	LAST_UPDATED,
+	SELECTED,
 };

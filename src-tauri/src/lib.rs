@@ -406,6 +406,35 @@ fn execute_with_args(exe_path: String, args: Vec<String>) -> Result<String, Stri
     }
 }
 
+#[tauri::command]
+async fn create_symlink(link_path: String, target_path: String) -> Result<(), String> {
+    // First, check if the target path exists
+    let target_metadata = std::fs::metadata(&target_path).map_err(|e| e.to_string())?;
+
+    // Use platform-specific functions
+    #[cfg(windows)]
+    {
+        if target_metadata.is_dir() {
+            // On Windows, use symlink_dir for directories
+            std::os::windows::fs::symlink_dir(&target_path, &link_path).map_err(|e| e.to_string())?;
+        } else {
+            // and symlink_file for files
+            std::os::windows::fs::symlink_file(&target_path, &link_path).map_err(|e| e.to_string())?;
+        }
+    }
+    #[cfg(unix)]
+    {
+        // On Unix-like systems, symlink works for both files and directories
+        std::os::unix::fs::symlink(&target_path, &link_path).map_err(|e| e.to_string())?;
+    }
+    #[cfg(not(any(windows, unix)))]
+    {
+        return Err("Symbolic links are not supported on this platform.".to_string());
+    }
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::init();
@@ -452,6 +481,7 @@ pub fn run() {
             get_image_server_url,
             get_session_id,
             execute_with_args,
+            create_symlink,
             hotreload::set_hotreload,
             hotreload::start_window_monitoring,
             hotreload::stop_window_monitoring,

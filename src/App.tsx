@@ -1,29 +1,46 @@
-import { useMemo } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import "./App.css";
+import { CHANGES, GAME, INIT_DONE, LANG,  LEFT_SIDEBAR_OPEN, MOD_LIST, ONLINE, RIGHT_SIDEBAR_OPEN, SETTINGS } from "./utils/vars";
+import { AnimatePresence, motion } from "motion/react";
+import Checklist from "./_Checklist/Checklist";
+import { initializeThemes } from "./utils/theme";
+import Changes from "./_Changes/Changes";
+import { useCallback, useEffect, useMemo } from "react";
+import { refreshModList, saveConfigs } from "./utils/filesys";
 import { SidebarProvider } from "./components/ui/sidebar";
-import LeftSidebar from "./App/LeftSideBar/Left";
-import RightSidebar from "./App/RightSideBar/Right";
-import Main from "./App/Main/Main";
-import { useAtom, useAtomValue } from "jotai";
-import { consentOverlayDataAtom, onlineModeAtom, introOpenAtom, progressOverlayDataAtom, leftSidebarOpenAtom, rightSidebarOpenAtom, settingsDataAtom, tutorialModeAtom } from "./utils/vars";
-import { main } from "./utils/init";
-import { AnimatePresence } from "motion/react";
-import Intro from "./App/Intro/Intro";
-import Consent from "./App/Consent/Consent";
-import Progress from "./App/Progress/Progress";
-import Tutorial from "./App/Tutorial/Tutorial";
-
-main();
+import LeftSidebar from "./_LeftSidebar/Left";
+import RightSidebar from "./_RightSidebar/Right";
+import Main from "./_Main/Main";
+initializeThemes();
+let prevRight = true
 function App() {
-	const online = useAtomValue(onlineModeAtom);
-	const restoreInfo = useAtomValue(progressOverlayDataAtom);
-	const plannedChanges = useAtomValue(consentOverlayDataAtom);
-	const introOpen = useAtomValue(introOpenAtom);
-	const [leftSidebarOpen, setLeftSidebarOpen] = useAtom(leftSidebarOpenAtom);
-	const [rightSidebarOpen, setRightSidebarOpen] = useAtom(rightSidebarOpenAtom);
-	const settings = useAtomValue(settingsDataAtom);
-	const tutorialMode = useAtomValue(tutorialModeAtom);
-	
+	const initDone = useAtomValue(INIT_DONE);
+	const lang = useAtomValue(LANG);
+	const online = useAtomValue(ONLINE)
+	const game = useAtomValue(GAME);
+	const changes = useAtomValue(CHANGES);
+	const settings = useAtomValue(SETTINGS);
+	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
+	const [rightSidebarOpen, setRightSidebarOpen] = useAtom(RIGHT_SIDEBAR_OPEN);
+	const setModList = useSetAtom(MOD_LIST);
+	const afterInit = useCallback(async () => {
+		saveConfigs();
+		setModList(await refreshModList());
+	}, []);
+	useEffect(() => {
+		if (initDone) {
+			afterInit();
+		}
+	}, [initDone]);
+	useEffect(() => {
+		if(online){
+			prevRight = rightSidebarOpen
+			setRightSidebarOpen(false)
+		}
+		else{
+			setRightSidebarOpen(prevRight)
+		}
+	}, [online]);
 	const leftSidebarStyle = useMemo(
 		() => ({
 			minWidth: leftSidebarOpen ? "20.95rem" : "3.95rem",
@@ -32,21 +49,21 @@ function App() {
 	);
 	const rightSidebarStyle = useMemo(
 		() => ({
-			minWidth: rightSidebarOpen ? "20.95rem" : "0rem",
+			minWidth: /*online?"0rem":*/ rightSidebarOpen ? "20.95rem" : "0rem",
 		}),
 		[rightSidebarOpen]
 	);
-	//console.log(introOpen);
 	return (
-		<div id="background" className="flex flex-row fixed justify-start items-start w-full h-full wuwa-ft">
+		<div id="background" className="flex flex-row fixed justify-start items-start w-full h-full game-font">
 			<div
 				className="fixed h-screen w-screen bg-bgg "
 				style={{
-					opacity: (settings.opacity ||1) * 0.1,
-					animation: settings.bgType == 2 ? "moveDiagonal 15s linear infinite" : "",
-					backgroundImage: settings.bgType == 0 ? "none" : "",
-					backgroundRepeat: settings.bgType == 0 ? "no-repeat" : "",
-				}}></div>
+					opacity: (settings.global.bgOpacity || 1) * 0.1,
+					animation: settings.global.bgType == 2 ? "moveDiagonal 15s linear infinite" : "",
+					backgroundImage: settings.global.bgType == 0 ? "none" : "",
+					backgroundRepeat: settings.global.bgType == 0 ? "no-repeat" : "",
+				}}
+			></div>
 			<SidebarProvider open={leftSidebarOpen}>
 				<LeftSidebar />
 			</SidebarProvider>
@@ -55,19 +72,23 @@ function App() {
 			</SidebarProvider>
 			<div className="w-full h-full fixed flex flex-row">
 				<div className="h-full duration-200 ease-linear" style={leftSidebarStyle} />
-				<Main {...{ leftSidebarOpen, setLeftSidebarOpen, rightSidebarOpen, setRightSidebarOpen, online }} />
+				<Main />
 				<div className="h-full duration-200 ease-linear" style={rightSidebarStyle} />
 			</div>
-			<AnimatePresence>{(introOpen || !settings.lang) && <Intro />}</AnimatePresence>
-			<AnimatePresence>{plannedChanges.title && <Consent />}</AnimatePresence>
-			<AnimatePresence>{restoreInfo.open && <Progress />}</AnimatePresence>
-			<AnimatePresence>{tutorialMode && <Tutorial />}</AnimatePresence>
-			<div
-				id="update-info"
-				className="fixed bottom-0 right-0 w-fit opacity-50 bg-background  max-w-83 h-7 duration-200 -mb-7 overflow-hidden whitespace-nowrap text-ellipsis items-center z-[999] text-sm px-2 py-1"
-				style={{
-					transitionProperty: "margin-bottom",
-				}}></div>
+			{/* <div className="w-full pointer-events-none h-full fixed flex flex-row">
+				<div className="h-full duration-200 ease-linear" style={leftSidebarStyle} />
+				<AnimatePresence>
+					{online&&rightSidebarOpen&&<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.3 }}
+					onClick={() => setRightSidebarOpen(false)}
+					className="w-full pointer-events-auto h-full bg-background/20 backdrop-blur-[2px]" />}
+				</AnimatePresence>
+			</div> */}
+			<AnimatePresence>{(!initDone || !lang || !game) && <Checklist />}</AnimatePresence>
+			<AnimatePresence>{changes.title && <Changes />}</AnimatePresence>
 		</div>
 	);
 }
