@@ -5,6 +5,7 @@ import Page1 from "./pages/Page1";
 import Page2 from "./pages/Page2";
 import Page3 from "./pages/Page3";
 import Page4 from "./pages/Page4";
+import Page5 from "./pages/Page5";
 function Checklist() {
 	const [page, setPage] = useState(0);
 	const pages = [
@@ -12,6 +13,7 @@ function Checklist() {
 		<Page2 setPage={setPage} />,
 		<Page3 setPage={setPage} />,
 		<Page4 setPage={setPage} />,
+		<Page5/>
 	] as any;
 	return (
 		<motion.div
@@ -21,13 +23,6 @@ function Checklist() {
 			exit={{ opacity: 0, filter: "blur(6px)", pointerEvents: "none" }}
 			className="z-10 bg-background/50 backdrop-blur-md fixed w-screen h-screen"
 		>
-			{/* <div
-				className="bg-bgg  fixed w-screen h-screen"
-				style={{
-					opacity: 0.1,
-					animation: "moveDiagonal 15s linear infinite",
-				}}
-			/> */}
 			<AnimatePresence mode="wait">
 				<motion.div
 					key={page}

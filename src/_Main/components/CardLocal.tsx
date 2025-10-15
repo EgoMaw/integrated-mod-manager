@@ -54,7 +54,7 @@ const CardLocal = React.memo(({ item, selected, lastUpdated }: CardLocalProps) =
 				>
 					{item.name}
 				</Label>
-				<Button className="-mt-123 bg-button/0 cursor-pointer flex text-red-300 items-center justify-center  px-2 w-8 h-6 z-200 -ml-5 -mr-5">
+				<Button className="-mt-123 bg-button/0 data-zzz:border-0 cursor-pointer flex text-red-300 items-center justify-center  px-2 w-8 h-6 z-200 -ml-5 -mr-5">
 					<XIcon className="pointer-events-none" />
 				</Button>
 			</div>

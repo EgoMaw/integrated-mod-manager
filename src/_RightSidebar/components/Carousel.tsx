@@ -68,7 +68,7 @@ function Carousel({ data, big }: { data: any[]; big?: boolean }) {
 					<div
 						className={
 							"h-1/3 min-h-2.5 aspect-square pointer-events-auto rounded-full border duration-200 " +
-							(index == current ? "bg-accent border-accent" : " hover:bg-border")
+							(index == current ? "bg-accent bgaccent   border-accent" : " hover:bg-border")
 						}
 						onClick={(e) => {
 							e.stopPropagation();

@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { GAME, store } from "./vars";
+import { GAME_ID_MAP } from "./consts";
 
 export async function executeWithArgs(exePath: string, args: string[]): Promise<string> {
 	try {
@@ -32,9 +33,10 @@ export async function executeXXMI(
 	return executeWithArgs(exePath, args);
 }
 
-export async function isGameProcessRunning(): Promise<boolean> {
+	
+export async function isGameProcessRunning(game = "WW"): Promise<boolean> {
 	try {
-		const isRunning = await invoke<boolean>("is_game_process_running");
+		const isRunning = await invoke<boolean>("is_game_process_running", { gameId: GAME_ID_MAP[game] });
 		//logger.log(`Game process running: ${isRunning}`);
 		return isRunning;
 	} catch (error) {

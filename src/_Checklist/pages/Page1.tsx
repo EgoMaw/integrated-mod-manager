@@ -19,6 +19,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 			timer = setTimeout(
 				() => {
 					setPage(1);
+					timer = null;
 				},
 				loadTime ? Math.max(0, 1500 - (Date.now() - loadTime)) : 1500
 			);
@@ -47,7 +48,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 					</span>
 				))}
 			</div>
-			<div className=" flex text-accent text-4xl">
+			<div className=" flex text-accent textaccent text-4xl">
 				{"Mod Manager".split("").map((letter, index) => (
 					<span
 						key={index}
@@ -144,7 +145,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: 0 }}
 							transition={{ duration: 0.4, ease: "easeInOut" }}
-							className="text-accent/20 mt-4 fixed bottom-2 right-1 text-sm max-w-1/3 flex flex-col text-center"
+							className="opacity-20 text-accent mt-4 fixed bottom-2 right-1 text-sm max-w-1/3 flex flex-col text-center"
 						>
 							<span>{TEXT[languageKeys[selectedIndex]].generic.Warning1}</span>
 							{TEXT[languageKeys[selectedIndex]].generic.Warning2}

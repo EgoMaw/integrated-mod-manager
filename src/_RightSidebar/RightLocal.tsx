@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { changeModName, saveConfigs, savePreviewImage } from "@/utils/filesys";
+import { Label } from "@/components/ui/label";
 
 function RightLocal() {
 	const categories = useAtomValue(CATEGORIES);
@@ -71,11 +72,13 @@ function RightLocal() {
 		} else {
 			setCategory({ name: "-1", icon: "" });
 		}
-	}, [item]);
+	}, [item, modList]);
 	return (
 		<Sidebar side="right" className="bg-sidebar duration-300">
 			<SidebarContent className="flex duration-300 flex-row w-full h-full gap-0 p-0 overflow-hidden border border-l-0">
-				<div className="flex flex-col items-center h-full min-w-full overflow-y-hidden ">
+				<div className="flex flex-col items-center h-full min-w-full overflow-y-hidden "
+				key={item?.path||"no-item"}
+				>
 					<div className="min-w-full text-accent flex items-center justify-center h-16 gap-3 px-3 border-b">
 						{item ? (
 							<>
@@ -107,26 +110,26 @@ function RightLocal() {
 							"---"
 						)}
 					</div>
-					<SidebarGroup className="min-h-82 px-1 mt-1 select-none">
+					<SidebarGroup className="min-h-82  px-1 mt-1 select-none">
 						<EditIcon
 							onClick={() => {
 								savePreviewImage(item.path);
 							}}
-							className="min-h-12 min-w-12 bg-background/50 z-25 text-accent rounded-tr-md rounded-bl-md self-end w-12 p-3 -mb-12 border"
+							className="min-h-12 min-w-12 bg-background/50 z-25 text-accent data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl rounded-tr-md rounded-bl-md self-end w-12 p-3 -mb-12 border"
 						/>
 						<img
 							id="preview"
-							className="w-82 h-82 bg-background/50 object-cover duration-150 border rounded-lg"
+							className="w-82 h-82 data-zzz:rounded-[1px] data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl bg-background/50 object-cover duration-150 border rounded-lg"
 							onError={(e) => handleImageError(e)}
 							src={`${getImageUrl(item?.path || "")}?${lastUpdated}`}
 						></img>
 					</SidebarGroup>
 					<SidebarGroup className="px-1 min-h-42.5 mt-1">
-						<div className="flex flex-col w-full border rounded-lg">
+						<div className="flex flex-col w-full border  rounded-lg">
 							<div className="bg-pat2 flex items-center justify-between w-full p-1 rounded-lg">
-								<Button className=" h-12 bg-accent/0 hover:bg-accent/0   min-w-28.5 w-28.5 text-accent">
+								<Label className=" h-12  flex items-center justify-center  min-w-28.5 w-28.5 text-accent ">
 									{textData.generic.Category}
-								</Button>
+								</Label>
 								{item?.depth == 1 ? (
 									<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 										<PopoverTrigger asChild>
@@ -171,6 +174,7 @@ function RightLocal() {
 																	renameMod(item.path, join(currentValue, item.name));
 																	setPopoverOpen(false);
 																}}
+																className="data-zzz:rounded-full data-zzz:text-foreground data-zzz:mt-1 data-zzz:border-2"
 															>
 																<img
 																	className="aspect-square outline bg-accent/10 flex text-white items-center justify-center h-12 rounded-full pointer-events-none"
@@ -180,7 +184,9 @@ function RightLocal() {
 																	src={cat._sIconUrl || "err"}
 																/>
 
-																<div className="w-35 text-ellipsis overflow-hidden break-words">{cat._sName}</div>
+																<div className="w-35 min-w-fit text-ellipsis overflow-hidden break-words">
+																	{cat._sName}
+																</div>
 																<CheckIcon
 																	className={cn("ml-auto", category.name === cat._sName ? "opacity-100" : "opacity-0")}
 																/>
@@ -198,9 +204,9 @@ function RightLocal() {
 								)}
 							</div>
 							<div className="bg-pat1 flex justify-between w-full p-1 rounded-lg">
-								<Button className="bg-input/0 hover:bg-input/0 h-12 w-28.5 text-accent">
+								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
 									{textData._RightSideBar._RightLocal.Source}
-								</Button>
+								</Label>
 								<div className="w-48.5 flex items-center px-1">
 									<Input
 										onBlur={(e) => {
@@ -213,6 +219,14 @@ function RightLocal() {
 														viewedAt: 0,
 													};
 													return { ...prev };
+												});
+												setModList((prev: any[]) => {
+													return prev.map((m: any) => {
+														if (m.path == item.path) {
+															return { ...m, source: e.currentTarget.value };
+														}
+														return m;
+													});
 												});
 												saveConfigs();
 											}
@@ -238,9 +252,9 @@ function RightLocal() {
 								</div>
 							</div>
 							<div className="bg-pat2 flex justify-between w-full p-1 rounded-lg">
-								<Button className="bg-input/0 hover:bg-input/0 h-12 w-28.5 text-accent">
+								<Label className="bg-input/0  flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
 									{textData._RightSideBar._RightLocal.Notes}
-								</Button>
+								</Label>
 								<div className="w-48.5 flex items-center px-1">
 									<Input
 										onBlur={(e) => {
@@ -251,6 +265,14 @@ function RightLocal() {
 														note: e.currentTarget.value,
 													};
 													return { ...prev };
+												});
+												setModList((prev: any[]) => {
+													return prev.map((m: any) => {
+														if (m.path == item.path) {
+															return { ...m, note: e.currentTarget.value };
+														}
+														return m;
+													});
 												});
 												saveConfigs();
 											}

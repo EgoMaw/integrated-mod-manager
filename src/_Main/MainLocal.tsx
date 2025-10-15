@@ -1,4 +1,15 @@
-import { CATEGORY, DATA, FILTER, LAST_UPDATED, MOD_LIST, SEARCH, SELECTED, SETTINGS, TEXT_DATA } from "@/utils/vars";
+import {
+	CATEGORY,
+	DATA,
+	FILTER,
+	INIT_DONE,
+	LAST_UPDATED,
+	MOD_LIST,
+	SEARCH,
+	SELECTED,
+	SETTINGS,
+	TEXT_DATA,
+} from "@/utils/vars";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { AnimatePresence, motion } from "motion/react";
 import CardLocal from "./components/CardLocal";
@@ -7,10 +18,13 @@ import { preventContextMenu } from "@/utils/utils";
 import { deleteMod, saveConfigs, toggleMod } from "@/utils/filesys";
 import MiniSearch from "minisearch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
+import { setChange } from "@/utils/hotreload";
 
 let searchDB: any = null;
 let prev = "prev";
+let prevEnabled = "noData";
 function MainLocal() {
+	const initDone = useAtomValue(INIT_DONE);
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [deleteItemData, setDeleteItemData] = useState<any>(null);
 	const textData = useAtomValue(TEXT_DATA);
@@ -41,6 +55,20 @@ function MainLocal() {
 		if (searchDB) {
 			searchDB.removeAll();
 			searchDB.addAll(modList);
+		}
+
+		if (!initDone) {
+			prevEnabled = "noData";
+		} else {
+			const enabled = modList
+				.filter((m: any) => m.enabled)
+				.map((m: any) => m.path)
+				.join(",");
+			if (prevEnabled !== "noData" && prevEnabled !== enabled) {
+				setChange();
+			}
+
+			prevEnabled = enabled;
 		}
 	}, [modList]);
 	useEffect(() => {
@@ -90,32 +118,24 @@ function MainLocal() {
 		},
 		[selected, setSelected, toggleOn, setModList]
 	);
-	const intervalFunction = useCallback(() => {
-		if (containerRef.current) {
-			const box = containerRef.current.getBoundingClientRect();
-			const scrollTop = containerRef.current.scrollTop;
-			const itemHeight = 320;
-			const itemWidth = 256;
-			const itemsPerRow = Math.floor(box.width / itemWidth);
-			setVisibleRange({
-				start: Math.floor(scrollTop / itemHeight) * itemsPerRow,
-				end: Math.ceil((scrollTop + box.height) / itemHeight) * itemsPerRow - 1,
-			});
-		}
-	}, [containerRef]);
 	const handleScroll = useCallback(() => {
 		if (initial) {
 			setInitial(false);
 		}
-		if (!scrollIntervalRef.current) {
-			scrollIntervalRef.current = setInterval(intervalFunction, 250);
-		}
 		if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
 		scrollTimeoutRef.current = setTimeout(() => {
-			if (scrollIntervalRef.current) clearInterval(scrollIntervalRef.current);
-			scrollIntervalRef.current = null;
-			scrollTimeoutRef.current = null;
-		}, 1000);
+			if (containerRef.current) {
+				const box = containerRef.current.getBoundingClientRect();
+				const scrollTop = containerRef.current.scrollTop;
+				const itemHeight = 320;
+				const itemWidth = 256;
+				const itemsPerRow = Math.floor(box.width / itemWidth);
+				setVisibleRange({
+					start: Math.floor(scrollTop / itemHeight) * itemsPerRow,
+					end: Math.ceil((scrollTop + box.height) / itemHeight) * itemsPerRow - 1,
+				});
+			}
+		}, 50);
 	}, [initial]);
 
 	// Memoize animation variants to prevent recreation on every render
@@ -124,6 +144,7 @@ function MainLocal() {
 			hidden: { opacity: initial ? 0 : 1, y: 20 },
 			visible: { opacity: 1, y: 0 },
 			exit: { opacity: initial ? 0 : 1, y: -20 },
+			invisible: { opacity: 0 },
 		}),
 		[initial]
 	);
@@ -154,21 +175,21 @@ function MainLocal() {
 		<div
 			ref={containerRef}
 			onScroll={handleScroll}
-			className="flex flex-col overflow-x-hidden items-center h-screen min-w-full overflow-y-auto duration-300"
+			className="flex flex-col  overflow-x-hidden items-center h-screen w-full  overflow-y-auto duration-300"
 		>
 			{" "}
 			<AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-				<AlertDialogContent className="min-w-120 game-font bg-background/50 backdrop-blur-xs border-border flex flex-col items-center gap-4 p-4 overflow-hidden border-2 rounded-lg">
+				<AlertDialogContent className="min-w-120">
 					<div className="max-w-96 flex flex-col items-center gap-6 mt-6 text-center">
 						<div className="text-xl text-gray-200">
-							{textData._Main._MainLocal.Delete} <span className="text-accent">{deleteItemData?.name}</span>?
+							{textData._Main._MainLocal.Delete} <span className="text-accent ">{deleteItemData?.name}</span>?
 						</div>
 						<div className="text-red-300	">{textData._Main._MainLocal.Irrev}</div>
 					</div>
 					<div className="flex justify-between w-full gap-4 mt-4">
 						<AlertDialogCancel className="w-24 duration-300">{textData.generic.Cancel}</AlertDialogCancel>
 						<AlertDialogAction
-							className="w-24 text-red-300 hover:bg-red-300 hover:text-background"
+							className="w-24 text-red-300 hover:bg-red-300 data-zzz:hover:text-background hover:text-background"
 							onClick={async () => {
 								if (!deleteItemData) return;
 								setData((prev: any) => {
@@ -216,7 +237,7 @@ function MainLocal() {
 								layout
 								variants={animationVariants()}
 								initial="hidden"
-								animate={["visible", "hidden", "exit"][isVisible]}
+								animate="visible"
 								exit="exit"
 								transition={transitionConfig(index)}
 								onMouseUp={(e: any) => handleClick(e, mod)}

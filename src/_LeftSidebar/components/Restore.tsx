@@ -10,12 +10,12 @@ function Restore({ leftSidebarOpen }: any) {
 	return (
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
-				<Button className="w-38.75 text-ellipsis h-12 overflow-hidden" style={{ width: leftSidebarOpen ? "" : "3rem" }}>
+				<Button className="w-38.75 data-[theme=zzz]:bg-red-300 text-ellipsis h-12 overflow-hidden" style={{ width: leftSidebarOpen ? "" : "3rem" }}>
 					<SaveAllIcon />
 					{leftSidebarOpen && textData._LeftSideBar._components._Restore.Restore}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="min-w-180 game-font min-h-150 bg-background/50 border-border flex flex-col items-center gap-4 p-4 overflow-hidden border-2 rounded-lg"></DialogContent>
+			<DialogContent></DialogContent>
 		</Dialog>
 	);
 }

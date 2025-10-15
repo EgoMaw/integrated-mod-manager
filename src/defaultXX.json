@@ -1,7 +1,8 @@
 {
 	"version": "2.1.0",
-	"source": "",
-	"target": "",
+	"game": "",
+	"sourceDir": "",
+	"targetDir": "",
 	"settings": {
 		"launch": 0,
 		"hotReload": 1,

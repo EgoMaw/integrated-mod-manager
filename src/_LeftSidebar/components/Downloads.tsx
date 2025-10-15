@@ -31,7 +31,7 @@ function Downloads() {
 	const downloadRef2 = useRef<HTMLDivElement>(null);
 	const downloadRef3 = useRef<HTMLDivElement>(null);
 	const downloadFile = async (item: any) => {
-		// console.log(item);
+		// //console.log(item);
 		// return;
 		if (item.category == "Other/Misc") item.category = "Other";
 		item.name = sanitizeFileName(item.name);
@@ -78,7 +78,7 @@ function Downloads() {
 		});
 		listen("fin", async () => {
 			await validateModDownload(path);
-			path=""
+			path = "";
 			if (downloadRef.current) downloadRef.current.style.width = "0%";
 			if (downloadRef2.current) downloadRef2.current.style.width = "0%";
 			if (downloadRef3.current) {
@@ -114,7 +114,7 @@ function Downloads() {
 			let count = 0;
 			let category = item.category;
 			for (let key in data) {
-				console.log(data[key].source, item.source);
+				//console.log(data[key].source, item.source);
 				if (data[key].source == item.source) {
 					count++;
 					name = key.split("\\")[1];
@@ -136,48 +136,66 @@ function Downloads() {
 		}
 	}, [downloads]);
 	const clearCompleted = () => {
-		setDownloads((prev:any) => ({...prev,completed:[]}));
+		setDownloads((prev: any) => ({ ...prev, completed: [] }));
 	};
 	const cancelDownload = (index: number) => {
-		setDownloads((prev:any) => {
+		setDownloads((prev: any) => {
 			return {
 				...prev,
-				queue: prev.queue.filter((_: any, i: number) => i !== index - (prev.downloading && Object.keys(prev.downloading).length > 0 ? 1 : 0)),
-			}
+				queue: prev.queue.filter(
+					(_: any, i: number) => i !== index - (prev.downloading && Object.keys(prev.downloading).length > 0 ? 1 : 0)
+				),
+			};
 		});
 	};
 	const done = downloads?.completed?.length || 0;
 	let downloadList = [];
-	console.log(downloads);
 	if (downloads?.downloading && Object.keys(downloads.downloading).length > 0)
 		downloadList.push({ ...downloads.downloading, status: "downloading" });
 	if (downloads?.queue)
 		downloadList = [...downloadList, ...downloads.queue.map((item: any) => ({ ...item, status: "pending" }))];
 	if (downloads?.completed)
 		downloadList = [...downloadList, ...downloads.completed.map((item: any) => ({ ...item, status: "completed" }))];
-	console.log("Download List:", downloadList);
 	return (
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
 				{
 					<Button
-						className="text-ellipsis bg-black/0 min-h-12 max-h-12 min-w-88 flex flex-col items-center w-full overflow-hidden"
+						className="text-ellipsis min-h-12 max-h-12 min-w -80 px-0 flex flex-col items-center w-full overflow-hidden"
 						style={{ width: leftSidebarOpen ? "" : "3rem" }}
 					>
 						{leftSidebarOpen ? (
 							downloadList.length > 0 ? (
 								<>
-									<div
-										ref={downloadRef}
-										key={"down" + JSON.stringify(downloadList[0])}
-										className="min-h-12 -mb-14 height-in bg-accent text-background hover:brightness-125 z-10 flex flex-col self-start justify-center overflow-hidden rounded-lg"
-										style={{ width: prev + "%" }}
-									>
-										<div className="min-w-82 fade-in flex items-center justify-center gap-1 pointer-events-none">
+									<div className="fade-in flex-col overflow-hidden rounded-md min-h-12  flex items-center justify-center w-full pointer-events-none">
+										<div
+											ref={downloadRef}
+											key={"down" + JSON.stringify(downloadList[0])}
+											className="min-h-12 -mb-12 height-in data-zzz:rounded-full data-zzz:text-background bg-accent bgaccent    text-background hover:brightness-125 z-10 flex flex-col self-start justify-center overflow-hidden rounded-lg"
+											style={{ width: prev + "%" }}
+										>
+											<div className="min-w-79 fade-in flex items-center justify-center gap-1 pointer-events-none">
+												{Icons[downloadList[0].status as keyof typeof Icons] || (
+													<FileQuestionIcon className="min-h-4 min-w-4" />
+												)}
+												<Label className="min-w-2 max-w-71.5 w-fit py-2 pr-2" style={{ backgroundColor: "#fff0" }}>
+													{downloadList[0].status == "downloading"
+														? `${textData._LeftSideBar._components._Downloads.Downloading} ${done + 1} of ${
+																downloadList.length
+														  }`
+														: `${textData._LeftSideBar._components._Downloads.Downloaded} ${done}/${downloadList.length}`}
+												</Label>
+											</div>
+										</div>
+										<div
+											key={"down2" + JSON.stringify(downloadList[0])}
+											className="fade-in min-h-12 
+											flex items-center justify-center w-full gap-1 pointer-events-none"
+										>
 											{Icons[downloadList[0].status as keyof typeof Icons] || (
 												<FileQuestionIcon className="min-h-4 min-w-4" />
 											)}
-											<Label className="min-w-2 max-w-71.5 w-fit py-2 pr-2" style={{ backgroundColor: "#fff0" }}>
+											<Label className=" w-fit max-w-72 pr-2 pointer-events-none">
 												{downloadList[0].status == "downloading"
 													? `${textData._LeftSideBar._components._Downloads.Downloading} ${done + 1} of ${
 															downloadList.length
@@ -186,24 +204,9 @@ function Downloads() {
 											</Label>
 										</div>
 									</div>
-									<div
-										key={"down2" + JSON.stringify(downloadList[0])}
-										className="fade-in bg-button rounded-md min-h-12 text-accent flex items-center justify-center w-full gap-1 pl-2 pointer-events-none"
-									>
-										{Icons[downloadList[0].status as keyof typeof Icons] || (
-											<FileQuestionIcon className="min-h-4 min-w-4" />
-										)}
-										<Label className=" w-fit max-w-72 pr-2 pointer-events-none">
-											{downloadList[0].status == "downloading"
-												? `${textData._LeftSideBar._components._Downloads.Downloading} ${done + 1} of ${
-														downloadList.length
-												  }`
-												: `${textData._LeftSideBar._components._Downloads.Downloaded} ${done}/${downloadList.length}`}
-										</Label>
-									</div>
 								</>
 							) : (
-								<div className="fade-in bg-button rounded-md min-h-12 text-accent flex items-center justify-center w-full gap-1 pl-2 pointer-events-none">
+								<div className="fade-in  min-h-12 flex items-center justify-center w-full gap-1 pl-2 pointer-events-none">
 									<DownloadIcon className="min-h-4 min-w-4" />
 									<Label className=" w-fit max-w-72 pr-2 pointer-events-none">Downloads</Label>
 								</div>
@@ -212,26 +215,26 @@ function Downloads() {
 							<>
 								<div
 									ref={downloadRef3}
-									className="bg-accent min-h-12 min-w-12 p-1 text-background max-w-12  max-h-12 flex items-center justify-center rounded-lg"
+									className="min-h-12 min-w-12 p-1 max-w-12  max-h-12 flex items-center justify-center rounded-lg"
 									style={{
 										background: "conic-gradient( var(--accent) 0% " + prev + "%, var(--button) 0% 100%)",
 										transition: "minHeight 0.3s, margin-bottom 0.3s, height 0.3s",
 									}}
 								>
-									<Label className=" w-full h-full flex items-center justify-center bg-button text-accent rounded-md pointer-events-none">{`${
+									<Label className=" w-full h-full flex items-center justify-center bg-button data-zzz:rounded-full data-zzz:text-foreground text-accent rounded-md pointer-events-none">{`${
 										done + (downloadList[0].status == "downloading" ? 1 : 0)
 									}/${downloadList.length}`}</Label>
 								</div>
 							</>
 						) : (
-							<div className="bg-button min-h-12 min-w-12 flex items-center justify-center rounded-md">
+							<div className="min-h-12 min-w-12 flex items-center justify-center rounded-md">
 								<DownloadIcon className="min-h-4 min-w-4" />
 							</div>
 						)}
 					</Button>
 				}
 			</DialogTrigger>
-			<DialogContent className="min-w-180 game-font min-h-150 bg-background/50 border-border flex flex-col items-center gap-4 p-4 overflow-hidden border-2 rounded-lg">
+			<DialogContent className="min-w-180 min-h-150">
 				<div className="min-h-fit text-accent my-6 text-3xl">{textData.generic.Downloads}</div>
 				<div className="h-116 flex flex-col items-center w-full gap-4 p-0">
 					<div className="flex justify-between w-full">
@@ -240,26 +243,31 @@ function Downloads() {
 							variant="outline"
 							size="sm"
 							onClick={clearCompleted}
+							style={{backgroundColor: "#0000"}}
 							disabled={!downloadList.some((item: any) => item.status === "completed" || item.status === "failed")}
 						>
 							{textData._LeftSideBar._components._Downloads.Clear}
 						</Button>
 					</div>
-					<div className="flex flex-col w-full h-full overflow-y-auto text-gray-300 border rounded-sm">
+					<div className="flex flex-col w-full data-zzz:gap-2 h-full overflow-y-auto text-gray-300 data-zzz:border-0 border rounded-sm">
 						{downloadList.length > 0 ? (
 							<>
 								{
 									<div
+										className="overflow-hidden data-zzz:rounded-full data-zzz:text-foreground  duration-0 flex items-center w-full min-h-16 min-w-0 -mb-16 data-zzz:-mb-18 border-b"
+									>
+										<div
 										key={"cur" + JSON.stringify(downloadList[0])}
 										ref={downloadRef2}
-										className="bg-accent/50 duration-0 flex items-center w-0 min-h-16 min-w-0 -mb-16 border-b"
+										className="bg-accent bgaccent opacity-50 data-zzz:rounded-full data-zzz:text-foreground  duration-0 flex items-center w-0 min-h-16 min-w-0"
 										style={{ width: prev + "%" }}
 									></div>
+									</div>
 								}
 								{downloadList.map((item: any, index: any) => (
 									<div
 										key={item.name.replaceAll("DISABLED_", "") + index}
-										className="hover:bg-background/20 flex justify-between items-center w-full  min-h-16 px-4 border-b"
+										className="hover:bg-background/20 data-zzz:rounded-full data-zzz:text-foreground data-zzz:border-2 flex justify-between items-center w-full  min-h-16 px-4 border-b"
 										style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150" }}
 									>
 										<div className="flex items-center w-full flex-1 gap-3 ">
@@ -292,7 +300,7 @@ function Downloads() {
 													variant="ghost"
 													size="sm"
 													onClick={() => cancelDownload(index)}
-													className="hover:text-gray-300 text-gray-400"
+													className="hover:text-gray-300 data-zzz:border-0 text-gray-400"
 												>
 													<X className="w-4 h-4" />
 												</Button>
@@ -302,7 +310,7 @@ function Downloads() {
 								))}
 							</>
 						) : (
-							<div className="flex items-center justify-center h-32 text-gray-400">
+							<div className="flex items-center justify-center h-full text-gray-400">
 								{textData._LeftSideBar._components._Downloads.NoQ}
 							</div>
 						)}

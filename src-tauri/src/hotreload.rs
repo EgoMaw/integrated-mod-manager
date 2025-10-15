@@ -33,26 +33,32 @@ static CHANGE: AtomicBool = AtomicBool::new(false);
 
 static MOD_MANAGER_TITLE: &str = "wuwa-mod-manager";
 static WINDOW_TARGET: RwLock<String> = RwLock::new(String::new());
-static GAME_TITLE: &str = "wuthering waves  ";
+static WW_TITLE: &str = "wuthering waves  ";
+static ZZ_TITLE: &str = "zenlesszonezero";
+static GI_TITLE: &str = "genshin impact";
+static SR_TITLE: &str = "honkai: star rail";
 
 #[cfg(windows)]
 fn init_window_target() {
     if let Ok(mut window_target) = WINDOW_TARGET.write() {
         if window_target.is_empty() {
-            *window_target = GAME_TITLE.to_string();
+            *window_target = WW_TITLE.to_string();
         }
     }
 }
 
 #[tauri::command]
-pub fn set_window_target(target_game: bool) -> Result<(), String> {
+pub fn set_window_target(target_game: i32) -> Result<(), String> {
     #[cfg(windows)]
     {
         if let Ok(mut window_target) = WINDOW_TARGET.write() {
-            *window_target = if target_game {
-                GAME_TITLE.to_string()
-            } else {
-                MOD_MANAGER_TITLE.to_string()
+            *window_target = match target_game {
+                0 => MOD_MANAGER_TITLE.to_string(),
+                1 => WW_TITLE.to_string(),
+                2 => ZZ_TITLE.to_string(),
+                3 => GI_TITLE.to_string(),
+                4 => SR_TITLE.to_string(),
+                _ => return Err(format!("Invalid target_game value: {}. Must be 0-4", target_game)),
             };
             log::info!("Window target set to: {}", *window_target);
             Ok(())
@@ -198,8 +204,16 @@ fn get_focused_window_process_name() -> Option<String> {
 
 #[cfg(windows)]
 #[tauri::command]
-pub fn is_game_process_running() -> bool {
-    check_process_running(GAME_TITLE)
+pub fn is_game_process_running(game_id: i32) -> bool {
+    let game_title = match game_id {
+        0 => WW_TITLE,
+        1 => ZZ_TITLE,
+        2 => GI_TITLE,
+        3 => SR_TITLE,
+        _ => return false, // Invalid game_id
+    };
+    
+    check_process_running(game_title)
 }
 
 #[cfg(windows)]
@@ -232,7 +246,6 @@ fn check_process_running(title: &str) -> bool {
             if process_handle.is_null() {
                 continue;
             }
-
             CloseHandle(process_handle);
 
             if check_process_windows(process_id, &target_title_lower) {
@@ -269,7 +282,7 @@ fn check_process_windows(process_id: u32, target_title_lower: &str) -> bool {
 
                 let mut window_process_id = 0;
                 GetWindowThreadProcessId(hwnd, &mut window_process_id);
-
+                
                 if window_process_id == *target_process_id {
                     let mut buffer = [0u16; 512];
                     let len = GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);

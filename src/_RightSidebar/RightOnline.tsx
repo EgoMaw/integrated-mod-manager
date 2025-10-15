@@ -5,6 +5,7 @@ import { fetchMod, formatSize, getTimeDifference, modRouteFromURL } from "@/util
 import {
 	DATA,
 	DOWNLOAD_LIST,
+	GAME,
 	INSTALLED_ITEMS,
 	MOD_LIST,
 	ONLINE_DATA,
@@ -18,8 +19,12 @@ import {
 	DiscIcon,
 	DownloadIcon,
 	EllipsisVerticalIcon,
+	EyeIcon,
 	LoaderIcon,
+	MessageSquareIcon,
+	PlusIcon,
 	Redo2Icon,
+	ThumbsUpIcon,
 	UploadIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -27,13 +32,14 @@ import { useEffect, useState } from "react";
 import Carousel from "./components/Carousel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { refreshModList, saveConfigs } from "@/utils/filesys";
+import { Separator } from "@radix-ui/react-separator";
 let now = Date.now() / 1000;
 function RightOnline({ open }: { open: boolean }) {
 	const textData = useAtomValue(TEXT_DATA);
 	const selected = useAtomValue(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
-	const setModList = useSetAtom(MOD_LIST)
-	const setData = useSetAtom(DATA)
+	const setModList = useSetAtom(MOD_LIST);
+	const setData = useSetAtom(DATA);
 	const onlineData = useAtomValue(ONLINE_DATA);
 	const [aboutOpen, setAboutOpen] = useState(false);
 	const [updateOpen, setUpdateOpen] = useState(false);
@@ -43,8 +49,7 @@ function RightOnline({ open }: { open: boolean }) {
 	const installedItems = useAtomValue(INSTALLED_ITEMS);
 	const item = onlineData[selected];
 	const installedItem = installedItems.find((it: any) => it.source && modRouteFromURL(it.source) == selected);
-	const type =installedItem ? (installedItem.modStatus ? "Update" : "Reinstall") : "Install";
-
+	const type = installedItem ? (installedItem.modStatus ? "Update" : "Reinstall") : "Install";
 	useEffect(() => {
 		now = Date.now() / 1000;
 		const controller = new AbortController();
@@ -63,22 +68,22 @@ function RightOnline({ open }: { open: boolean }) {
 		};
 	}, [selected]);
 	useEffect(() => {
-		if(type!="Install" && item?._sProfileUrl){
-			setData((prev:any)=>{
-				if(installedItem.name){
-					prev[installedItem.name]={...prev[installedItem.name],viewedAt: now * 1000}
+		if (type != "Install" && item?._sProfileUrl) {
+			setData((prev: any) => {
+				if (installedItem.name) {
+					prev[installedItem.name] = { ...prev[installedItem.name], viewedAt: now * 1000 };
 				}
-				return {...prev}
-			})
-			refreshModList().then((list)=>{
-				setModList(list)
-			})
-			saveConfigs()
+				return { ...prev };
+			});
+			refreshModList().then((list) => {
+				setModList(list);
+			});
+			saveConfigs();
 		}
 	}, [selected]);
 	const popoverContent = item?._aFiles?.map((file: any) => (
 		<Button
-			className="min-h-fit flex items-center justify-center min-w-full gap-1 p-2 overflow-hidden"
+			className="min-h-fit data-zzz:rounded-md flex items-center justify-center min-w-full gap-1 p-2 overflow-hidden"
 			onClick={() => {
 				setDownloadList((prev: any) => {
 					let dlitem = {
@@ -119,7 +124,7 @@ function RightOnline({ open }: { open: boolean }) {
 		>
 			<div className="w-[calc(100%-6rem)] text-start flex flex-col gap-1">
 				<p className=" text-ellipsis wrap-break-word overflow-hidden text-base resize-none">{file._sFile}</p>
-				<div className=" min-w-fit text-background flex flex-wrap w-full gap-1 text-xs">
+				<div className=" min-w-fit data-zzz:text-background text-background flex flex-wrap w-full gap-1 text-xs">
 					{file._sAnalysisResultCode == "contains_exe" ? (
 						<div className=" w-12 px-1 text-center bg-red-300 rounded-lg">exe</div>
 					) : (
@@ -161,6 +166,7 @@ function RightOnline({ open }: { open: boolean }) {
 			</div>
 		</Button>
 	));
+	console.log(onlineData[selected]);
 	return (
 		<AnimatePresence mode="wait">
 			{open && (
@@ -169,9 +175,9 @@ function RightOnline({ open }: { open: boolean }) {
 					animate={{ translateX: "0%", opacity: 1 }}
 					exit={{ translateX: "100%", opacity: 0 }}
 					transition={{ duration: 0.3, ease: "linear" }}
-					className="bg-sidebar fixed overflow-hidden h-full z-50 flex flex-col items-center justify-center border-l right-0"
+					className="bg-sidebar fixed overflow-hidden h-full z-10 flex flex-col items-center justify-center border-l right-0"
 					style={{
-						maxWidth: "42%",
+						maxWidth: "42vw",
 						width: "50rem",
 						backdropFilter: "blur(8px)",
 						backgroundColor: "color-mix(in oklab, var(--sidebar) 75%, transparent)",
@@ -210,9 +216,32 @@ function RightOnline({ open }: { open: boolean }) {
 								className="flex flex-col items-center w-full h-full overflow-hidden duration-300"
 							>
 								<div className="text-accent min-h-16 flex items-center justify-start w-full gap-3 px-3 border-b">
+									<div className="min-w-fit trs bg-button p-2 rounded-md data-zzz:border-2 flex items-center gap-2">
+										<img
+											className="aspect-square min-w-6 max-w-6 scale-120 h-full ctrs rounded-full pointer-events-none"
+											onError={(e) => {
+												e.currentTarget.src = "/who.jpg";
+											}}
+											src={item._aCategory._sIconUrl || "err"}
+										/>
+
+										<span className="ctrs">{item._aCategory._sName.split(" ")[0]}</span>
+									</div>
+
 									<Label key={item._sName} className="w-full text-xl text-center">
 										{item._sName}
 									</Label>
+									<div className="min-w-fit trs bg-button p-2 rounded-md data-zzz:border-2 flex items-center gap-2">
+											<img
+												className="aspect-square min-w-6 max-w-6 scale-120 h-full ctrs rounded-full pointer-events-none"
+												onError={(e) => {
+													e.currentTarget.src = "/who.jpg";
+												}}
+												src={item._aSubmitter._sAvatarUrl || "err"}
+											/>
+
+											<span className="ctrs">{item._aSubmitter?._sName}</span>
+										</div>
 								</div>
 								<div className="flex flex-col w-full pb-2 mb-24 overflow-hidden overflow-y-scroll">
 									<div
@@ -233,7 +262,7 @@ function RightOnline({ open }: { open: boolean }) {
 											<CollapsibleTrigger className="text-accent flex items-center justify-between w-full h-8">
 												<Button
 													className={
-														"w-full flex justify-between bg-accent text-background " +
+														"w-full flex justify-between bg-accent bgaccent   data-zzz:text-background text-background " +
 														(aboutOpen
 															? "hover:brightness-125"
 															: "bg-input/50 text-accent hover:text-accent hover:bg-input")
@@ -262,7 +291,7 @@ function RightOnline({ open }: { open: boolean }) {
 											<CollapsibleTrigger className="text-accent flex items-center justify-between w-full h-8">
 												<Button
 													className={
-														"w-full flex justify-between bg-accent text-background " +
+														"w-full flex justify-between bg-accent bgaccent   data-zzz:text-background text-background " +
 														(updateOpen
 															? "hover:brightness-125"
 															: "bg-input/50 text-accent hover:text-accent hover:bg-input")
@@ -289,7 +318,7 @@ function RightOnline({ open }: { open: boolean }) {
 													{item._aUpdateChangeLog &&
 														item._aUpdateChangeLog.map((changeItem: any, index: number) => (
 															<div key={index} className="flex items-center gap-2">
-																<div className="min-w-2 min-h-2 self-start mt-1.75 bg-accent rounded-full" />
+																<div className="min-w-2 min-h-2 self-start mt-1.75 bg-accent bgaccent   rounded-full" />
 																<label className=" text-cyan-50 text-sm font-sans">
 																	{changeItem.text}- [{changeItem.cat}]
 																</label>
@@ -303,45 +332,82 @@ function RightOnline({ open }: { open: boolean }) {
 										</Collapsible>
 									)}
 								</div>
-								<div className="text-accent min-h-22 h-22 min-w-full absolute bottom-0 flex items-center justify-center gap-3 px-3 border-t">
-									<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-										<PopoverTrigger
-											style={{ width: `${type == "Install" ? "19.5rem" : "16.5rem"}` }}
-											className="flex h-10 gap-4 overflow-hidden text-ellipsis bg-button text-accent shadow-xs hover:brightness-120  duration-300  items-center justify-center active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-											disabled={!item._aFiles || item._aFiles?.length == 0}
-										>
-											{{ Install: <DownloadIcon />, Reinstall: <Redo2Icon />, Update: <UploadIcon /> }[type]}
-											{
-												{
-													Install: textData.generic.Install,
-													Reinstall: textData._RightSideBar._RightOnline.Reinstall,
-													Update: textData.generic.Update,
-												}[type]
-											}
-										</PopoverTrigger>
-										<PopoverContent
-											className="w-192 max-w-[40vw] max-h-[75vh] overflow-auto gap-1 bg-sidebar p-1 flex flex-col"
-											style={{ marginLeft: type == "Install" ? "0rem" : "3rem", marginBottom: "0.5rem" }}
-										>
-											{popoverContent}
-										</PopoverContent>
-									</Popover>
-									{type !== "Install" && (
-										<Popover open={altPopoverOpen} onOpenChange={setAltPopoverOpen}>
+								<div className="text-accent min-h-24 h-24 min-w-full absolute bottom-0 flex items-center justify-evenly gap-1 px-1 border-t">
+									<div className="grid grid-cols-3 gap-2 min-w-40 w-40 text-xs">
+										{[
+											<>
+												<PlusIcon className="min-h-4 h-4" />
+												{getTimeDifference(now, item._tsDateAdded || 0)}
+											</>,
+											<>
+												<LoaderIcon className="h-4" />
+												{getTimeDifference(now, item._tsDateModified || 0)}
+											</>,
+											<>
+												<ThumbsUpIcon className="h-4" />
+												{item._nLikeCount || "0"}
+											</>,
+
+											<>
+												<MessageSquareIcon className="h-4" />
+												{item._nPostCount || "0"}
+											</>,
+											<>
+												<DownloadIcon className="h-4" />
+												{item._nDownloadCount || "0"}
+											</>,
+											<>
+												<EyeIcon className="h-4" />
+												{item._nViewCount || "0"}
+											</>,
+										].map((children) => (
+											<label className="flex flex-col items-center justify-center  data-zzz:text-foreground text-accent ">
+												{children}
+											</label>
+										))}
+									</div>
+									<Separator className="min-w-0 border-l min-h-full" />
+									<div className="flex min-w-fit items-center justify-center w-full gap-1">
+										<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 											<PopoverTrigger
-												className="w-9 flex h-10 gap-4 overflow-hidden text-ellipsis bg-button text-accent shadow-xs hover:brightness-120  duration-300  items-center justify-center active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+												style={{ width: `${type == "Install" ? "19.5rem" : "16.5rem"}` }}
+												className="flex h-10 gap-4 overflow-hidden text-ellipsis bg-button data-zzz:rounded-full data-zzz:text-foreground data-zzz:border-2 text-accent shadow-xs hover:brightness-120  duration-300  items-center justify-center active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
 												disabled={!item._aFiles || item._aFiles?.length == 0}
 											>
-												<EllipsisVerticalIcon />
+												{{ Install: <DownloadIcon />, Reinstall: <Redo2Icon />, Update: <UploadIcon /> }[type]}
+												{
+													{
+														Install: textData.generic.Install,
+														Reinstall: textData._RightSideBar._RightOnline.Reinstall,
+														Update: textData.generic.Update,
+													}[type]
+												}
 											</PopoverTrigger>
-											<PopoverContent className="w-192 max-w-[40vw]  mr-[calc(min(25rem,21vw))] translate-x-1/2 mb-2 max-h-[75vh] overflow-auto gap-1 bg-sidebar p-1 flex flex-col">
-												<Label className="w-full flex items-center justify-center text-lg bg-accent/25 text-accent rounded-md h-12">
-													{textData._RightSideBar._RightOnline.Sep}
-												</Label>
+											<PopoverContent
+												className="w-152 max-w-[calc(42vw-11.625rem)] mr-1 max-h-[75vh] overflow-auto gap-1 bg-sidebar p-1 flex flex-col"
+												style={{ marginLeft: type == "Install" ? "0rem" : "3rem", marginBottom: "0.5rem" }}
+											>
 												{popoverContent}
 											</PopoverContent>
 										</Popover>
-									)}
+
+										{type !== "Install" && (
+											<Popover open={altPopoverOpen} onOpenChange={setAltPopoverOpen}>
+												<PopoverTrigger
+													className="w-10 flex h-10 gap-4 overflow-hidden text-ellipsis data-zzz:rounded-full data-zzz:text-foreground data-zzz:border-2 bg-button text-accent shadow-xs hover:brightness-120  duration-300  items-center justify-center active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+													disabled={!item._aFiles || item._aFiles?.length == 0}
+												>
+													<EllipsisVerticalIcon />
+												</PopoverTrigger>
+												<PopoverContent className="w-152 max-w-[calc(42vw-11.625rem)] mr-2 max-h-[75vh] mb-2 overflow-auto gap-1 bg-sidebar p-1 flex flex-col">
+													<Label className="w-full flex items-center justify-center text-lg bg-accent/25 data-zzz:bg-zzz-accent-2/25 data-zzz:text-zzz-accent-2 text-accent rounded-md h-12">
+														{textData._RightSideBar._RightOnline.Sep}
+													</Label>
+													{popoverContent}
+												</PopoverContent>
+											</Popover>
+										)}
+									</div>
 								</div>
 							</motion.div>
 						)}

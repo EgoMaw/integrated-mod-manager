@@ -137,6 +137,23 @@ a {
 .stopClicks300ms {
 	animation: stopClicks 10s;
 }
+.download {
+	animation: download 2s;
+}
+@keyframes download {
+	0% {
+		opacity: 0;
+		translate: 0px 0px;
+	}
+	25% {
+		opacity: 1;
+		translate: 0px 0px;
+	}
+	100% {
+		opacity: 0;
+		translate: 0px 20px;
+	}
+}
 @keyframes stopClicks {
 	0%,
 	100% {
@@ -144,9 +161,11 @@ a {
 	}
 }
 
+@custom-variant data-zzz (&:is([data-theme="zzz"] *));
 @theme inline {
 	--color-wuwa-accent: var(--wuwa-accent);
 	--color-zzz-accent: var(--zzz-accent);
+	--color-zzz-accent-2: var(--zzz-accent-2);
 	--color-button: var(--button);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -187,10 +206,13 @@ a {
 	--game-font-jp: wuwa;
 	--game-font-kr: wuwa;
 	--game-font-ru: wuwa;
+	--radius-main: 0.5rem;
+	--border-w-main: 1px;
+
 	--button: #2d2a28;
 	--background: oklch(0.147 0.004 49.25);
 	--foreground: oklch(0.985 0.001 106.423);
-	--card: oklch(0.216 0.006 56.043);
+	--card: oklch(21.612% 0.00611 55.916);
 	--card-foreground: oklch(0.985 0.001 106.423);
 	--popover: oklch(0.216 0.006 56.043);
 	--popover-foreground: oklch(0.985 0.001 106.423);
@@ -220,7 +242,12 @@ a {
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.553 0.013 58.071);
 }
-
+/* Default theme (WuWa) */
+:root {
+	--wuwa-accent: #cdb896;
+	--zzz-accent: #efdd00;
+	--zzz-accent-2: #f68f36;
+}
 /* ZZZ Theme Variables */
 [data-theme="zzz"] {
 	--game-font-en: zzz-en;
@@ -228,31 +255,38 @@ a {
 	--game-font-jp: zzz-jp;
 	--game-font-kr: zzz-kr;
 	--game-font-ru: zzz-ru;
-	--button: #2d2a28;
-	--background: oklch(0.147 0.004 49.25);
-	--foreground: oklch(0.985 0.001 106.423);
-	--card: oklch(0.216 0.006 56.043);
-	--card-foreground: oklch(0.985 0.001 106.423);
+	--radius-main: 99rem;
+	--border-w-main: 2px;
+
+	--button: #191919;
+	--background: oklch(0% 0 0);
+
+	--card: #0f0f0f;
 	--popover: oklch(0.216 0.006 56.043);
+	--secondary: oklch(0.268 0.007 34.298);
+	--muted: #837660;
+
+	--border: #323232;
+	--input: oklch(1 0 0 / 15%);
+	--ring: oklch(0.553 0.013 58.071);
+
+	--accent: var(--zzz-accent);
+	--foreground: #e6e6e6;
+	--card-foreground: oklch(0.985 0.001 106.423);
 	--popover-foreground: oklch(0.985 0.001 106.423);
 	--primary: oklch(0.923 0.003 48.717);
 	--primary-foreground: oklch(0.216 0.006 56.043);
-	--secondary: oklch(0.268 0.007 34.298);
 	--secondary-foreground: oklch(0.985 0.001 106.423);
-	--muted: #837660;
 	--muted-foreground: oklch(0.709 0.01 56.259);
-	--accent: var(--zzz-accent);
 	--accent-foreground: oklch(0.985 0.001 106.423);
 	--destructive: oklch(0.704 0.191 22.216);
-	--border: #4e463a;
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.553 0.013 58.071);
 	--chart-1: oklch(0.488 0.243 264.376);
 	--chart-2: oklch(0.696 0.17 162.48);
 	--chart-3: oklch(0.769 0.188 70.08);
 	--chart-4: oklch(0.627 0.265 303.9);
 	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.216 0.006 56.043);
+
+	--sidebar: #0f0f0f;
 	--sidebar-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
 	--sidebar-primary-foreground: oklch(0.985 0.001 106.423);
@@ -260,6 +294,12 @@ a {
 	--sidebar-accent-foreground: oklch(0.985 0.001 106.423);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.553 0.013 58.071);
+}
+[data-theme="zzz"] .trs {
+	transform: skew(-8deg, -8deg) rotate(8deg);
+}
+[data-theme="zzz"] .ctrs {
+	transform: skew(8deg, 8deg) rotate(-8deg);
 }
 
 /* Theme-specific background images */
@@ -323,6 +363,21 @@ a {
 	transition-duration: 200ms; /* duration-200 */
 	overflow: hidden;
 }
+[data-theme="zzz"] .card-generic {
+	width: 14rem; /* w-56 */
+	height: 18rem; /* h-72 */
+	cursor: pointer;
+	/* outline-accent/0 */
+	user-select: none; /* select-none */
+	background-color: var(--card); /* bg-card */
+	border-radius: 1px 1rem 1px 1rem; /* rounded-lg */
+	border: 1px solid var(--border); /* border */
+	transition-duration: 200ms; /* duration-200 */
+	outline-offset: 0.375rem; /* outline-offset-7 */
+	outline: 1px solid transparent;
+	transition-duration: 200ms; /* duration-200 */
+	overflow: hidden;
+}
 
 .card-online {
 	display: flex;
@@ -369,11 +424,6 @@ a {
 	--game-font: var(--game-font-ru);
 }
 
-/* Default theme (WuWa) */
-:root {
-	--wuwa-accent: #cdb896;
-	--zzz-accent: #f68f36;
-}
 ::-webkit-scrollbar {
 	width: 10px;
 }
@@ -382,7 +432,7 @@ a {
 	border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-	background: var(--muted);
+	background: color-mix(in oklab, var(--accent) 50%, transparent);
 	border-radius: 10px;
 }
 .thin::-webkit-scrollbar {
@@ -390,12 +440,12 @@ a {
 }
 .thin::-webkit-scrollbar-track {
 	background: var(--card);
-	border: solid var(--color-card) 2px;
+	border: solid var(--card) 2px;
 	border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-	background: var(--muted);
-	border: solid var(--color-background) 1px;
+	background: color-mix(in oklab, var(--accent) 50%, transparent);
+	border: solid var(--background) 1px;
 	border-radius: 10px;
 }
 
@@ -472,4 +522,46 @@ a {
 		outline-width: 1px;
 		outline-color: transparent;
 	}
+}
+/* .bg-button{
+	background-color: var(--button);
+	background-image: radial-gradient(circle at 20% 50%, var(--border) 1px, transparent 1.5px),
+	                  radial-gradient(circle at 70% 50%, var(--border) 1px, transparent 1.5px);
+	background-size: 12px 12px;
+	background-position: 0 0, 12px 6px;
+} */
+[data-theme="zzz"] .bg2 {
+	 &[data-state="active"] {
+            
+			animation: color-transition 5s ease-in-out infinite alternate 1s;
+        }
+}
+[data-theme="zzz"] .bgaccent {
+	animation: color-transition 5s ease-in-out infinite alternate 1s;
+}
+
+@keyframes color-transition {
+	0% {
+		background-color: var(--zzz-accent);
+	}
+	100% {
+		background-color: var(--zzz-accent-2);
+	}
+}
+
+[data-theme="zzz"] .textaccent {
+	animation: color-transition-text 5s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes color-transition-text {
+	0% {
+		color: var(--zzz-accent);
+	}
+	100% {
+		color: var(--zzz-accent-2);
+	}
+}
+
+#checkbox{
+	animation: none;
 }

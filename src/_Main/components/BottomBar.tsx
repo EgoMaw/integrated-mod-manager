@@ -28,8 +28,8 @@ function BottomBar() {
 	}, [categories, modList, online]);
 	return (
 		<div className="min-h-20 flex items-center justify-center w-full h-20 p-2">
-			<div className="bg-sidebar text-accent flex items-center justify-center w-full h-full gap-1 p-2 border rounded-lg">
-				<label className="w-20 gap-1">{textData.generic.Category}</label>:
+			<div className="bg-sidebar z-100 text-accent flex items-center justify-center w-full h-full gap-1 p-2 border rounded-lg">
+				<label className="min-w-fit gap-1">{textData.generic.Category} :</label>
 				<div
 					onWheel={(e) => {
 						if (e.deltaX != 0) return;
@@ -77,25 +77,25 @@ function BottomBar() {
 										padding: online && cat._special ? "0rem" : "",
 									}}
 									className={
-										(online ? onlinePath.startsWith(`Skins/${cat._sName}`) : category == cat._sName)
-											? " bg-accent text-background"
-											: ""
+										"trs data-zzz:rounded-lg "+((online ? onlinePath.startsWith(`Skins/${cat._sName}`) : category == cat._sName)
+											? " bg-accent bgaccent    data-zzz:text-background text-background"
+											: "")
 									}
 								>
 									{cat._sName == "All" ? (
-										<GroupIcon className="aspect-square h-full pointer-events-none" />
+										<GroupIcon className="aspect-square ctrs h-full pointer-events-none" />
 									) : cat._sName == UNCATEGORIZED ? (
-										<FileQuestionIcon className="aspect-square h-full pointer-events-none" />
+										<FileQuestionIcon className="aspect-square ctrs h-full pointer-events-none" />
 									) : (
 										<img
-											className="aspect-square min-w-6 scale-120 h-full rounded-full pointer-events-none"
+											className="aspect-square min-w-6 scale-120 h-full ctrs rounded-full pointer-events-none"
 											onError={(e) => {
 												e.currentTarget.src = "/who.jpg";
 											}}
 											src={cat._sIconUrl || "err"}
 										/>
 									)}
-									{cat._sName}
+									<span className="ctrs">{cat._sName.split(" ")[0]}</span>
 								</Button>
 							</motion.div>
 						))}

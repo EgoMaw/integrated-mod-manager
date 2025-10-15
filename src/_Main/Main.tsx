@@ -17,7 +17,7 @@ function Main() {
 					<motion.div
 						{...ONLINE_TRANSITION(online)}
 						key={online ? "online" : "local"}
-						className="flex flex-col items-center h-full min-w-full overflow-y-hidden "
+						className="flex flex-col delay-200 items-center h-full min-w-full overflow-y-hidden "
 					>
 						{online ? <MainOnline /> : <MainLocal />}
 					</motion.div>

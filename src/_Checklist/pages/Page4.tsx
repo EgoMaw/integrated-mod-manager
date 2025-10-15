@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { applyChanges, folderSelector, verifyDirStruct } from "@/utils/filesys";
+import { managedSRC } from "@/utils/consts";
+import { applyPreset, folderSelector, verifyDirStruct } from "@/utils/filesys";
 import { getDataDir } from "@/utils/init";
 import { CHANGES, GAME, SOURCE, TARGET, TEXT_DATA } from "@/utils/vars";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -21,7 +22,7 @@ function Page4({ setPage }: { setPage: (page: number) => void }) {
 		<div className="text-muted-foreground fixed flex flex-col items-center justify-center w-screen h-screen">
 			<div className="fixed z-20 flex flex-col items-center justify-center w-full duration-200">
 				{tgt == "" ? (
-					<div className=" text-accent/75 flex flex-col items-center gap-5 my-2 text-2xl">
+					<div className=" text-accent flex flex-col items-center gap-5 my-2 text-2xl">
 						{textData._Intro._Intro.NotFound}
 						<Button
 							className="w-1/2 mt-2"
@@ -87,7 +88,7 @@ function Page4({ setPage }: { setPage: (page: number) => void }) {
 						</div>
 
 						<div className=" flex min-w-fit  items-center gap-2">
-							<Checkbox checked={checked} onClick={() => setChecked(!checked)} className=" checked:bg-accent" />
+							<Checkbox checked={checked} onClick={() => setChecked(!checked)} className=" checked:bg-accent bgaccent  " />
 							<label className="text-accent/75 text-sm min-w-fit">
 								{" "}
 								Mods are stored in {game}MI\Mods {/* TRANSLATE */}
@@ -98,7 +99,8 @@ function Page4({ setPage }: { setPage: (page: number) => void }) {
 							className={"w-32 mt-2"}
 							onClick={async () => {
 								setTarget(tgt);
-								setSource(checked ? (tgt+"\\Mods") : src);
+								setSource(checked ? (tgt+"\\Mods") : src.endsWith(managedSRC)?src.split(managedSRC)[0]:src);
+								applyPreset([])
 								setChanges(await verifyDirStruct());
 								setPage(4);
 

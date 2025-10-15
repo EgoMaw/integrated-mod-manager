@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarContent, SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
 import { applyPreset, refreshModList, saveConfigs } from "@/utils/filesys";
-import { FILTER, LEFT_SIDEBAR_OPEN, MOD_LIST, PRESETS, TEXT_DATA } from "@/utils/vars";
+import { CURRENT_PRESET, FILTER, LEFT_SIDEBAR_OPEN, MOD_LIST, PRESETS, TEXT_DATA } from "@/utils/vars";
 import { Separator } from "@radix-ui/react-separator";
 import { useAtom, useAtomValue } from "jotai";
 import { CheckIcon, CircleIcon, EditIcon, PlusIcon, SaveIcon, XIcon } from "lucide-react";
@@ -14,7 +14,7 @@ function LeftLocal() {
 	const textData = useAtomValue(TEXT_DATA);
 	const [filter, setFilter] = useAtom(FILTER);
 	const [presets, setPresets] = useAtom(PRESETS);
-	const [currentPreset, setCurrentPreset] = useState(-1);
+	const [currentPreset, setCurrentPreset] = useAtom(CURRENT_PRESET)
 	const [modList, setModList] = useAtom(MOD_LIST);
 	const updatePreset = (index: number, name: string, shouldSave = false, shouldDelete = false) => {
 		const tempPresets: any = [...presets];
@@ -92,7 +92,7 @@ function LeftLocal() {
 							onClick={() => {
 								setFilter(fil.name);
 							}}
-							className={"w-25 " + (filter == fil.name ? "bg-accent text-background " : "")}
+							className={"w-25 data-zzz:text-xs " + (filter == fil.name ? "bg-accent bgaccent data-zzz:text-background text-background " : "")}
 							style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
 						>
 							{fil.icon}
@@ -145,9 +145,12 @@ function LeftLocal() {
 										{leftSidebarOpen ? (
 											<div
 												className={
-													"w-full text-accent duration-200 rounded-lg px-2 fade-in pointer-events-none items-center flex gap-1 " +
-													(currentPreset == index ? " bg-accent text-background" : "bg-input/10")
+													"w-full text-accent data-zzz:border-2 data-zzz:rounded-full duration-200 rounded-lg px-2 pointer-events-none items-center flex gap-1 " +
+													(currentPreset == index ? " bg-accent bgaccent text-background" : "data-zzz:text-foreground bg-input/10")
 												}
+												style={{
+													transitionProperty: "background-color, border-radius",
+												}}
 											>
 												<Input
 													autoFocus={index === focusedPreset}

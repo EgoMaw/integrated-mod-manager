@@ -1,3 +1,20 @@
+import {
+	CATEGORIES,
+	DATA,
+	GAME,
+	INIT_DONE,
+	LANG,
+	ONLINE,
+	ONLINE_DATA,
+	PRESETS,
+	resetAtoms,
+	SETTINGS,
+	SOURCE,
+	store,
+	TARGET,
+	TEXT_DATA,
+	TYPES,
+} from "./vars";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { currentMonitor, PhysicalSize } from "@tauri-apps/api/window";
@@ -6,10 +23,14 @@ import { exists, writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 import defConfig from "../default.json";
 import defConfigXX from "../defaultXX.json";
 import { apiClient } from "./api";
-import { CATEGORIES, DATA, GAME, LANG, PRESETS, SETTINGS, SOURCE, store, TARGET } from "./vars";
 import { VERSION } from "./consts";
 import { switchGameTheme } from "./theme";
 import { executeXXMI, isGameProcessRunning } from "./autolaunch";
+// import { updateIni } from "./iniUpdater";
+import { setHotreload, stopWindowMonitoring } from "./hotreload";
+import { registerGlobalHotkeys } from "./hotkeyUtils";
+import { TEXT } from "./text";
+import { unregisterAll } from "@tauri-apps/plugin-global-shortcut";
 // import { v2_0_4_migration } from "./filesys";
 
 let isFirstLoad = false;
@@ -19,8 +40,10 @@ let dataDir = "";
 export function getDataDir() {
 	return dataDir;
 }
+let appData = "";
+let categories: any[] = [];
 export const window = getCurrentWebviewWindow();
-invoke("get_username");
+// invoke("get_username");
 export function setWindowType(type: number) {
 	if (type == 0) {
 		window.setFullscreen(false);
@@ -38,8 +61,8 @@ export function setWindowType(type: number) {
 		window.setFullscreen(true);
 	}
 }
- invoke<string>('get_image_server_url').then((url) => {
-	console.log("Image server URL:", url);
+invoke<string>("get_image_server_url").then((url) => {
+	//console.log("Image server URL:", url);
 });
 async function updateConfig(oconfig: any) {
 	// await v2_0_4_migration(oconfig.dir);
@@ -63,7 +86,7 @@ async function updateConfig(oconfig: any) {
 	let data = oconfig.data || {};
 	let keys = Object.keys(data);
 	for (let key of keys) {
-		if(key.startsWith("\\")){
+		if (key.startsWith("\\")) {
 			data[key.substring(1)] = data[key];
 			delete data[key];
 		}
@@ -92,29 +115,47 @@ async function updateConfig(oconfig: any) {
 	return config;
 }
 export async function initGame(game: string) {
-	try {
+	if (await exists(`config${game}.json`)) {
 		configXX = JSON.parse(await readTextFile(`config${game}.json`));
-		switchGameTheme(game == "ZZ" ? "zzz" : "wuwa");
-		dataDir = dataDir.replace("\\__MI", `\\${game}MI`);
-	} finally {
-		writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
-		store.set(DATA, configXX.data || {});
-		store.set(SOURCE, configXX.sourceDir||(dataDir+"\\Mods") || "");
-		store.set(TARGET, configXX.targetDir||dataDir || "");
-		store.set(PRESETS, configXX.presets || []);
-		store.set(SETTINGS, (prev) => ({ global: { ...prev.global, game }, game: { ...prev.game, ...configXX.settings } }));
-	}
+	} else configXX = { ...defConfigXX };
+	configXX.game = game;
+	switchGameTheme(game == "ZZ" ? "zzz" : "wuwa");
+	dataDir = `${appData}\\XXMI Launcher\\${game}MI`;
+	writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
+	apiClient.setGame(game as any);
+	await setCategories(game);
+	store.set(SOURCE, configXX.sourceDir || "");
+	store.set(TARGET, configXX.targetDir || "");
+	store.set(SETTINGS, (prev) => ({ global: { ...prev.global, game }, game: { ...prev.game, ...configXX.settings } }));
+	store.set(TYPES, apiClient.generic.types);
+	store.set(DATA, configXX.data || {});
+	store.set(PRESETS, configXX.presets || []);
 	return configXX;
 }
-let categories: any[] = [];
-export async function main() {
-	//Try to fetch categories(character list)
+store.sub(SETTINGS, async () => {
+	const settings = store.get(SETTINGS);
+	const compare = {
+		src: [settings.global.game, settings.global.lang],
+		to: [GAME, LANG],
+		names: ["game", "lang"],
+	};
+	for (let i = 0; i < compare.src.length; i++) {
+		if (compare.src[i] !== store.get(compare.to[i])) {
+			if (compare.names[i] === "lang" && compare.src[i])
+				store.set(TEXT_DATA, TEXT[compare.src[i] as keyof typeof TEXT] || TEXT["en"]);
+			// else if (compare.names[i] === "game" && compare.src[i]) await initGame(compare.src[i]);
+			store.set(compare.to[i], compare.src[i]);
+		}
+	}
+});
+async function setCategories(game?: string) {
+	if (!game) return;
 	try {
 		categories = await apiClient.categories();
+		//console.log("Fetched categories:", categories);
 		if (!categories || categories.length == 0) throw "No categories found, please verify the directories again";
 	} catch (e) {
 		try {
-			config = JSON.parse(await readTextFile("config.json"));
 			if (config.game) configXX = await initGame(config.game);
 		} finally {
 			categories = configXX.categories || apiClient.categoryList;
@@ -123,54 +164,65 @@ export async function main() {
 		if (!categories || categories.length == 0) return;
 		store.set(CATEGORIES, categories);
 	}
-	const appData = await path.dataDir();
+}
+function removeHelpers() {
+	stopWindowMonitoring();
+	unregisterAll();
+}
+async function initHelpers() {
+	if (configXX.settings.launch && (await exists(config.exeXXMI)) && ["WW", "ZZ", "GI", "SR"].includes(config.game)) {
+		isGameProcessRunning(config.game).then((running) => {
+			if (!running) executeXXMI(config.exeXXMI);
+		});
+	}
+	setHotreload(configXX.settings.hotReload as 0 | 1 | 2, config.game, configXX.targetDir);
+
+	registerGlobalHotkeys();
+}
+export async function main() {
+	invoke("get_username");
+	resetAtoms();
+	removeHelpers();
+	appData = await path.dataDir();
 	dataDir = `${appData}\\XXMI Launcher\\__MI`;
 	const exeXXMI = `${appData}\\XXMI Launcher\\Resources\\Bin\\XXMI Launcher.exe`;
-
-	//Get config files
-	try {
-		config = JSON.parse(await readTextFile("config.json"));
-	} finally {
-		if (config.version < "2.1.0") {
-			config = await updateConfig(config);
-		}
-		writeTextFile("config.json", JSON.stringify(config, null, 2));
-		if (config.game) configXX = await initGame(config.game);
+	if (!(await exists("config.json"))) {
+		await writeTextFile("config.json", JSON.stringify(defConfig, null, 2));
 	}
-	store.set(SETTINGS, (prev) => ({
-		global: { ...prev.global, ...config },
-		game: { ...prev.game, ...configXX.settings },
-	}));
-	
+	config = JSON.parse(await readTextFile("config.json"));
+	if (config.game) apiClient.setGame(config.game);
+	await setCategories(config.game);
+	//Get config files
+
+	if (config.version < "2.1.0") {
+		config = await updateConfig(config);
+	}
+	writeTextFile("config.json", JSON.stringify(config, null, 2));
+	if (config.game) configXX = await initGame(config.game);
+
 	setWindowType(config.winType);
 
 	const bg = document.querySelector("body");
 	if (bg)
 		bg.style.backgroundColor = "color-mix(in oklab, var(--background) " + config.bgOpacity * 100 + "%, transparent)";
-	if (configXX.targetDir == "" || configXX.sourceDir == "") {
+	if (config.game && (configXX.targetDir == "" || configXX.sourceDir == "")) {
 		isFirstLoad = true;
 		if (await exists(dataDir)) {
-			configXX.target = dataDir;
-			configXX.source = dataDir;
-		} else dataDir = "";
+			configXX.targetDir = dataDir;
+			configXX.sourceDir = dataDir;
+		} else {
+			dataDir = "";
+		}
 	}
-
 	if (config.exeXXMI == "" && (await exists(exeXXMI))) {
 		config.exeXXMI = exeXXMI;
 	}
-	if(configXX.settings.launch && await exists(config.exeXXMI)){
-		isGameProcessRunning().then((running)=>{
-			if(!running) executeXXMI(config.exeXXMI);
-		});
-	}
-		// if (config.settings.launch && config.settings.appDir) {
-	// 	(async () => {
-	// 		if (!(await isGameProcessRunning())) {
-	// 			executeWWMI(config.settings.appDir);
-	// 		}
-	// 	})();
-	// }
-
+	store.set(SETTINGS, (prev) => ({
+		global: { ...prev.global, ...config },
+		game: { ...prev.game, ...configXX.settings },
+	}));
+	// isGameProcessRunning()
+	initHelpers();
 	// Check for updates with 2-second timeout
 	// let update: Update | null = null;
 	// try {
@@ -207,11 +259,6 @@ export async function main() {
 	// }
 
 	// store.set(settingsDataAtom, config.settings as Settings);
-	// if (config.settings.hotReload == 1) {
-	// 	updateIni(0);
-	// } else {
-	// 	updateIni(1);
-	// }
 
 	// store.set(onlineTypeAtom, config.settings.onlineType ?? "Mod");
 	// if (!firstLoad) {
@@ -235,8 +282,4 @@ export async function main() {
 	// updateInfo("Initialization complete.", 2000);
 
 	// setupImageServerListeners();
-
-	// setHotreload(config.settings.hotReload as 0 | 1 | 2);
-
-	// await registerGlobalHotkeys();
 }

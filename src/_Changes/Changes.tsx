@@ -9,46 +9,30 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ChevronRightIcon, FileIcon, Folder, FolderCogIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
-function Changes() {
+function Changes({ afterInit }: { afterInit: () => Promise<void> }) {
 	const textData = useAtomValue(TEXT_DATA);
-	const [changes,setChanges] = useAtom(CHANGES);
-	const setInitDone = useSetAtom(INIT_DONE)
-	// const [firstLoad, setFirstLoad] = useAtom(firstLoadAtom);
-	// const [consentOverlayData, setConsentOverlayData] = useAtom(consentOverlayDataAtom);
-	// const setTutorialMode = useSetAtom(tutorialModeAtom);
-	// const setLocalModList = useSetAtom(localModListAtom);
-	// const setIntroOpen = useSetAtom(introOpenAtom);
-	// const setTutorialPage = useSetAtom(tutorialPageAtom);
-	// useEffect(() => {
-	// 	async function refresh() {
-	// 		setLocalModList(await refreshRootDir(""));
-	// 		setConsentOverlayData({ title: "", from: [], to: [], next: false });
-	// 		setTutorialPage(0);
-	// 		setIntroOpen(false);
-	// 		saveConfig();
-	// 	}
-	// 	if (consentOverlayData.next) {
-	// 		if(firstLoad){ setTutorialMode(true);setFirstLoad(false);}
-	// 		refresh();
-	// 	}
-	// }, [consentOverlayData.next]);
-	useEffect(()=>{
-		if(!changes.skip) return;
-		setInitDone(true);
-		setChanges({
-			...changes,
-			skip: false,
-			before: [],
-			after: [],
-			map: {},
-			title:""
-		}as any);
-	},[changes.skip])
-	console.log(changes)
+	const [changes, setChanges] = useAtom(CHANGES);
+	const setInitDone = useSetAtom(INIT_DONE);
+	useEffect(() => {
+		if (!changes.skip) return;
+		afterInit().then(() => {
+			setTimeout(() => {
+				setInitDone(true);
+				setChanges({
+					...changes,
+					skip: false,
+					before: [],
+					after: [],
+					map: {},
+					title: "",
+				} as any);
+			}, 1000);
+		});
+	}, [changes.skip]);
 	return changes.before.length ? (
 		<motion.div
-		key="changes"
-			initial={{ opacity:  0, filter: "blur(6px)" }}
+			key="changes"
+			initial={{ opacity: 0, filter: "blur(6px)" }}
 			animate={{ opacity: 1, filter: "blur(0px)" }}
 			exit={{ opacity: 0, filter: "blur(6px)" }}
 			className="bg-background/50 fixed z-50 flex items-center justify-center w-full h-full duration-200"
@@ -166,7 +150,7 @@ function Changes() {
 				</div>
 				<div className="flex justify-between w-full h-10 mt-2">
 					<Button
-						className="w-28 text-red-300 hover:bg-red-300 hover:text-background"
+						className="w-28 text-red-300 hover:bg-red-300 data-zzz:hover:text-background hover:text-background"
 						onClick={() => {
 							invoke("exit_app");
 						}}
@@ -175,8 +159,8 @@ function Changes() {
 					</Button>
 					<div className="flex flex-col items-center justify-center w-full">
 						<div className=" flex items-center gap-2">
-							<Checkbox id="checkbox" className=" checked:bg-accent" />
-							<label className="text-accent/75 text-sm">{textData._Consent._Consent.RestorePoint}</label>
+							<Checkbox id="checkbox" className=" checked:bg-accent bgaccent" />
+							<label className="text-accent opacity-75 text-sm">{textData._Consent._Consent.RestorePoint}</label>
 						</div>
 					</div>
 					<Button
@@ -188,7 +172,8 @@ function Changes() {
 							// else {
 							// 	updateInfo("Optimizing dir structure...");
 							// 	setConsentOverlayData((prev) => ({ ...prev, next: true }));
-							applyChanges();
+							await applyChanges();
+							setChanges((prev: any) => ({ ...prev, skip: true }));
 							// }
 						}}
 					>

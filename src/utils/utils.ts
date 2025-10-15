@@ -3,12 +3,8 @@ import { IMAGER_SERVER, managedSRC } from "./consts";
 import { DATA, GAME, INSTALLED_ITEMS, LAST_UPDATED, ONLINE_DATA, SOURCE, store } from "./vars";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { apiClient } from "./api";
-export function join(...parts: string[]) {
-	let result = parts.join("\\").replace("/", "\\").replaceAll("\\\\", "\\");
-	result = result.endsWith("\\") ? result.slice(0, -1) : result;
-	result = result.startsWith("\\") ? result.slice(1) : result;
-	return result;
-}
+import { join } from "./hotreload";
+export { join };
 const reservedWindowsNames = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
 const illegalCharacters = /[<>:"/\\|?*\x00-\x1F]/g;
 
@@ -114,7 +110,7 @@ export function getTimeDifference(startTimestamp: number, endTimestamp: number) 
 }
 export async function fetchMod(selected: string, controller?: AbortController) {
 	let allData = {};
-	console.log(selected);
+	//console.log(selected);
 	await apiClient.updates(selected, controller?.signal).then(async (data) => {
 		await apiClient.mod(selected, controller?.signal).then((data2) => {
 			if (data._aRecords && data._aRecords.length > 0) {

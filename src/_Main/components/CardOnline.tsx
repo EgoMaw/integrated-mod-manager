@@ -57,7 +57,7 @@ const Online = React.memo((data: any) => {
 				</div>
 			)}
 			<div
-				className={`w-fit fadein bg-background/50 text-accent backdrop-blur -mt-72 flex flex-col items-center px-4 py-1 mb-48 rounded-br-lg pointer-events-none`}
+				className={`w-fit fadein bg-background/50 text-accent  backdrop-blur -mt-72 flex flex-col items-center px-4 py-1 mb-48 rounded-br-lg pointer-events-none`}
 			>
 				{data._sModelName}
 			</div>

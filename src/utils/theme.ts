@@ -5,6 +5,7 @@ export type Language = "en" | "cn" | "jp" | "kr" | "ru";
  * Switch between WuWa and ZZZ themes
  * @param theme - The theme to switch to ('wuwa' or 'zzz')
  */
+let interval = null as any;
 export function switchGameTheme(theme: GameTheme): void {
 	const root = document.documentElement;
 
@@ -17,7 +18,7 @@ export function switchGameTheme(theme: GameTheme): void {
 	// Optional: Store theme preference in localStorage
 	localStorage.setItem("game-theme", theme);
 
-	console.log(`Switched to ${theme.toUpperCase()} theme`);
+	//console.log(`Switched to ${theme.toUpperCase()} theme`);
 }
 
 /**
@@ -33,7 +34,7 @@ export function switchLanguage(language: Language): void {
 	// Store language preference in localStorage
 	localStorage.setItem("app-language", language);
 
-	console.log(`Switched to ${language.toUpperCase()} language`);
+	//console.log(`Switched to ${language.toUpperCase()} language`);
 }
 
 /**

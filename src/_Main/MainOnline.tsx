@@ -1,5 +1,6 @@
 import { apiClient } from "@/utils/api";
 import {
+	GAME,
 	ONLINE_DATA,
 	ONLINE_PATH,
 	ONLINE_SELECTED,
@@ -8,6 +9,7 @@ import {
 	RIGHT_SLIDEOVER_OPEN,
 	SETTINGS,
 	TEXT_DATA,
+	TYPES,
 } from "@/utils/vars";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,6 +20,11 @@ import Carousel from "./components/Carousel";
 import { preventContextMenu } from "@/utils/utils";
 import { LoaderIcon } from "lucide-react";
 const pageCount = {} as any;
+function resetPageCounts() {
+	Object.keys(pageCount).forEach((key) => {
+		delete pageCount[key];
+	});
+}
 let max = 0;
 function MainOnline() {
 	const [initial, setInitial] = useState(true);
@@ -31,7 +38,9 @@ function MainOnline() {
 	const onlineSort = useAtomValue(ONLINE_SORT);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
 	const [selected, setSelected] = useAtom(ONLINE_SELECTED);
+	const types = useAtomValue(TYPES)
 	const [visibleRange, setVisibleRange] = useState({ start: -1, end: -1 });
+	const game = useAtomValue(GAME);
 	const onModClick = useCallback(
 		(e: MouseEvent, mod: any) => {
 			let targetTag = (e.target as HTMLElement).tagName.toLowerCase();
@@ -89,7 +98,7 @@ function MainOnline() {
 	}, [onlinePath, onlineType, onlineSort]);
 
 	const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+	// const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 	const updateVisibilityRange = useCallback(() => {
 		if (!containerRef.current) return;
 
@@ -120,21 +129,24 @@ function MainOnline() {
 		if (initial) {
 			setInitial(false);
 		}
-		if (!scrollIntervalRef.current) {
-			scrollIntervalRef.current = setInterval(() => {
-				updateVisibilityRange();
-				// Check for infinite scroll using optimized method
-				checkLoadMore();
-			}, 250); // Adjust interval as needed
-		}
+		// if (!scrollIntervalRef.current) {
+		// 	scrollIntervalRef.current = setInterval(() => {
+		// 		updateVisibilityRange();
+		// 		// Check for infinite scroll using optimized method
+		// 		checkLoadMore();
+		// 	}, 250); // Adjust interval as needed
+		// }
 		if (scrollTimeoutRef.current) {
 			clearTimeout(scrollTimeoutRef.current);
 		}
 
 		scrollTimeoutRef.current = setTimeout(() => {
-			if (scrollIntervalRef.current) clearInterval(scrollIntervalRef.current);
-			scrollIntervalRef.current = null;
-		}, 1000); // ~60fps
+			// if (scrollIntervalRef.current) clearInterval(scrollIntervalRef.current);
+			// scrollIntervalRef.current = null;
+			updateVisibilityRange();
+			// Check for infinite scroll using optimized method
+			checkLoadMore();
+		}, 50); // ~60fps
 	}, [updateVisibilityRange, checkLoadMore, containerRef.current, carouselRef.current, initial]);
 	function initialLoad(url: string, onlinePath: string, controller: AbortController) {
 		fetch(url, { signal: controller.signal })
@@ -160,7 +172,11 @@ function MainOnline() {
 		}
 		setVisibleRange({ start: -1, end: -1 });
 		setInitial(true);
-		if (!pageCount[onlinePath]) {
+		//console.log("fetching1", onlineData,onlinePath);
+		//console.log("fetching2");
+		//console.log("fetching3");
+		console.log("fetching", onlinePath, types);
+		if (!onlineData[onlinePath]) {
 			pageCount[onlinePath] = 1;
 			loadingRef.current = true;
 			if (onlinePath.startsWith("home")) {
@@ -175,7 +191,7 @@ function MainOnline() {
 					})
 				);
 				initialLoad(apiClient.home({ type: onlineType }), onlinePath, controller);
-			} else if (onlinePath.startsWith("Skins") || onlinePath.startsWith("Other") || onlinePath.startsWith("UI")) {
+			} else if (types.some(t=> onlinePath.startsWith(t._sName)|| onlinePath.startsWith("Skins"))) {
 				initialLoad(
 					apiClient.category({ cat: onlinePath.split("&_sort=")[0], sort: onlineSort, page: 1 }),
 					onlinePath,
@@ -191,7 +207,7 @@ function MainOnline() {
 		return () => {
 			controller.abort();
 		};
-	}, [onlinePath, onlineType]);
+	}, [onlinePath, onlineType, game,types]);
 
 	// Memoize the current timestamp to avoid recalculation on every render
 	const now = useMemo(() => Date.now() / 1000, [onlinePath]);
@@ -210,7 +226,7 @@ function MainOnline() {
 		return onlineData[onlinePath].filter((item: any) => nsfw || item._sInitialVisibility != "hide");
 	}, [onlineData, onlinePath, nsfw]);
 	// Memoize animation variants to prevent recreation on every render
-	const animationVariants = useCallback(
+	const animationVariants = useMemo(
 		() => ({
 			hidden: { opacity: initial ? 0 : 1, y: 20 },
 			visible: { opacity: 1, y: 0 },
@@ -226,7 +242,7 @@ function MainOnline() {
 			ease: "easeOut",
 			delay: initial ? 0.05 * index : 0,
 		}),
-		[initial]
+		[]
 	);
 
 	// Determine if item should be visible
@@ -237,7 +253,7 @@ function MainOnline() {
 		},
 		[visibleRange]
 	);
-	console.log(selected);
+	//console.log(selected);
 	return (
 		<div
 			ref={containerRef}
@@ -282,9 +298,9 @@ function MainOnline() {
 							<motion.div
 								key={`${item._sModelName}-${item._idRow}`}
 								layout
-								variants={animationVariants()}
+								variants={animationVariants}
 								initial="hidden"
-								animate={["visible", "hidden", "exit"][isVisible]}
+								animate="visible"
 								exit="exit"
 								transition={transitionConfig(index)}
 								onMouseUp={(e: any) => onModClick(e, item)}
@@ -314,7 +330,7 @@ function MainOnline() {
 						key={"loader"}
 						transition={transitionConfig(0)}
 					>
-						<LoaderIcon className="min-w-8 min-h-8 animate-spin text-accent" />
+						<LoaderIcon className="min-w-8 min-h-8 animate-spin text-accent " />
 					</motion.div>
 				)}
 			</AnimatePresence>

@@ -101,7 +101,7 @@ function Carousel({
 					<div
 						className={
 							"h-1/3 aspect-square rounded-full border duration-200 " +
-							(index == current ? "bg-accent border-accent" : " hover:bg-border")
+							(index == current ? "bg-accent bgaccent   border-accent" : " hover:bg-border")
 						}
 						onClick={() => {
 							if (api) {
