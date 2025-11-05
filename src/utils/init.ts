@@ -235,6 +235,9 @@ export async function main() {
 		const temp = await checkWWMM();
 		if(temp)config = await updateConfig(JSON.parse(temp));
 	}
+	else{
+		store.set(FIRST_LOAD, false);
+	}
 	apiClient.setClient(config.clientDate || "");
 	if (config.game) apiClient.setGame(config.game);
 	if (config.version < "2.1.0") {

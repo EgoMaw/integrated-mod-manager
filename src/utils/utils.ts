@@ -66,7 +66,7 @@ export function handleImageError(event: React.SyntheticEvent<HTMLImageElement, E
 		target.style.opacity = "0";
 		target.classList.remove("fadein");
 	}
-	target.src = `/${store.get(GAME)}mm.png`;
+	target.src = `/${store.get(GAME)||"WW"}mm.png`;
 }
 export function preventContextMenu(event: React.MouseEvent): void {
 	event.preventDefault();
