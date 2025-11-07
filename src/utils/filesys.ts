@@ -131,8 +131,8 @@ export async function selectPath(
 ) {
 	return await open(options);
 }
-export function folderSelector(path = "") {
-	return selectPath({ directory: true, ...(path ? { defaultPath: path } : {}) });
+export function folderSelector(path = "",title:string | undefined=undefined) {
+	return selectPath({ directory: true, ...(path ? { defaultPath: path } : {}),...(title ? { title } : {}) });
 }
 function replaceDisabled(name: string) {
 	return name.replace("DISABLED_", "").replace("DISABLED", "").trim();
@@ -269,6 +269,45 @@ export async function previewRestorePoint(point: string) {
 	return entries.map((entry: Mod) => {
 		let category = categories.find((cat) => cat._sName == entry.name);
 		if (category && entry.isDir) entry.icon = category._sIconUrl;
+		return entry;
+	});
+}
+export async function sourceBatchPreview(newCategory = "" as string) {
+	console.log("[IMM] Previewing source batch...");
+	let path = src;
+	if (!(await exists(path))) return [];
+	let categories = store.get(CATEGORIES) || [];
+	try {
+		if (newCategory) {
+			await mkdir(join(modRoot, newCategory), { recursive: true });
+		}
+	} catch {}
+	let entries = (await readDirRecr(path, "", 2)).map((entry: Mod) => {
+		if (entry.name === managedSRC) {
+			// entry.icon = "IMM2.png";
+
+			entry.children.map((child: Mod) => {
+				let category = categories.find((cat) => cat._sName == child.name);
+				if (category && child.isDir) child.icon = category._sIconUrl;
+				return child;
+			});
+		} else if (entry.name === managedTGT) {
+			// entry.icon = "IMM2.png";
+		}
+		return entry;
+	});
+	console.log("[WWW]", entries);
+	return entries;
+}
+export async function addToBatchPreview(opath: string) {
+	console.log("[IMM] Adding to source batch preview:", opath);
+	const path = join(src, opath);
+	if (!(await exists(path))) return [];
+	let entries = await readDirRecr(path, "", 0);
+	console.log("[WWW]", path, " -> ", entries);
+	return entries.map((entry: Mod) => {
+		entry.path = join(opath, entry.path);
+		entry.parent = opath;
 		return entry;
 	});
 }
@@ -938,11 +977,11 @@ export async function validateModDownload(path: string) {
 	}
 	return true;
 }
-export async function changeModName(path: string, newPath: string) {
+export async function changeModName(path: string, newPath: string, add = false) {
 	try {
-		const enabled = await toggleMod(path, false);
+		const enabled = add || (await toggleMod(path, false));
 		await mkdir(join(src, managedSRC, ...newPath.split("\\").slice(0, -1)), { recursive: true });
-		await rename(join(src, managedSRC, path), join(src, managedSRC, newPath));
+		await rename(add ? join(src, path) : join(src, managedSRC, path), join(src, managedSRC, newPath));
 		if (enabled) await toggleMod(newPath, true);
 		// addToast({ type: "success", message: "Mod renamed successfully!" });
 		return newPath;
@@ -984,6 +1023,7 @@ export async function deleteMod(path: string) {
 	}
 }
 export async function toggleMod(path: string, enabled: boolean) {
+	console.log("[IMM] Toggling mod:", path, "Enabled:", enabled);
 	try {
 		const modSrc = join(src, managedSRC, path);
 		const modTgt = join(tgt, "Mods", managedTGT, path);
@@ -1060,7 +1100,7 @@ export async function applyPreset(data: string[], name = "") {
 			const batch = data.slice(i, i + batchSize);
 			await Promise.all(
 				batch.map((mod) =>
-					toggleMod(mod, true).catch((error="unknown") => {
+					toggleMod(mod, true).catch((error = "unknown") => {
 						console.error(`[IMM] Error toggling mod ${mod}:`, error);
 					})
 				)

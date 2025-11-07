@@ -12,6 +12,7 @@ import Settings from "./components/Settings";
 import { ONLINE_TRANSITION } from "@/utils/consts";
 import { useInstalledItemsManager } from "@/utils/utils";
 import Downloads from "./components/Downloads";
+import BatchOperations from "./components/Batch";
 function LeftSidebar() {
 	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
 	const textData = useAtomValue(TEXT_DATA);
@@ -114,7 +115,8 @@ function LeftSidebar() {
 								minHeight: leftSidebarOpen ? "3rem" : "6.5rem",
 							}}
 						>
-							<Restore leftSidebarOpen={leftSidebarOpen} />
+							{/* <Restore leftSidebarOpen={leftSidebarOpen} /> */}
+							<BatchOperations leftSidebarOpen={leftSidebarOpen} />
 							<Settings leftSidebarOpen={leftSidebarOpen} />
 						</div>
 					</SidebarFooter>
