@@ -6,11 +6,13 @@ import { managedSRC } from "@/utils/consts";
 import { applyPreset, folderSelector, verifyDirStruct } from "@/utils/filesys";
 import { getDataDir } from "@/utils/init";
 import { CHANGES, GAME, SOURCE, TARGET, TEXT_DATA } from "@/utils/vars";
+import { exists } from "@tauri-apps/plugin-fs";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
-const dataDir = getDataDir();
+import { useEffect, useState } from "react";
+
 function Page4({ setPage }: { setPage: (page: number) => void }) {
-	const [tgt, setTgt] = useState(dataDir);
+
+	const [tgt, setTgt] = useState(getDataDir());
 	const [src, setSrc] = useState(tgt+"\\Mods");
 	const [checked, setChecked] = useState(true);
 	const setSource = useSetAtom(SOURCE);
@@ -18,6 +20,15 @@ function Page4({ setPage }: { setPage: (page: number) => void }) {
 	const textData = useAtomValue(TEXT_DATA);
 	const game = useAtomValue(GAME);
 	const setChanges = useSetAtom(CHANGES);
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			if(!exists(tgt)) {
+				if(!cancelled) setTgt("");
+				return;
+			}
+		})();
+	}, []);
 	return (
 		<div className="text-muted-foreground fixed flex flex-col items-center justify-center w-screen h-screen">
 			<div className="fixed z-20 flex flex-col items-center justify-center w-full duration-200">
