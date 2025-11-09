@@ -21,6 +21,7 @@ import {
 	FolderIcon,
 	LinkIcon,
 	Settings2Icon,
+	TrashIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { openPath } from "@tauri-apps/plugin-opener";
@@ -38,8 +39,13 @@ import { Mod } from "@/utils/types";
 import ManageCategories from "./components/ManageCategories";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
+import { formatHotkeyDisplay, normalizeHotkey } from "@/utils/hotkeyUtils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatePresence, motion } from "motion/react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
+let text = "";
 function RightLocal() {
+	const [tab, setTab] = useState<"notes" | "hotkeys">("hotkeys");
 	const setOnline = useSetAtom(ONLINE);
 	const setOnlineSelected = useSetAtom(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
@@ -69,21 +75,30 @@ function RightLocal() {
 	}, []);
 	const categories = useAtomValue(CATEGORIES);
 	const source = useAtomValue(SOURCE);
+	const [deleteItemData, setDeleteItemData] = useState<Mod | null>(null);
+
 	const [modList, setModList] = useAtom(MOD_LIST);
 	const [selected, setSelected] = useAtom(SELECTED);
 	const textData = useAtomValue(TEXT_DATA);
 	const setData = useSetAtom(DATA);
 	const [item, setItem] = useState<Mod | undefined>();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [alertOpen, setAlertOpen] = useState(false);
 	const [popoverOpen, setPopoverOpen] = useState(false);
+	useEffect(() => {
+		if (!alertOpen) {
+			setDeleteItemData(null);
+		}
+	}, [alertOpen]);
 	function manageCategoriesButton({ title = "Manage Categories" }: any) {
 		return (
 			<Button
 				onClick={() => {
 					setPopoverOpen(false);
 					setDialogOpen(true);
-			}}
-			className="my-1 w-full mx-2">
+				}}
+				className="my-1 w-full mx-2"
+			>
 				<Settings2Icon className="h-4 w-4" />
 				{title}
 			</Button>
@@ -118,8 +133,10 @@ function RightLocal() {
 		});
 	}
 	useEffect(() => {
+		text = "";
 		if (selected) {
 			const mod = modList.find((m) => m.path == selected);
+			text = mod?.note || "";
 			setItem(mod);
 		} else setItem(undefined);
 	}, [selected]);
@@ -136,12 +153,59 @@ function RightLocal() {
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<ManageCategories />
 			</Dialog>
+			<AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+				<AlertDialogContent>
+					<div className="max-w-96 flex flex-col items-center gap-6 mt-6 text-center">
+						<div className="text-xl text-gray-200">
+							{textData._Main._MainLocal.Delete} <span className="text-accent ">{deleteItemData?.name}</span>?
+						</div>
+						<div className="text-destructive">{textData._Main._MainLocal.Irrev}</div>
+					</div>
+					<div className="flex justify-between w-full gap-4 mt-4">
+						<AlertDialogCancel className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
+						<AlertDialogAction
+							className="w-24 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
+							onClick={async () => {
+								// if (!deleteItemData) return;
+								// setData((prev) => {
+								// 	const newData = { ...prev };
+								// 	if (deleteItemData.path) {
+								// 		delete newData[deleteItemData.path];
+								// 	}
+								// 	return newData;
+								// });
+								// deleteMod(deleteItemData.path);
+								// saveConfigs();
+								// setModList((prev) => {
+								// 	const newData = prev.filter((m) => m.path != deleteItemData.path);
+								// 	return newData;
+								// });
+								// setAlertOpen(false);
+								// setSelected("");
+								// let items = await refreshRootDir("");
+								// setRightSidebarOpen(false);
+								// setLocalModList(items);
+								// saveConfig();
+							}}
+						>
+							{textData._Main._MainLocal.Delete}
+						</AlertDialogAction>
+					</div>
+				</AlertDialogContent>
+			</AlertDialog>
 			<SidebarContent className="flex polka duration-300 flex-row w-full h-full gap-0 p-0 overflow-hidden border border-l-0">
 				<div className="flex flex-col items-center h-full min-w-full overflow-y-hidden " key={item?.path || "no-item"}>
-					<div className="min-w-full text-accent flex items-center justify-center h-16 gap-3 px-3 border-b">
+					<div className="min-w-full text-accent flex items-center justify-center min-h-16 h-16 gap-3 px-3 border-b">
 						{item ? (
 							<>
-								{item.isDir ? <FolderIcon className="scale-120" /> : <FileIcon className="scale-120" />}
+								<Button
+									className="aspect-square"
+									onClick={() => {
+										openPath(join(source, managedSRC, item.path));
+									}}
+								>
+									<ArrowUpRightFromSquareIcon  className="w-4 h-4" />
+								</Button>
 								<Input
 									onFocus={(e) => {
 										e.target.select();
@@ -156,14 +220,20 @@ function RightLocal() {
 									className="label text-muted-foreground"
 									defaultValue={item?.name || ""}
 								/>
-								<div
-									className="min-h-8 text-accent hover:border-border border-border/0 min-w-8 bg-pat2 hover:bg-pat1 flex items-center justify-center p-2 duration-200 border rounded-lg"
+								<Button
+									className="aspect-square active:bg-destructive"
 									onClick={() => {
-										openPath(join(source, managedSRC, item.path));
+										setDeleteItemData((prev) => {
+											if (prev) return prev;
+											setAlertOpen(true);
+											return item;
+										});
 									}}
+									
+								
 								>
-									<ArrowUpRightFromSquareIcon className="w-full h-full" />
-								</div>
+									<TrashIcon className="w-4 h-4 text-destructive group-active:text-background"/>
+								</Button>
 							</>
 						) : (
 							"---"
@@ -183,7 +253,7 @@ function RightLocal() {
 							src={`${getImageUrl(item?.path || "")}?${lastUpdated}`}
 						></img>
 					</SidebarGroup>
-					<SidebarGroup className="px-1 min-h-42.5 mt-1">
+					<SidebarGroup className="px-1 min-h-27.5 my-1">
 						<div className="flex flex-col w-full border  rounded-lg">
 							<div className="bg-pat2 flex items-center justify-between w-full p-1 rounded-lg">
 								<Label className=" h-12  flex items-center justify-center  min-w-28.5 w-28.5 text-accent ">
@@ -253,12 +323,12 @@ function RightLocal() {
 													</CommandGroup>
 												</CommandList>
 
-												{manageCategoriesButton({})}
+												<div className="pr-5">{manageCategoriesButton({})}</div>
 											</Command>
 										</PopoverContent>
 									</Popover>
 								) : (
-									<div className="w-48.5 flex items-center pr-2">{manageCategoriesButton({title:"Manage"})}</div>
+									<div className="w-48.5 flex items-center pr-2">{manageCategoriesButton({ title: "Manage" })}</div>
 								)}
 							</div>
 							<div className="bg-pat1 flex justify-between w-full p-1 rounded-lg">
@@ -309,70 +379,117 @@ function RightLocal() {
 									{}
 								</div>
 							</div>
-							<div className="bg-pat2 flex justify-between w-full p-1 rounded-lg">
-								<Label className="bg-input/0  flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
-									{textData._RightSideBar._RightLocal.Notes}
-								</Label>
-								<div className="w-48.5 flex items-center px-1">
-									<Input
-										onBlur={(e) => {
-											if (item && e.currentTarget.value !== item?.note) {
-												setData((prev) => {
-													prev[item.path] = {
-														...prev[item.path],
-														note: e.currentTarget.value,
-													};
-													return { ...prev };
-												});
-												setModList((prev) => {
-													return prev.map((m) => {
-														if (m.path == item.path) {
-															return { ...m, note: e.currentTarget.value };
-														}
-														return m;
-													});
-												});
-												saveConfigs();
-											}
-										}}
-										type="text"
-										className="w-full select-none focus-within:select-auto overflow-hidden h-12 focus-visible:ring-[0px] border-0  text-ellipsis"
-										style={{ backgroundColor: "#fff0" }}
-										key={item?.note}
-										placeholder={textData._RightSideBar._RightLocal.NoNotes}
-										defaultValue={item?.note}
-									/>
-								</div>
-							</div>
 						</div>
 					</SidebarGroup>
 					<SidebarGroup
-						className="px-1 my-1 duration-200 opacity-0"
+						className="duration-200 h-full opacity-0"
 						style={{
-							opacity: item && item?.keys?.length > 0 ? 1 : 0,
+							opacity: item ? 1 : 0,
 						}}
 					>
-						<div className="flex flex-col w-full h-full overflow-hidden border rounded-lg">
-							<div className="bg-pat1 text-accent min-h-14 flex items-center justify-center w-full p-1 rounded-lg">
-								{textData._RightSideBar._RightLocal.HotKeys}
-							</div>
-							<div className="w-full h-full">
-								<div className="text-gray-300 h-full max-h-[calc(100vh-39.75rem)] w-full overflow-y-auto overflow-x-hidden">
-									<div className="min-h-8 text-accent bg-pat2 flex items-center justify-center">
-										<label className="text-c w-1/2 px-4">{textData._RightSideBar._RightLocal.Key}</label>
-										<label className="text-c w-1/2 px-4">{textData._RightSideBar._RightLocal.Action}</label>
-									</div>
-									{item?.keys?.map((hotkey, index) => (
-										<div
-											key={index + item.path}
-											className={"flex w-full items-center justify-center h-8 bg-pat" + (1 + (index % 2))}
-										>
-											<label className="text-c w-1/2 px-4">{hotkey.key}</label>
-											<label className="text-c w-1/2 px-4">{hotkey.name}</label>
-										</div>
-									))}
-								</div>
-							</div>
+						<div className="flex flex-col p-2 w-full h-full overflow-hidden ">
+							<Tabs defaultValue={tab} onValueChange={(val: any) => setTab(val)} className="w-full min-h-full">
+								<TabsList className="bg-background/0  w-full gap-2">
+									<TabsTrigger
+										value="hotkeys"
+										nbg2
+										className="w-1/2 transparent-bg  h-10"
+										style={{
+											color: tab == "hotkeys" ? "var(--accent)" : "var(--muted-foreground)",
+											border: "1px solid var(--border)",
+											opacity: tab == "hotkeys" ? 1 : 0.4,
+										}}
+									>
+										{textData._RightSideBar._RightLocal.HotKeys}
+									</TabsTrigger>
+									<TabsTrigger
+										nbg2
+										value="notes"
+										className="w-1/2 transparent-bg h-10"
+										style={{
+											color: tab !== "hotkeys" ? "var(--accent)" : "var(--muted-foreground)",
+											border: "1px solid var(--border)",
+											opacity: tab !== "hotkeys" ? 1 : 0.4,
+										}}
+									>
+										{textData._RightSideBar._RightLocal.Notes}
+									</TabsTrigger>
+								</TabsList>
+								<AnimatePresence mode="wait" initial={false}>
+									<motion.div
+										key={tab + item?.note}
+										initial={{ opacity: 0, x: tab == "hotkeys" ? "-25%" : "25%" }}
+										animate={{ opacity: 1, x: 0 }}
+										exit={{ opacity: 0, x: tab == "hotkeys" ? "-25%" : "25%" }}
+										transition={{ duration: 0.2 }}
+										className="w-full border rounded-md gap-2 flex h-full"
+									>
+										{tab == "hotkeys" ? (
+											<div className="text-gray-300 h-full max-h-[calc(100vh-36.75rem)] flex flex-col w-full overflow-y-scroll overflow-x-hidden">
+												{item?.keys?.map((hotkey, index) => (
+													<div
+														key={index + item.path}
+														className={
+															"flex border-b justify-center text-border items-center gap-2 w-full min-h-12 px-4 py-2 bg-pat" +
+															(1 + (index % 2))
+														}
+													>
+														<label className="text-sm min-w-1/3 max-w-1/3 text-accent flex-1 truncate">
+															{hotkey.name}
+														</label>
+														|
+														<div className="flex w-2/3 items-center gap-1 ">
+															{formatHotkeyDisplay(normalizeHotkey(hotkey.key))
+																.split(" ﹢ ")
+																.map((key, i, arr) => (
+																	<span key={i} className="flex items-center">
+																		<kbd className="px-2 py-1 text-sm font-semibold text-accent bg-sidebar border border-border rounded-md shadow-sm min-w-8 text-center">
+																			{key}
+																		</kbd>
+																		{i < arr.length - 1 && (
+																			<span className="mx-1 text-xs text-muted-foreground">+</span>
+																		)}
+																	</span>
+																))}
+														</div>
+													</div>
+												))}
+											</div>
+										) : (
+											<div className="w-full h-full p-2">
+												<textarea
+													onBlur={(e) => {
+														text = e.currentTarget.value;
+														if (item && e.currentTarget.value !== item?.note) {
+															setData((prev) => {
+																prev[item.path] = {
+																	...prev[item.path],
+																	note: e.currentTarget.value,
+																};
+																return { ...prev };
+															});
+															setModList((prev) => {
+																return prev.map((m) => {
+																	if (m.path == item.path) {
+																		return { ...m, note: e.currentTarget.value };
+																	}
+																	return m;
+																});
+															});
+															saveConfigs();
+														}
+													}}
+													className="w-full focus-within:outline-0 resize-none  select-none focus-within:select-auto overflow-y-scroll h-full  focus-visible:ring-[0px] border-0  text-ellipsis"
+													style={{ backgroundColor: "#fff0" }}
+													key={item?.note}
+													placeholder={textData._RightSideBar._RightLocal.NoNotes}
+													defaultValue={text}
+												/>
+											</div>
+										)}
+									</motion.div>
+								</AnimatePresence>
+							</Tabs>
 						</div>
 					</SidebarGroup>
 				</div>

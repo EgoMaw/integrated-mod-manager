@@ -14,7 +14,7 @@ function Help({ setPage }: { setPage: (page: number) => void }) {
 		<Dialog>
 			<DialogTrigger asChild>
 				<Button
-					className="w-38.75 showAfterDelay fixed bottom-5 left-1/2 -translate-x-1/2 data-[theme=zzz]:bg-destructive text-ellipsis h-12 overflow-hidden"
+					className="w-38.75 showAfterDelay fixed bottom-5 left-1/2 -translate-x-1/2  text-ellipsis h-12 overflow-hidden"
 					// style={{ width: leftSidebarOpen ? "" : "3rem" }}
 				>
 					<BadgeHelpIcon className="h-full aspect-square " /> Help

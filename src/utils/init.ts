@@ -38,7 +38,7 @@ import { TEXT } from "./text";
 import { unregisterAll } from "@tauri-apps/plugin-global-shortcut";
 import { isOlderThanOneDay, safeLoadJson, setImageServer } from "./utils";
 import { addToast } from "@/_Toaster/ToastProvider";
-import { Category, Preset, Settings } from "./types";
+import { Category, Games, Preset, Settings } from "./types";
 import { resetPageCounts } from "@/_Main/MainOnline";
 // import { v2_0_4_migration } from "./filesys";
 
@@ -49,8 +49,8 @@ export function getDataDir() {
 	return dataDir;
 }
 let appData = "";
-let prevGame="";
-export function getPrevGame(){
+let prevGame = "";
+export function getPrevGame() {
 	return prevGame;
 }
 let categories: Category[] = [];
@@ -135,16 +135,16 @@ export async function updateConfig(oconfig = null as any) {
 	store.set(FIRST_LOAD, true);
 	return config;
 }
-export async function initGame(game: string) {
+export async function initGame(game: Games) {
 	console.log(`[IMM] Initializing game: ${game}...`);
 	store.set(ONLINE_DATA, {});
 	if (await exists(`config${game}.json`)) {
 		configXX = JSON.parse(await readTextFile(`config${game}.json`));
 	} else configXX = { ...defConfigXX };
 	configXX.game = game;
-	switchGameTheme(game == "ZZ" ? "zzz" : "wuwa");
+	switchGameTheme(game);
 	dataDir = `${appData}\\XXMI Launcher\\${game}MI`;
-	if (!exists(dataDir)) {
+	if (!(await exists(dataDir))) {
 		dataDir = "";
 	}
 	writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
@@ -167,8 +167,7 @@ export async function initGame(game: string) {
 }
 store.sub(SETTINGS, async () => {
 	const settings = store.get(SETTINGS);
-	if(isInitialized){
-
+	if (isInitialized) {
 		config = { ...config, ...settings.global };
 		configXX = { ...configXX, settings: { ...configXX.settings, ...settings.game } };
 	}
@@ -186,10 +185,10 @@ store.sub(SETTINGS, async () => {
 		}
 	}
 });
-export async function setCategories(game=prevGame) {
+export async function setCategories(game = prevGame) {
 	console.log("[IMM] Setting categories...");
 	if (!game) return;
-	prevGame=game;
+	prevGame = game;
 	try {
 		categories = await apiClient.categories();
 		//console.log("Fetched categories:", categories);
@@ -209,7 +208,7 @@ export async function setCategories(game=prevGame) {
 		for (let key of Object.keys(customCats)) {
 			catObj[key] = { ...catObj[key], _sName: key, ...customCats[key] };
 		}
-		categories = Object.values(catObj).map((cat) => ({...cat,_sIconUrl:cat._sIconUrl||"/who.jpg"}));
+		categories = Object.values(catObj).map((cat) => ({ ...cat, _sIconUrl: cat._sIconUrl || "/who.jpg" }));
 		store.set(CATEGORIES, categories);
 	}
 }
@@ -218,9 +217,8 @@ function removeHelpers() {
 	unregisterAll();
 	resetPageCounts();
 }
-async function initHelpers() {
-	console.log("[IMM] Initializing helpers...");
-	if (configXX.settings.launch && (await exists(config.exeXXMI)) && ["WW", "ZZ", "GI", "SR"].includes(config.game)) {
+export async function launchGame() {
+	if (await exists(config.exeXXMI))
 		isGameProcessRunning(config.game).then((running) => {
 			if (!running) {
 				executeXXMI(config.exeXXMI);
@@ -230,6 +228,11 @@ async function initHelpers() {
 				});
 			}
 		});
+}
+async function initHelpers() {
+	console.log("[IMM] Initializing helpers...");
+	if (configXX.settings.launch && ["WW", "ZZ", "GI", "SR"].includes(config.game)) {
+		launchGame();
 	}
 	setHotreload(configXX.settings.hotReload as 0 | 1 | 2, config.game, configXX.targetDir);
 
@@ -252,7 +255,7 @@ export async function main() {
 	removeHelpers();
 	appData = await path.dataDir();
 	dataDir = `${appData}\\XXMI Launcher\\__MI`;
-	
+
 	const exeXXMI = `${appData}\\XXMI Launcher\\Resources\\Bin\\XXMI Launcher.exe`;
 	if (!(await exists("config.json"))) {
 		console.log("[IMM] Creating default config.json...");

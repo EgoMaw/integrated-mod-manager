@@ -116,8 +116,8 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 						// 		return [...prev];
 						// 	});
 					}}
-					className="w-38.75 text-ellipsis h-12 overflow-hidden"
-					style={{ width: leftSidebarOpen ? "" : "3rem" }}
+					className="w-38.75 text-ellipsis peer h-12 overflow-hidden"
+					style={{ width: leftSidebarOpen ? "" : "3rem" ,borderRadius: leftSidebarOpen ? "" : "999px"}}
 				>
 					<SettingsIcon />
 					{leftSidebarOpen && textData.Settings}

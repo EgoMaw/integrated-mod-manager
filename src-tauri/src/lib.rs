@@ -1,11 +1,13 @@
 use futures_util::StreamExt;
 use reqwest::Client;
+use serde::Serialize;
 use sevenz_rust2::decompress_file;
 use std::fs::{remove_file, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::Instant;
 use tauri::Emitter;
 use unrar::Archive as RarArchive;
 use zip::ZipArchive;
@@ -17,12 +19,69 @@ const PROGRESS_UPDATE_THRESHOLD: u64 = 1024;
 const BUFFER_SIZE: usize = 8192;
 const IMAGE_SERVER_PORT: u16 = 1469;
 
+#[derive(Serialize, Clone)]
+struct DownloadProgress {
+    downloaded: f64,
+    total: f64,
+    speed: String,
+    eta: String,
+}
+
+/// Format bytes into human-readable format (KB, MB, GB)
+fn format_bytes(bytes: u64) -> String {
+    const KB: u64 = 1024;
+    const MB: u64 = KB * 1024;
+    const GB: u64 = MB * 1024;
+
+    if bytes >= GB {
+        format!("{:.2} GB", bytes as f64 / GB as f64)
+    } else if bytes >= MB {
+        format!("{:.2} MB", bytes as f64 / MB as f64)
+    } else if bytes >= KB {
+        format!("{:.2} KB", bytes as f64 / KB as f64)
+    } else {
+        format!("{} B", bytes)
+    }
+}
+
+/// Format speed in bytes per second
+fn format_speed(bytes_per_sec: f64) -> String {
+    const KB: f64 = 1024.0;
+    const MB: f64 = KB * 1024.0;
+    const GB: f64 = MB * 1024.0;
+
+    if bytes_per_sec >= GB {
+        format!("{:.2} GB/s", bytes_per_sec / GB)
+    } else if bytes_per_sec >= MB {
+        format!("{:.2} MB/s", bytes_per_sec / MB)
+    } else if bytes_per_sec >= KB {
+        format!("{:.2} KB/s", bytes_per_sec / KB)
+    } else {
+        format!("{:.2} B/s", bytes_per_sec)
+    }
+}
+
+/// Format time duration into human-readable format
+fn format_duration(seconds: u64) -> String {
+    let hours = seconds / 3600;
+    let minutes = (seconds % 3600) / 60;
+    let secs = seconds % 60;
+
+    if hours > 0 {
+        format!("{}h {}m {}s", hours, minutes, secs)
+    } else if minutes > 0 {
+        format!("{}m {}s", minutes, secs)
+    } else {
+        format!("{}s", secs)
+    }
+}
+
 /// Check if a directory is empty
 fn is_directory_empty(path: &Path) -> Result<bool, std::io::Error> {
     if !path.exists() || !path.is_dir() {
         return Ok(true); // Consider non-existent or non-directory as "empty"
     }
-    
+
     let mut entries = std::fs::read_dir(path)?;
     Ok(entries.next().is_none())
 }
@@ -32,12 +91,12 @@ fn safe_remove_file(file_path: &Path) -> Result<(), String> {
     if !file_path.exists() {
         return Ok(());
     }
-    
+
     // Get the parent directory
     if let Some(parent_dir) = file_path.parent() {
         // First remove the file
         remove_file(file_path).map_err(|e| e.to_string())?;
-        
+
         // Then check if the parent directory is empty and remove it if so
         if is_directory_empty(parent_dir).map_err(|e| e.to_string())? {
             if let Err(e) = std::fs::remove_dir(parent_dir) {
@@ -49,43 +108,42 @@ fn safe_remove_file(file_path: &Path) -> Result<(), String> {
         // No parent directory, just remove the file
         remove_file(file_path).map_err(|e| e.to_string())?;
     }
-    
+
     Ok(())
 }
 
 /// Clean folder before extraction, keeping only preview files and the target archive
-fn clean_folder_before_extraction(folder_path: &Path, archive_file_name: &str) -> Result<(), String> {
+fn clean_folder_before_extraction(
+    folder_path: &Path,
+    archive_file_name: &str,
+) -> Result<(), String> {
     let entries = std::fs::read_dir(folder_path).map_err(|e| e.to_string())?;
-    
+
     for entry in entries {
         let entry = entry.map_err(|e| e.to_string())?;
         let file_path = entry.path();
-        
+
         if file_path.is_file() {
-            let file_name = file_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
-            
+            let file_name = file_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+
             // Keep the archive file itself
             if file_name == archive_file_name {
                 continue;
             }
-            
+
             // Keep preview files (preview.* with any extension)
             if file_name.starts_with("preview.") {
                 continue;
             }
-            
+
             // Delete everything else
             log::info!("Cleaning up file before extraction: {}", file_name);
             if let Err(e) = std::fs::remove_file(&file_path) {
                 log::warn!("Failed to remove file {}: {}", file_name, e);
             }
         } else if file_path.is_dir() {
-            let dir_name = file_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
-            
+            let dir_name = file_path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+
             // Delete all directories
             log::info!("Cleaning up directory before extraction: {}", dir_name);
             if let Err(e) = std::fs::remove_dir_all(&file_path) {
@@ -93,7 +151,7 @@ fn clean_folder_before_extraction(folder_path: &Path, archive_file_name: &str) -
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -203,6 +261,9 @@ async fn download_and_unzip(
     let mut downloaded: u64 = 0;
     let mut last_progress_update: u64 = 0;
 
+    // Variables for speed calculation
+    let start_time = Instant::now();
+
     while let Some(item) = stream.next().await {
         let global_sid = SESSION_ID.load(Ordering::SeqCst);
         if global_sid != current_sid {
@@ -226,10 +287,35 @@ async fn download_and_unzip(
         downloaded += chunk.len() as u64;
 
         if emit && (downloaded - last_progress_update) >= PROGRESS_UPDATE_THRESHOLD {
-            let progress = (downloaded as f64 / total_size as f64) * 100.0;
-            app_handle
-                .emit("download-progress", progress)
-                .map_err(|e| e.to_string())?;
+            
+            // Calculate speed and ETA asynchronously to avoid blocking download
+            let total_elapsed = start_time.elapsed().as_secs_f64();
+            let avg_speed = if total_elapsed > 0.0 {
+                downloaded as f64 / total_elapsed
+            } else {
+                0.0
+            };
+            
+            let remaining_bytes = total_size.saturating_sub(downloaded);
+            let eta_secs = if avg_speed > 0.0 {
+                (remaining_bytes as f64 / avg_speed) as u64
+            } else {
+                0
+            };
+            
+            let progress_data = DownloadProgress {
+                downloaded: downloaded as f64,
+                total:total_size as f64,
+                speed: format_speed(avg_speed),
+                eta: format_duration(eta_secs),
+            };
+            
+            // Emit asynchronously to not block download
+            let app_handle_clone = app_handle.clone();
+            tauri::async_runtime::spawn(async move {
+                let _ = app_handle_clone.emit("download-progress", progress_data);
+            });
+            
             last_progress_update = downloaded;
         }
     }
@@ -250,6 +336,22 @@ async fn download_and_unzip(
 
     drop(writer);
 
+    // Log final download statistics
+    let total_elapsed = start_time.elapsed().as_secs_f64();
+    let avg_speed = if total_elapsed > 0.0 {
+        downloaded as f64 / total_elapsed
+    } else {
+        0.0
+    };
+
+    log::info!(
+        "Download completed for '{}': {} in {:.2}s (Avg Speed: {})",
+        file_name,
+        format_bytes(downloaded),
+        total_elapsed,
+        format_speed(avg_speed)
+    );
+
     log::info!(
         "Download completed successfully for session {}: {}",
         current_sid,
@@ -259,7 +361,7 @@ async fn download_and_unzip(
     if ext == "zip" {
         // Clean folder before extraction
         clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-        
+
         let zip_file = File::open(&file_path).map_err(|e| e.to_string())?;
         let mut archive = ZipArchive::new(zip_file).map_err(|e| e.to_string())?;
 
@@ -284,7 +386,7 @@ async fn download_and_unzip(
     } else if ext == "rar" {
         // Clean folder before extraction
         clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-        
+
         let mut archive = RarArchive::new(&file_path)
             .open_for_processing()
             .map_err(|e| e.to_string())?;
@@ -319,7 +421,7 @@ async fn download_and_unzip(
     } else if ext == "7z" {
         // Clean folder before extraction
         clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-        
+
         decompress_file(&file_path, save_path).expect("complete");
         safe_remove_file(&file_path)?;
     }
@@ -416,10 +518,12 @@ async fn create_symlink(link_path: String, target_path: String) -> Result<(), St
     {
         if target_metadata.is_dir() {
             // On Windows, use symlink_dir for directories
-            std::os::windows::fs::symlink_dir(&target_path, &link_path).map_err(|e| e.to_string())?;
+            std::os::windows::fs::symlink_dir(&target_path, &link_path)
+                .map_err(|e| e.to_string())?;
         } else {
             // and symlink_file for files
-            std::os::windows::fs::symlink_file(&target_path, &link_path).map_err(|e| e.to_string())?;
+            std::os::windows::fs::symlink_file(&target_path, &link_path)
+                .map_err(|e| e.to_string())?;
         }
     }
     #[cfg(unix)]

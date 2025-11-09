@@ -56,6 +56,12 @@ export function formatHotkeyDisplay(hotkey: string): string {
 		.replaceAll("period", ".")
 		.replaceAll("slash", "/")
 		.replaceAll("equal", "=")
+		.replaceAll("up", "🠉")
+		.replaceAll("down", "🠋")
+		.replaceAll("left", "🠈")
+		.replaceAll("right", "🠊")
+		.replaceAll("lbutton", "Left Click")
+
 		.replaceAll("xx+xx", " ﹢ ");
 }
 export function encodeHotkeyForStorage(displayString: string): string {
@@ -76,6 +82,10 @@ export function encodeHotkeyForStorage(displayString: string): string {
 		.replaceAll(";", "semicolon")
 		.replaceAll("'", "quote")
 		.replaceAll("=", "equal")
+		.replaceAll("🠊", "right")
+		.replaceAll("🠈", "left")
+		.replaceAll("🠋", "down")
+		.replaceAll("🠉", "up")
 		.replaceAll("xxplusxx", "+");
 }
 export function sortHotkeys(keys: string[]): string[] {
@@ -97,6 +107,7 @@ export function normalizeHotkey(hotkey: string): string {
 	return hotkey
 		.toLowerCase()
 		.replaceAll("alt", "Alt")
+		.replaceAll("ctrl", "Ctrl")
 		.replaceAll("control", "Ctrl")
 		.replaceAll("shift", "Shift")
 		.replaceAll("key", "")
@@ -150,7 +161,7 @@ export async function registerGlobalHotkeys(): Promise<void> {
 						const presetIndex = allPresets.findIndex((p) => p === matchedPreset);
 
 						store.set(CURRENT_PRESET, presetIndex);
-						await applyPreset(matchedPreset.data,matchedPreset.name);
+						await applyPreset(matchedPreset.data, matchedPreset.name);
 						store.set(MOD_LIST, await refreshModList());
 
 						invoke("focus_mod_manager_send_f10_return_to_game");

@@ -128,7 +128,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 		});
 	}, [checked]);
 	useEffect(() => {
-		if (checked.size === 0 && curSelectedIndices.length >0 ) {
+		if (checked.size === 0 && curSelectedIndices.length > 0) {
 			setCurSelectedIndices([]);
 			prevSelectedIndices = [];
 		} else {
@@ -259,7 +259,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 						: "#31313150",
 				}}
 				onClick={(e) => {
-					if (e.target !== e.currentTarget || item.path === managedTGT) return;
+					if (e.target !== e.currentTarget || item.path === managedTGT || !item.isDir) return;
 					const newExpanded = new Set(expanded);
 					if (expanded.has(item.path) || item.path === managedTGT) {
 						newExpanded.delete(item.path);
@@ -432,13 +432,11 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
 				<Button
-					className="w-38.75 data-[theme=zzz]:bg-destructive text-ellipsis h-12 overflow-hidden"
-					style={{ width: leftSidebarOpen ? "" : "3rem" }}
+					className="w-38.75 text-ellipsis h-12 overflow-hidden"
+					style={{ width: leftSidebarOpen ? "" : "3rem", borderRadius: leftSidebarOpen ? "" : "999px" }}
 				>
-					{/* <SaveAllIcon /> */}
 					<GroupIcon />
-					{"Batch Ops"}
-					{/* {leftSidebarOpen && textData._LeftSideBar._components._Restore.Restore} */}
+					{leftSidebarOpen && "Batch Ops"}
 				</Button>
 			</DialogTrigger>
 			<DialogContent

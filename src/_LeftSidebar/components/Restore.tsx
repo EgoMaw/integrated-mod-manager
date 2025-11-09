@@ -47,8 +47,8 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
 				<Button
-					className="w-38.75 data-[theme=zzz]:bg-destructive text-ellipsis h-12 overflow-hidden"
-					style={{ width: leftSidebarOpen ? "" : "3rem" }}
+					className="w-38.75 text-ellipsis h-12 overflow-hidden"
+					style={{ width: leftSidebarOpen ? "" : "3rem",borderRadius: leftSidebarOpen ? "" : "999px" }}
 				>
 					<SaveAllIcon />
 					{leftSidebarOpen && textData._LeftSideBar._components._Restore.Restore}

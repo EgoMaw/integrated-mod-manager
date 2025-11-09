@@ -148,6 +148,10 @@ export async function fetchMod(selected: string, controller?: AbortController) {
 	});
 	return allData;
 }
+const sizeLabels = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+export function formatBytes(bytes: number, size = 0): string {
+	return bytes >= 1024 ? formatBytes(bytes / 1024, size + 1) : `${Math.round(bytes * 100) / 100} ${sizeLabels[size]}`;
+}
 export function modRouteFromURL(url: string): string {
 	let modId = url?.split("mods/").pop()?.split("/")[0] || "";
 	return modId ? "Mod/" + modId : "";

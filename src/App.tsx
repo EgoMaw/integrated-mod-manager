@@ -121,12 +121,7 @@ function App() {
 					)}
 				</AnimatePresence>
 			</div>
-			<Button
-				className="text-ellipsis min-h-12 max-h-12 max-w-12 fixed bottom-5 border right-5 z-10 px-0 flex items-center w-full overflow-hidden"
-				// style={{ width: leftSidebarOpen ? "" : "3rem" }}
-			>
-				<PlayIcon className="w-6 h-6" />
-			</Button>
+			
 			<AnimatePresence>{(!initDone || !lang || !game) && <Checklist />}</AnimatePresence>
 			<AnimatePresence>{changes.title && <Changes afterInit={afterInit} />}</AnimatePresence>
 			<AnimatePresence>{progressOverlay.open && <Progress />}</AnimatePresence>

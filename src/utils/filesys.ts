@@ -800,10 +800,14 @@ async function readDirRecr(root: string, path: string, maxDepth = 2, depth = 0, 
 	}
 	return files.sort(sortMods);
 }
-async function detectHotkeys(entries: Mod[], data: ModDataObj, src: string): Promise<[Mod[], ModHotKeys[]]> {
-	const hotkeyData: ModHotKeys[] = [];
+async function detectHotkeys(entries: Mod[], data: ModDataObj, src: string, depth = 0): Promise<[Mod[], ModHotKeys[]]> {
+	let hotkeyData: ModHotKeys[] = [];
 
 	for (const entry of entries) {
+		if (depth < 2) {
+			hotkeyData = [];
+		}
+
 		try {
 			// Apply stored data to entry
 			if (data[entry.path]) {
@@ -826,18 +830,31 @@ async function detectHotkeys(entries: Mod[], data: ModDataObj, src: string): Pro
 					let target = "";
 
 					for (let line of lines) {
-						line = line
+						let ln = line
 							.trim()
 							.replaceAll(/[\r\n]+/g, "")
 							.replaceAll(" ", "");
 
-						if (counter === 0 && line.startsWith("key=")) {
-							key = line.split("=")[1]?.trim() || "";
+						if (counter === 0 && ln.startsWith("key=")) {
+							key =
+								line
+									.split("=")[1]
+									?.trim()
+									.split(" ")
+									.map((k) => {
+										k = k.toLowerCase();
+										if (k.startsWith("no_")) k = "";
+										else {
+											k = k.replace("vk_", "");
+										}
+										return k.trim();
+									}).filter((k) => k)
+									.join("+") || "";
 							counter++;
-						} else if (counter === 1 && line.startsWith("type=")) {
+						} else if (counter === 1 && ln.startsWith("type=")) {
 							type = line.split("=")[1]?.trim() || "";
 							counter++;
-						} else if (counter === 2 && line.startsWith("$")) {
+						} else if (counter === 2 && ln.startsWith("$")) {
 							target = line.split("=")[0]?.trim().slice(1) || "";
 							counter = 0;
 							hotkeyData.push({
@@ -855,17 +872,19 @@ async function detectHotkeys(entries: Mod[], data: ModDataObj, src: string): Pro
 
 			// Recursively process children
 			if (entry.isDir && entry.children.length > 0) {
-				const [updatedChildren, childHK] = await detectHotkeys(entry.children, data, src);
+				const [updatedChildren, childHK] = await detectHotkeys(entry.children, data, src, depth + 1);
 				entry.children = updatedChildren;
-				if (childHK.length > 0) {
-					entry.keys = childHK;
+				if (childHK.length > 0 && depth > 0) {
+					hotkeyData = [...hotkeyData, ...childHK];
 				}
+			}
+			if (depth == 1) {
+				entry.keys = hotkeyData;
 			}
 		} catch (entryError) {
 			//console.error(`Error processing entry ${entry.name}:`, entryError);
 		}
 	}
-
 	return [entries, hotkeyData];
 }
 export async function refreshModList() {
@@ -877,9 +896,15 @@ export async function refreshModList() {
 
 		await categorizeDir(modSrc);
 
-		const entries = (await detectHotkeys(await readDirRecr(modSrc, "", 2), data, modSrc))[0]
+		const entries = (await detectHotkeys(await readDirRecr(modSrc, "", 3), data, modSrc))[0]
 			.map((entry) => entry.children)
 			.flat()
+			.map((entry) =>{
+				if(entry.depth==1)
+					entry.children =[];
+				return entry
+			} )
+			.filter((entry) => entry.depth < 2)
 			.sort(sortMods);
 
 		// Batch process entries - separate rename operations from exists checks

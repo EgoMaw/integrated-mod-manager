@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { DATA, DOWNLOAD_LIST, LEFT_SIDEBAR_OPEN, MOD_LIST, TEXT_DATA } from "@/utils/vars";
-import { sanitizeFileName } from "@/utils/utils";
+import { formatBytes, sanitizeFileName } from "@/utils/utils";
 import { createModDownloadDir, refreshModList, saveConfigs, validateModDownload } from "@/utils/filesys";
 import { DownloadItem } from "@/utils/types";
 let path = "";
-let downloadElement:any = null;
+let downloadElement: any = null;
 let prev = 0;
+let prevText = " • ";
 const Icons = {
 	pending: <Clock className="min-h-4 min-w-4 max-w-4" />,
 	downloading: <Loader2 className="min-h-4 min-w-4 max-w-4 animate-spin" />,
@@ -30,7 +31,9 @@ function Downloads() {
 	const downloadRef = useRef<HTMLDivElement>(null);
 	const downloadRef2 = useRef<HTMLDivElement>(null);
 	const downloadRef3 = useRef<HTMLDivElement>(null);
-	const downloadFile = async (item:DownloadItem) => {
+	const speedRef = useRef<HTMLDivElement>(null);
+	const lastSpeedUpdate = useRef<number>(0);
+	const downloadFile = async (item: DownloadItem) => {
 		//console.log(item);
 		// return;
 		if (item.category == "Other/Misc") item.category = "Other";
@@ -40,6 +43,7 @@ function Downloads() {
 			name: item.name,
 			path: item.category + "\\" + item.name,
 			source: item.source,
+			category: item.category,
 			updatedAt: item.updated * 1000,
 		};
 		setData((prevData) => {
@@ -68,24 +72,37 @@ function Downloads() {
 	};
 	useEffect(() => {
 		listen("download-progress", (event) => {
-			prev = event.payload as number;
-			if (downloadRef.current) downloadRef.current.style.width = event.payload + "%";
-			if (downloadRef2.current) downloadRef2.current.style.width = event.payload + "%";
+			const payload = event.payload as any;
+			const total = payload.total as number;
+			const downloaded = payload.downloaded as number;
+			prev = ((downloaded / total) * 100).toFixed(2) as unknown as number;
+			prevText =` • ${prev}% (${formatBytes(downloaded)}/${formatBytes(total)}) • ${payload.speed} • ${payload.eta} • `
+			// Debounce speed/ETA updates to 500ms
+			const now = Date.now();
+			if (now - lastSpeedUpdate.current >= 1000) {
+				if(speedRef.current) speedRef.current.textContent = prevText;
+				lastSpeedUpdate.current = now;
+			}
+			
+			if (downloadRef.current) downloadRef.current.style.width = prev + "%";
+			if (downloadRef2.current) downloadRef2.current.style.width = prev + "%";
 			if (downloadRef3.current) {
 				downloadRef3.current.style.background =
-					"conic-gradient( var(--accent) 0% " + event.payload + "%, var(--button) 0% 100%)";
+					"conic-gradient( var(--accent) 0% " + prev + "%, var(--button) 0% 100%)";
 			}
 		});
 		listen("fin", async () => {
-			if(!path || !downloadElement) return;
+			if (!path || !downloadElement) return;
 			validateModDownload(path);
 			path = "";
+			if (speedRef.current) speedRef.current.textContent = " • ";
 			if (downloadRef.current) downloadRef.current.style.width = "0%";
 			if (downloadRef2.current) downloadRef2.current.style.width = "0%";
 			if (downloadRef3.current) {
 				downloadRef3.current.style.background = "conic-gradient( var(--accent) 0% 0%, var(--button) 0% 100%)";
 			}
 			prev = 0;
+			prevText = " • ";
 			setData((prevData) => {
 				if (downloadElement.path)
 					prevData[downloadElement.path] = {
@@ -278,8 +295,10 @@ function Downloads() {
 												>
 													{item.name.replaceAll("DISABLED_", "")}
 												</Label>
-												<div className="text-xs text-gray-400 capitalize">
-													{item.status} • {item.category}
+												<div className="text-xs text-gray-400 flex gap-1 capitalize">
+													{item.status}
+													<div ref={index==0?speedRef:null}>{prevText}</div>
+													{item.category}
 												</div>
 											</div>
 										</div>

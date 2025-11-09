@@ -6,9 +6,8 @@ import { managedSRC } from "@/utils/consts";
 import { applyPreset, folderSelector, verifyDirStruct } from "@/utils/filesys";
 import { getDataDir } from "@/utils/init";
 import { CHANGES, GAME, SOURCE, TARGET, TEXT_DATA } from "@/utils/vars";
-import { exists } from "@tauri-apps/plugin-fs";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 
 function Page4({ setPage }: { setPage: (page: number) => void }) {
 
@@ -20,15 +19,6 @@ function Page4({ setPage }: { setPage: (page: number) => void }) {
 	const textData = useAtomValue(TEXT_DATA);
 	const game = useAtomValue(GAME);
 	const setChanges = useSetAtom(CHANGES);
-	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			if(!exists(tgt)) {
-				if(!cancelled) setTgt("");
-				return;
-			}
-		})();
-	}, []);
 	return (
 		<div className="text-muted-foreground fixed flex flex-col items-center justify-center w-screen h-screen">
 			<div className="fixed z-20 flex flex-col items-center justify-center w-full duration-200">

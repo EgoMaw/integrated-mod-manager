@@ -614,3 +614,8 @@ a {
 		color: var(--background);
 	}
 }
+
+.transparent-bg {
+	background-color: transparent;
+	animation: none;
+}

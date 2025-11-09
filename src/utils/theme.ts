@@ -1,22 +1,30 @@
-export type GameTheme = "wuwa" | "zzz";
+import { Games } from "./types";
+
+type GameTheme = "wuwa" | "zzz";
 export type Language = "en" | "cn" | "jp" | "kr" | "ru";
+function gameToTheme(game: Games): GameTheme {
+	return ({ WW: "wuwa", ZZ: "zzz", "": "" }[game] || "wuwa") as GameTheme;
+}
+function themeToGame(theme: GameTheme): Games {
+	return ({ wuwa: "WW", zzz: "ZZ", "": "" }[theme] || "WW") as Games;
+}
 
 /**
  * Switch between WuWa and ZZZ themes
  * @param theme - The theme to switch to ('wuwa' or 'zzz')
  */
 // let interval = null as any;
-export function switchGameTheme(theme: GameTheme): void {
+export function switchGameTheme(theme: Games): void {
 	const root = document.documentElement;
 
 	// Remove any existing theme data attribute
 	root.removeAttribute("data-theme");
 
 	// Set the new theme
-	root.setAttribute("data-theme", theme);
+	root.setAttribute("data-theme", gameToTheme(theme));
 
 	// Optional: Store theme preference in localStorage
-	localStorage.setItem("game-theme", theme);
+	localStorage.setItem("game-theme", gameToTheme(theme));
 
 	//console.log(`Switched to ${theme.toUpperCase()} theme`);
 }
@@ -67,8 +75,8 @@ export function getCurrentLanguage(): Language {
 export function initializeThemes(): void {
 	const savedTheme = localStorage.getItem("game-theme") as GameTheme;
 	const themeToUse = savedTheme || "wuwa";
-	switchGameTheme(themeToUse);
-    initializeLanguage();
+	switchGameTheme(themeToGame(themeToUse));
+	initializeLanguage();
 }
 
 /**
@@ -80,7 +88,6 @@ export function initializeLanguage(): void {
 	switchLanguage(languageToUse);
 }
 
-
 /**
  * Toggle between WuWa and ZZZ themes
  */
@@ -88,5 +95,5 @@ export function toggleGameTheme(): void {
 	const currentTheme = getCurrentTheme();
 	const newTheme: GameTheme = currentTheme === "wuwa" ? "zzz" : "wuwa";
 
-	switchGameTheme(newTheme);
+	switchGameTheme(themeToGame(newTheme));
 }

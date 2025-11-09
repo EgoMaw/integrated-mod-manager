@@ -17,7 +17,7 @@ function Page2({ setPage }: { setPage: (page: number) => void }) {
 		setSettings((prev) => ({ ...prev, global: { ...prev.global, game: gameCode } }));
 		await saveConfigs(true);
 		setTimeout(() => {
-			switchGameTheme({ WW: "wuwa", ZZ: "zzz"}[gameCode] as "wuwa" | "zzz");
+			switchGameTheme(gameCode);
 		}, 100);
 
 		setPage(0);

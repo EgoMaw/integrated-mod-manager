@@ -31,7 +31,6 @@ let filterChangeCount = 0;
 function MainLocal() {
 	const initDone = useAtomValue(INIT_DONE);
 	const [alertOpen, setAlertOpen] = useState(false);
-	const [deleteItemData, setDeleteItemData] = useState<Mod | null>(null);
 	const textData = useAtomValue(TEXT_DATA);
 	const [initial, setInitial] = useState(true);
 	const lastUpdated = useAtomValue(LAST_UPDATED);
@@ -107,11 +106,7 @@ function MainLocal() {
 		let tag = (e.target as HTMLElement).tagName.toLowerCase();
 		if (tag == "button") {
 			if (!mod) return;
-			setDeleteItemData((prev) => {
-				if (prev) return prev;
-				setAlertOpen(true);
-				return mod;
-			});
+			
 			return setSelected(mod.path);
 		}
 		if (click == toggleOn) {
@@ -156,11 +151,7 @@ function MainLocal() {
 		}),
 		[initial]
 	);
-	useEffect(() => {
-		if (!alertOpen) {
-			setDeleteItemData(null);
-		}
-	}, [alertOpen]);
+	
 	// Memoize transition config
 	const transitionConfig = useCallback(
 		(index: number) => ({
@@ -216,46 +207,7 @@ function MainLocal() {
 					</label>
 				</label>
 				{noItems}
-				<AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-					<AlertDialogContent>
-						<div className="max-w-96 flex flex-col items-center gap-6 mt-6 text-center">
-							<div className="text-xl text-gray-200">
-								{textData._Main._MainLocal.Delete} <span className="text-accent ">{deleteItemData?.name}</span>?
-							</div>
-							<div className="text-destructive">{textData._Main._MainLocal.Irrev}</div>
-						</div>
-						<div className="flex justify-between w-full gap-4 mt-4">
-							<AlertDialogCancel className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
-							<AlertDialogAction
-								className="w-24 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
-								onClick={async () => {
-									if (!deleteItemData) return;
-									setData((prev) => {
-										const newData = { ...prev };
-										if (deleteItemData.path) {
-											delete newData[deleteItemData.path];
-										}
-										return newData;
-									});
-									deleteMod(deleteItemData.path);
-									saveConfigs();
-									setModList((prev) => {
-										const newData = prev.filter((m) => m.path != deleteItemData.path);
-										return newData;
-									});
-									setAlertOpen(false);
-									setSelected("");
-									// let items = await refreshRootDir("");
-									// setRightSidebarOpen(false);
-									// setLocalModList(items);
-									// saveConfig();
-								}}
-							>
-								{textData._Main._MainLocal.Delete}
-							</AlertDialogAction>
-						</div>
-					</AlertDialogContent>
-				</AlertDialog>
+				
 				<AnimatePresence mode="popLayout">
 					<motion.div
 						layout
