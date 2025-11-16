@@ -17,8 +17,6 @@ import {
 	CheckIcon,
 	ChevronDownIcon,
 	EditIcon,
-	FileIcon,
-	FolderIcon,
 	LinkIcon,
 	Settings2Icon,
 	TrashIcon,
@@ -33,7 +31,7 @@ import { Sidebar, SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { changeModName, saveConfigs, savePreviewImage } from "@/utils/filesys";
+import { changeModName, deleteMod, saveConfigs, savePreviewImage } from "@/utils/filesys";
 import { Label } from "@/components/ui/label";
 import { Mod } from "@/utils/types";
 import ManageCategories from "./components/ManageCategories";
@@ -155,33 +153,34 @@ function RightLocal() {
 			</Dialog>
 			<AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
 				<AlertDialogContent>
-					<div className="max-w-96 flex flex-col items-center gap-6 mt-6 text-center">
-						<div className="text-xl text-gray-200">
+					<div className="max-w-96  flex flex-col items-center gap-6 mt-6 text-center">
+						<div className="text-xl max-w-96  break-words text-gray-200">
 							{textData._Main._MainLocal.Delete} <span className="text-accent ">{deleteItemData?.name}</span>?
 						</div>
 						<div className="text-destructive">{textData._Main._MainLocal.Irrev}</div>
 					</div>
 					<div className="flex justify-between w-full gap-4 mt-4">
-						<AlertDialogCancel className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
+						<AlertDialogCancel variant="default" className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
 						<AlertDialogAction
-							className="w-24 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
+							variant="destructive"
+							className="w-24 "
 							onClick={async () => {
-								// if (!deleteItemData) return;
-								// setData((prev) => {
-								// 	const newData = { ...prev };
-								// 	if (deleteItemData.path) {
-								// 		delete newData[deleteItemData.path];
-								// 	}
-								// 	return newData;
-								// });
-								// deleteMod(deleteItemData.path);
-								// saveConfigs();
-								// setModList((prev) => {
-								// 	const newData = prev.filter((m) => m.path != deleteItemData.path);
-								// 	return newData;
-								// });
-								// setAlertOpen(false);
-								// setSelected("");
+								if (!deleteItemData) return;
+								setData((prev) => {
+									const newData = { ...prev };
+									if (deleteItemData.path) {
+										delete newData[deleteItemData.path];
+									}
+									return newData;
+								});
+								deleteMod(deleteItemData.path);
+								saveConfigs();
+								setModList((prev) => {
+									const newData = prev.filter((m) => m.path != deleteItemData.path);
+									return newData;
+								});
+								setAlertOpen(false);
+								setSelected("");
 								// let items = await refreshRootDir("");
 								// setRightSidebarOpen(false);
 								// setLocalModList(items);
@@ -221,7 +220,8 @@ function RightLocal() {
 									defaultValue={item?.name || ""}
 								/>
 								<Button
-									className="aspect-square active:bg-destructive"
+									className="aspect-square"
+									variant="destructive"
 									onClick={() => {
 										setDeleteItemData((prev) => {
 											if (prev) return prev;
@@ -232,7 +232,7 @@ function RightLocal() {
 									
 								
 								>
-									<TrashIcon className="w-4 h-4 text-destructive group-active:text-background"/>
+									<TrashIcon className="w-4 h-4"/>
 								</Button>
 							</>
 						) : (
@@ -302,7 +302,7 @@ function RightLocal() {
 																	renameMod(item.path, join(currentValue, item.name));
 																	setPopoverOpen(false);
 																}}
-																className="data-zzz:rounded-full data-zzz:text-foreground data-zzz:mt-1 data-zzz:border-2"
+																className="button-like zzz-fg-text data-zzz:mt-1"
 															>
 																<img
 																	className="aspect-square outline bg-accent/10 flex text-white items-center justify-center h-12 rounded-full pointer-events-none"
@@ -323,7 +323,7 @@ function RightLocal() {
 													</CommandGroup>
 												</CommandList>
 
-												<div className="pr-5">{manageCategoriesButton({})}</div>
+												{/* <div className="pr-5">{manageCategoriesButton({})}</div> */}
 											</Command>
 										</PopoverContent>
 									</Popover>

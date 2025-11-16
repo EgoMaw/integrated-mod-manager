@@ -1,4 +1,4 @@
-export type Games = "WW" | "ZZ" | ""; //| "GI" | "SR";
+export type Games = "WW" | "ZZ" | "GI" | ""; //| "GI" | "SR";
 export type Language = "en" | "cn" | "ru" | "jp" | "kr" | "";
 export interface DirEntry {
 	name: string;
@@ -16,7 +16,7 @@ export interface GlobalSettings {
 	toggleClick: 0 | 2;
 	ignore: string;
 	clientDate: string;
-	exeXXMI: string;
+	XXMI: string;
 	lang: Language;
 	game: Games;
 	version?: string;
@@ -67,6 +67,7 @@ export interface Preset {
 export interface GameConfig {
 	version: string;
 	game: Games;
+	custom: 0|1;
 	sourceDir: string;
 	targetDir: string;
 	settings: GameSettings;

@@ -1,13 +1,6 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
-// import { renameMod } from "@/utils/fsUtils";
-// import { setChange } from "@/utils/hotreload";
-// import { previewUri } from "@/utils/vars";
-import { File, Folder, XIcon } from "lucide-react";
 import { getImageUrl, handleImageError } from "@/utils/utils";
-import { Button } from "@/components/ui/button";
-// import { CSS_CLASSES, COMMON_STYLES } from "@/utils/consts";
-// import type { CardLocalProps } from "@/utils/types";
 
 interface CardLocalProps {
 	item: {
@@ -38,16 +31,12 @@ const CardLocal = React.memo(({ item, selected, lastUpdated }: CardLocalProps) =
 			/>
 			<img
 				style={{ filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }}
-				className="w-full fadein h-[calc(100%-3.5rem)] -mt-71.5 duration-200 rounded-t-lg pointer-events-none object-cover"
+				className="w-full fadein h-[calc(100%-3.5rem)] -mt-71.5 data-gxi:-mt-57.5  duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover"
 				src={previewUrl}
 				onError={(e) => handleImageError(e)}
 			/>
-			<div className="bg-background/50 fadein backdrop-blur flex items-center w-full min-h-14 gap-2 px-4 py-1">
-				{item.isDir ? (
-					<Folder style={{ filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }} />
-				) : (
-					<File style={{ filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }} />
-				)}
+			<div className="bg-background/50 fadein backdrop-blur data-gxi:-mt-71.5 flex items-center w-full min-h-14 gap-2 px-4 py-1 header-img">
+				
 				<Label
 					className="w-56 pointer-events-none select-none overflow-hidden border-0 text-ellipsis"
 					style={{ backgroundColor: "#fff0", filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }}

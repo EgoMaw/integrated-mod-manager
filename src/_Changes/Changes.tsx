@@ -162,7 +162,8 @@ function Changes({ afterInit }: { afterInit: () => Promise<void> }) {
 				</div>
 				<div className="flex justify-between w-full h-10 mt-2">
 					<Button
-						className="w-28 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
+						variant="destructive"
+						className="w-28"
 						onClick={async () => {
 							// invoke("exit_app");
 							await createManagedDir();

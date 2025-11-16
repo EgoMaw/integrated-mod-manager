@@ -9,6 +9,7 @@ export function join(...parts: string[]) {
 	return result;
 }
 export function updateIni(tgt: string, foreground = 0) {
+	tgt=tgt.split("\\").slice(0,-1).join("\\");
 	const target = join(tgt, "d3dx.ini");
 	exists(target).then((res) => {
 		if (!res) return;

@@ -30,7 +30,7 @@ function Help() {
 				<div className="w-255 gap-12 h-161 overflow-hidden flex">
 					<div className="h-full min-w-82 flex flex-col gap-2 overflow-hidden">
 						{/* <Input placeholder="Search..." /> */}
-						<div className="w-82 h-full data-zzz:border-0 border data-zzz:gap-1 flex flex-col rounded-sm data-zzz:pr-1 overflow-y-auto overflow-x-hidden">
+						<div className="w-82 h-full border-0 data-wuwa:border data-wuwa:gap-0 gap-1 flex flex-col rounded-sm data-wuwa:pr-0 pr-1 overflow-y-auto overflow-x-hidden">
 							{Object.keys(data).map((key, index) => (
 								<Button
 									key={key}
@@ -47,8 +47,8 @@ function Help() {
 												: selectedItem === index
 												? "var(--accent)"
 												: "",
-										color: game == "ZZ" && selectedItem === index ? "var(--background)" : "",
-										animation: game == "ZZ" && selectedItem === index ? "" : "none",
+										color: game !== "WW" && selectedItem === index ? "var(--background)" : "",
+										animation: game !== "WW" && selectedItem === index ? "" : "none",
 									}}
 								>
 									{data[key as keyof typeof data].title}

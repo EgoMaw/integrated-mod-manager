@@ -1,11 +1,58 @@
+
+
+
+[data-theme="gi"] .hover\:text-background {
+	&:hover {
+		@media (hover: hover) {
+			color: var(--background);
+		}
+	}
+}
+.hidden-for-5s {
+	animation: hideFor5s 1s forwards;
+}
+@keyframes hideFor5s {
+	0%,
+	99% {
+		display: none;
+	}
+	100% {
+		
+	}
+}
+[data-theme="gi"] .hover\:bg-destructive {
+	&:hover {
+		@media (hover: hover) {
+			background-color: var(--destructive);
+		}
+	}
+}
+
+[data-theme="zzz"] .hover\:text-background {
+	&:hover {
+		@media (hover: hover) {
+			color: var(--background);
+		}
+	}
+}
+[data-theme="zzz"] .hover\:bg-destructive {
+	&:hover {
+		@media (hover: hover) {
+			background-color: var(--destructive);
+		}
+	}
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 @custom-variant data-zzz (&:is([data-theme="zzz"] *));
+@custom-variant data-wuwa (&:is([data-theme="wuwa"] *));
+@custom-variant data-gi (&:is([data-theme="gi"] *));
 @theme inline {
 	--color-wuwa-accent: var(--wuwa-accent);
 	--color-zzz-accent: var(--zzz-accent);
 	--color-zzz-accent-2: var(--zzz-accent-2);
+	--color-gi-accent: var(--gi-accent);
 	--color-button: var(--button);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -46,7 +93,7 @@
 	--wuwa-accent: #cdb896;
 	--zzz-accent: #efdd00;
 	--zzz-accent-2: #f68f36;
-
+	--gi-accent: #d1bc8e;
 	/* Common values across themes */
 	--foreground: oklch(0.985 0.001 106.423);
 	--card-foreground: oklch(0.985 0.001 106.423);
@@ -112,6 +159,238 @@
 	--input: oklch(100% 0.00011 271.152 / 0.15);
 	--sidebar: oklch(0.216 0.006 56.043);
 }
+/* Genshin Theme Variables */
+[data-theme="gi"] {
+	--game-font-en: gi-cn;
+	--game-font-cn: gi-cn;
+	--game-font-jp: gi-jp;
+	--game-font-kr: gi-cn;
+	--game-font-ru: gi-cn;
+	--radius-main: 0.5rem;
+	--border-w-main: 1px;
+	--button: #272935;
+	--background: oklch(18.176% 0.01387 272.724);
+	--card: #1b1d24	;
+	--accent: var(--gi-accent);
+	--border: #4e463a;
+	--input: oklch(100% 0.00011 271.152 / 0.15);
+	--sidebar: var(--card);
+	--foreground: #eae3d7;
+	--destructive: #ff5d5d;
+	--success: #99ff88;
+	--warn: #f7c635;
+}
+
+/* ========================================
+   GI Theme Specific Styles
+   ======================================== */
+[data-theme="gi	"] .text-accent {
+	color: var(--foreground);
+}
+
+
+[data-theme="gi"] .text-destructive {
+	color: var(--destructive);
+}
+
+[data-theme="gi"] .text-background {
+	color: var(--background);
+}
+
+[data-theme="gi"] .zzz-fg-text {
+	color: var(--foreground);
+}
+
+[data-theme="gi"] .zzz-border {
+	border-style: var(--tw-border-style);
+	border-width: 0px;
+}
+
+[data-theme="gi"] .zzz-rounded {
+	border-radius: calc(infinity * 1px);
+}
+
+[data-theme="gi"] /* Hide default cursor */
+* {
+	cursor: url("/GICursor.png"), auto;
+}
+[data-theme="gi"] .logo {
+	background-image: url("/GILogo.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+[data-theme="gi"] .cursor {
+	background-image: url("/GICursor.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+[data-theme="gi"] .button-like {
+	border-style: var(--tw-border-style);
+	border-width: 0px;
+	border-radius: calc(infinity * 1px);
+}
+[data-theme="gi"] .bg-bgg {
+	background-image: url("/GImm.png");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: 0 0;
+}
+[data-theme="gi"] .triqr{
+	
+	background-image: url("/hint.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;}
+[data-theme="gi"] .card-generic {
+	width: 14rem; /* w-56 */
+	height: 18rem; /* h-72 */
+	/* cursor: pointer; */
+	/* outline-accent/0 */
+	user-select: none; /* select-none */
+	background-color: var(--card); /* bg-card */
+	border-radius: 1px; /* rounded-lg */
+	border: 1px solid var(--border); /* border */
+	transition-duration: 200ms; /* duration-200 */
+	outline-offset: 0.375rem; /* outline-offset-7 */
+	outline: 1px solid transparent;
+	transition-duration: 200ms; /* duration-200 */
+	overflow: hidden;
+}
+/* ========================================
+   ZZZ Theme Specific Styles
+   ======================================== */
+
+[data-theme="zzz"] .text-destructive {
+	color: var(--destructive);
+}
+
+[data-theme="zzz"] .text-background {
+	color: var(--background);
+}
+
+[data-theme="zzz"] .zzz-fg-text {
+	color: var(--foreground);
+}
+
+
+
+[data-theme="zzz"] .zzz-border {
+	border-style: var(--tw-border-style);
+	border-width: 2px;
+}
+
+[data-theme="zzz"] .zzz-rounded {
+	border-radius: calc(infinity * 1px);
+}
+
+[data-theme="zzz"] .button-like {
+	border-style: var(--tw-border-style);
+	border-width: 2px;
+	border-radius: calc(infinity * 1px);
+}
+
+[data-theme="zzz"] .polka {
+	background-image: radial-gradient(circle, rgba(31, 31, 31, 50%) 2px, transparent 2px),
+		radial-gradient(circle, rgba(31, 31, 31, 50%) 2px, transparent 2px);
+	background-size: 20px 20px;
+	background-position: 0 0, 10px 10px;
+}
+
+[data-theme="zzz"] .trs {
+	transform: skew(-8deg, -8deg) rotate(8deg);
+}
+
+[data-theme="zzz"] .ctrs {
+	transform: skew(8deg, 8deg) rotate(-8deg);
+}
+
+[data-theme="zzz"] /* Hide default cursor */
+* {
+	cursor: url("/ZZCursor.png"), auto;
+}
+
+[data-theme="zzz"] .bg-bgg {
+	background-image: url("/ZZmm.png");
+	background-size: 100px 100px;
+	background-repeat: repeat;
+	background-attachment: fixed;
+	background-position: 0 0;
+}
+
+[data-theme="zzz"] .card-generic {
+	width: 14rem; /* w-56 */
+	height: 18rem; /* h-72 */
+	/* cursor: pointer; */
+	/* outline-accent/0 */
+	user-select: none; /* select-none */
+	background-color: var(--card); /* bg-card */
+	border-radius: 1px 1rem 1px 1rem; /* rounded-lg */
+	border: 1px solid var(--border); /* border */
+	transition-duration: 200ms; /* duration-200 */
+	outline-offset: 0.375rem; /* outline-offset-7 */
+	outline: 1px solid transparent;
+	transition-duration: 200ms; /* duration-200 */
+	overflow: hidden;
+}
+
+[data-theme="zzz"] .logo {
+	background-image: url("/ZZLogo.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+[data-theme="zzz"] .cursor {
+	background-image: url("/ZZCursor.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+[data-theme="zzz"] .bg2 {
+	&[data-state="active"] {
+		animation: color-transition 5s ease-in-out infinite alternate 1s;
+	}
+}
+
+[data-theme="zzz"] .bgaccent {
+	animation: color-transition 5s ease-in-out infinite alternate 1s;
+}
+
+[data-theme="zzz"] .textaccent {
+	animation: color-transition-text 5s ease-in-out infinite alternate-reverse;
+}
+
+/* ========================================
+   WuWa Theme Specific Styles
+   ======================================== */
+
+[data-theme="wuwa"] /* Hide default cursor */
+* {
+	cursor: url("/WWCursor.png"), auto;
+}
+
+[data-theme="wuwa"] .logo {
+	background-image: url("/WWLogo.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+[data-theme="wuwa"] .cursor {
+	background-image: url("/WWCursor.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+/* ========================================
+   Font Faces
+   ======================================== */
 
 @font-face {
 	font-family: wuwa;
@@ -141,6 +420,14 @@
 	font-family: zzz-kr;
 	src: url("./fonts/zzz/kr.ttf");
 }
+@font-face {
+	font-family: gi-cn;
+	src: url("./fonts/gi/cn.ttf");
+}
+@font-face {
+	font-family: gi-jp;
+	src: url("./fonts/gi/jp.ttf");
+}
 .game-font {
 	font-family: var(--game-font), var(--game-font-en);
 }
@@ -156,12 +443,11 @@
 .zzz-font {
 	font-family: zzz-en;
 }
-[data-theme="zzz"] .polka {
-	background-image: radial-gradient(circle, rgba(31, 31, 31, 50%) 2px, transparent 2px),
-		radial-gradient(circle, rgba(31, 31, 31, 50%) 2px, transparent 2px);
-	background-size: 20px 20px;
-	background-position: 0 0, 10px 10px;
-}
+
+/* ========================================
+   General Styles
+   ======================================== */
+
 .fadein {
 	animation: fadein 0.3s ease-in-out;
 }
@@ -278,26 +564,10 @@ a {
 		pointer-events: none;
 	}
 }
-[data-theme="zzz"] .trs {
-	transform: skew(-8deg, -8deg) rotate(8deg);
-}
-[data-theme="zzz"] .ctrs {
-	transform: skew(8deg, 8deg) rotate(-8deg);
-}
+
 /* Hide default cursor */
 * {
 	cursor: url("/WWCursor.png"), auto;
-}
-
-/* Theme-specific background images */
-[data-theme="wuwa"] /* Hide default cursor */
-* {
-	cursor: url("/WWCursor.png"), auto;
-}
-
-[data-theme="zzz"] /* Hide default cursor */
-* {
-	cursor: url("/ZZCursor.png"), auto;
 }
 
 /* Default background (fallback) */
@@ -308,13 +578,7 @@ a {
 	background-attachment: fixed;
 	background-position: 0 0;
 }
-[data-theme="zzz"] .bg-bgg {
-	background-image: url("/ZZmm.png");
-	background-size: 100px 100px;
-	background-repeat: repeat;
-	background-attachment: fixed;
-	background-position: 0 0;
-}
+
 .card-grid {
 	grid-template-columns: repeat(auto-fill, minmax(256px, 256px));
 	grid-auto-rows: 288px;
@@ -329,21 +593,6 @@ a {
 	user-select: none; /* select-none */
 	background-color: var(--card); /* bg-card */
 	border-radius: 0.5rem; /* rounded-lg */
-	border: 1px solid var(--border); /* border */
-	transition-duration: 200ms; /* duration-200 */
-	outline-offset: 0.375rem; /* outline-offset-7 */
-	outline: 1px solid transparent;
-	transition-duration: 200ms; /* duration-200 */
-	overflow: hidden;
-}
-[data-theme="zzz"] .card-generic {
-	width: 14rem; /* w-56 */
-	height: 18rem; /* h-72 */
-	/* cursor: pointer; */
-	/* outline-accent/0 */
-	user-select: none; /* select-none */
-	background-color: var(--card); /* bg-card */
-	border-radius: 1px 1rem 1px 1rem; /* rounded-lg */
 	border: 1px solid var(--border); /* border */
 	transition-duration: 200ms; /* duration-200 */
 	outline-offset: 0.375rem; /* outline-offset-7 */
@@ -376,20 +625,7 @@ a {
 	background-repeat: no-repeat;
 	background-position: center;
 }
-/* Theme-specific logo */
-[data-theme="wuwa"] .logo {
-	background-image: url("/WWLogo.png");
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
 
-[data-theme="zzz"] .logo {
-	background-image: url("/ZZLogo.png");
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
 /* Default background (fallback) */
 .cursor {
 	background-image: url("/WWCursor.png");
@@ -397,20 +633,7 @@ a {
 	background-repeat: no-repeat;
 	background-position: center;
 }
-/* Theme-specific logo */
-[data-theme="wuwa"] .cursor {
-	background-image: url("/WWCursor.png");
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
 
-[data-theme="zzz"] .cursor {
-	background-image: url("/ZZCursor.png");
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
 /* Language-specific font variables */
 [data-lang="en"] {
 	--game-font: var(--game-font-en);
@@ -434,6 +657,9 @@ a {
 
 ::-webkit-scrollbar {
 	width: 10px;
+}
+.thin::-webkit-scrollbar {
+	width: 4px;
 }
 ::-webkit-scrollbar-track {
 	background: var(--card);
@@ -547,21 +773,10 @@ a {
 		outline-color: transparent;
 	}
 }
-/* .bg-button{
-	background-color: var(--button);
-	background-image: radial-gradient(circle at 20% 50%, var(--border) 1px, transparent 1.5px),
-	                  radial-gradient(circle at 70% 50%, var(--border) 1px, transparent 1.5px);
-	background-size: 12px 12px;
-	background-position: 0 0, 12px 6px;
-} */
-[data-theme="zzz"] .bg2 {
-	&[data-state="active"] {
-		animation: color-transition 5s ease-in-out infinite alternate 1s;
-	}
-}
-[data-theme="zzz"] .bgaccent {
-	animation: color-transition 5s ease-in-out infinite alternate 1s;
-}
+
+/* ========================================
+   Animations
+   ======================================== */
 
 @keyframes color-transition {
 	0% {
@@ -570,10 +785,6 @@ a {
 	100% {
 		background-color: var(--zzz-accent-2);
 	}
-}
-
-[data-theme="zzz"] .textaccent {
-	animation: color-transition-text 5s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes color-transition-text {

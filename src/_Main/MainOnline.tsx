@@ -27,6 +27,7 @@ export function resetPageCounts() {
 	});
 }
 let max = 0;
+let prevLoaded=0;
 function MainOnline() {
 	const [initial, setInitial] = useState(true);
 	const containerRef = useRef(null as any);
@@ -80,7 +81,7 @@ function MainOnline() {
 				loadingRef.current = false;
 				return;
 			}
-
+			prevLoaded=(pageCount[onlinePath]-1)*15;
 			try {
 				if (onlinePath.startsWith("home")) {
 					await nextPage(apiClient.home({ page: pageCount[onlinePath], type: onlineType }), onlinePath);
@@ -172,6 +173,7 @@ function MainOnline() {
 			containerRef.current.scrollTo({ top: 0 });
 		}
 		setVisibleRange({ start: -1, end: -1 });
+		prevLoaded=0
 		setInitial(true);
 		//console.log("fetching1", onlineData,onlinePath);
 		//console.log("fetching2");
@@ -212,7 +214,6 @@ function MainOnline() {
 
 	// Memoize the current timestamp to avoid recalculation on every render
 	const now = useMemo(() => Date.now() / 1000, [onlinePath]);
-
 	// Memoize filtered banner data
 	const filteredBannerData = useMemo(() => {
 		if (!onlineData?.banner) return [];
@@ -303,7 +304,7 @@ function MainOnline() {
 								initial="hidden"
 								animate="visible"
 								exit="exit"
-								transition={transitionConfig(index)}
+								transition={transitionConfig(index-prevLoaded || 0)}
 								onMouseUp={(e: any) => onModClick(e, item)}
 								onContextMenu={preventContextMenu}
 							>

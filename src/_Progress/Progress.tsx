@@ -36,10 +36,10 @@ function Progress() {
 					.replace("Restoration Completed", textData._Progress.RestorationCompleted)
 					}
 			</div>
-			<div className="w-120 bg-background/50 h-8 overflow-hidden border rounded-lg data-zzz:rounded-full data-zzz:border-2">
+			<div className="w-120 bg-background/50 h-8 overflow-hidden border rounded-lg button-like">
 				<div
 					id="restore-progress"
-					className="bg-muted data-zzz:bg-accent opacity-75 bgaccent w-0 h-full duration-100 rounded-lg data-zzz:rounded-full"
+					className="bg-muted data-zzz:bg-accent opacity-75 bgaccent w-0 h-full duration-100 rounded-lg zzz-rounded"
 				/>
 			</div>
 			<div className="w-120 text-accent/75 flex items-center justify-between gap-2 mt-2 text-sm">
@@ -49,7 +49,8 @@ function Progress() {
 				<label id="restore-progress-percentage">0%</label>
 			</div>
 			<Button
-				className={"w-32 my-6 " + (!restoreInfo.finished && "hover:bg-destructive hover:text-background text-destructive")}
+				variant={restoreInfo.finished ? "default" : "warn"}
+				className="w-32 my-6 "
 				onClick={async () => {
 					setRestoreInfo((prev) => ({ ...prev, finished: true }));
 					if (!restoreInfo.finished) {

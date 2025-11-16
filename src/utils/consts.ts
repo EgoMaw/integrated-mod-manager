@@ -20,8 +20,8 @@ export const IGNORE = "IGNORE";
 export const UNCATEGORIZED = "Uncategorized";
 export const managedSRC = "DISABLED (Managed by IMM)";
 export const managedTGT = "Mods (Managed by IMM)";
-export const VERSION = "2.1.1";
-export const GAMES: Games[] = ["WW", "ZZ"];
+export const VERSION = "2.1.2";
+export const GAMES: Games[] = ["WW", "ZZ", "GI"];
 export const PRIORITY_KEYS = ["Alt", "Ctrl", "Shift", "Capslock", "Tab", "Up", "Down", "Left", "Right"] as const;
 export const LANG_LIST: { Name: string; Flag: string; Code: Language }[] = [
 	{
@@ -77,7 +77,7 @@ export const DEFAULTS = {
 			toggleClick: 2,
 			ignore: VERSION,
 			clientDate: "1759866302559426603",
-			exeXXMI: "",
+			XXMI: "",
 			lang: "",
 			game: "",
 		},
@@ -90,6 +90,7 @@ export const DEFAULTS = {
 	} as Settings,
 	SOURCE: "",
 	TARGET: "",
+	XXMI_MODE: 0 as 0|1,
 	DATA: {} as ModDataObj,
 	PRESETS: [] as Preset[],
 	CATEGORIES: [] as Category[],

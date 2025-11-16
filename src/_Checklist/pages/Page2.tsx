@@ -63,7 +63,7 @@ function Page2({ setPage }: { setPage: (page: number) => void }) {
 							switchGame("WW");
 						}
 					}}
-					className="flex duration-200 border-2 border-wuwa-accent/30 hover:shadow-lg hover:-mt-2 active:scale-90 shadow-wuwa-accent bg-wuwa-accent/7 p-6 rounded-md aspect-square flex-col items-center wuwa-font"
+					className="flex duration-200 border-2 border-wuwa-accent/30 hover:shadow-lg hover:-mt-2 active:scale-90 shadow-wuwa-accent bg-wuwa-accent/7 p-6 rounded-md aspect-[3/2] min-w-56 flex-col items-center wuwa-font"
 				>
 					<img src="/WWLogo.png" className="max-h-40 " />
 					<label className="text-2xl mt-8">WuWa</label>
@@ -75,10 +75,22 @@ function Page2({ setPage }: { setPage: (page: number) => void }) {
 							switchGame("ZZ");
 						}
 					}}
-					className="flex duration-200 border-2 border-zzz-accent-2/30 hover:shadow-lg hover:-mt-2 active:scale-90 shadow-zzz-accent-2 bg-zzz-accent-2/7 p-6 rounded-md min-w-56 flex-col items-center zzz-font"
+					className="flex duration-200 border-2 border-zzz-accent-2/30 hover:shadow-lg hover:-mt-2 active:scale-90 shadow-zzz-accent-2 bg-zzz-accent-2/7 p-6 rounded-md min-w-56.5 flex-col items-center zzz-font"
 				>
 					<img src="/ZZLogo.png" className="max-h-40 " />
 					<label className="text-2xl mt-8">Z·Z·Z</label>
+				</div>
+				<div
+					onClick={async () => {
+						if (!settings.global.game) initGame("GI");
+						else {
+							switchGame("GI");
+						}
+					}}
+					className="flex duration-200 border-2 border-gi-accent/30 hover:shadow-lg hover:-mt-2 active:scale-90 shadow-gi-accent bg-gi-accent/7 p-6 rounded-md aspect-[3/2] min-w-56.5 flex-col items-center wuwa-font"
+				>
+					<img src="/GILogo.png" className="max-h-40 -mt-2 scale-110 mb-2" />
+					<label className="text-2xl mt-8">Genshin</label>
 				</div>
 			</div>
 		</div>

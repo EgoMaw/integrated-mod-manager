@@ -50,8 +50,16 @@ function ToastProvider() {
 					style={{
 						zIndex: 99999 - counter + index,
 						scale: 0.9 + (index - toasts.length) * 0.1,
+						color:
+							toast.type === "success"
+								? "var(--success)"
+								: toast.type === "error"
+								? "var(--destructive)"
+								: toast.type === "warning"
+								? "var(--warn)"
+								: ""
 					}}
-					className="w-full game-font h-20 polka min-h-20 -mb-22 bg-card pointer-events-none flex items-center justify-center rounded-md data-zzz:rounded-full data-zzz:border-2 border"
+					className="w-full game-font text-center h-20 polka min-h-20 -mb-22 bg-card pointer-events-none flex items-center justify-center rounded-md button-like border"
 					>
 						{toast.message}
 					</motion.div>

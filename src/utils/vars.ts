@@ -36,7 +36,7 @@ const SETTINGS = atom<Settings>({
 		toggleClick: 2,
 		ignore: VERSION,
 		clientDate: "1759866302559426603",
-		exeXXMI: "",
+		XXMI: "",
 		lang: "",
 		game: "",
 		preReleases: false,
@@ -54,6 +54,8 @@ const DATA = atom<ModDataObj>({});
 const PRESETS = atom<Preset[]>([]);
 const CATEGORIES = atom<Category[]>([]);
 const TYPES = atom<Category[]>([]);
+const XXMI_MODE = atom<0|1>(0);
+const XXMI_DIR = atom<string>("");
 //not-saved
 const LEFT_SIDEBAR_OPEN = atom(true);
 const RIGHT_SIDEBAR_OPEN = atom(true);
@@ -97,7 +99,7 @@ const NOTICE = atom({
 	subheading: "",
 	ignoreable: 2,
 	timer: 10,
-	ver: "2.1.1",
+	ver: "2.1.2",
 	id: 0,
 } as any);
 const HELP_OPEN = atom(false);
@@ -130,12 +132,15 @@ export function resetAtoms() {
 		ONLINE_PATH,
 		ONLINE_SORT,
 		ONLINE_SELECTED,
+		XXMI_MODE
 	};
 	Object.keys(atoms).forEach((atom) =>
 		store.set(atoms[atom as keyof typeof atoms] as any, DEFAULTS[atom as keyof typeof DEFAULTS])
 	);
 }
 export {
+	XXMI_DIR,
+	XXMI_MODE,
 	FIRST_LOAD,
 	HELP_OPEN,
 	TUTORIAL_OPEN,

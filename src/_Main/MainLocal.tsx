@@ -1,6 +1,5 @@
 import {
 	CATEGORY,
-	DATA,
 	FILTER,
 	INIT_DONE,
 	LAST_UPDATED,
@@ -11,14 +10,13 @@ import {
 	SOURCE,
 	TEXT_DATA,
 } from "@/utils/vars";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { AnimatePresence, motion } from "motion/react";
 import CardLocal from "./components/CardLocal";
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { preventContextMenu } from "@/utils/utils";
-import { deleteMod, saveConfigs, toggleMod } from "@/utils/filesys";
+import { toggleMod } from "@/utils/filesys";
 import MiniSearch from "minisearch";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { join, setChange } from "@/utils/hotreload";
 import { managedSRC } from "@/utils/consts";
 import { openPath } from "@tauri-apps/plugin-opener";
@@ -30,7 +28,6 @@ let prevEnabled = "noData";
 let filterChangeCount = 0;
 function MainLocal() {
 	const initDone = useAtomValue(INIT_DONE);
-	const [alertOpen, setAlertOpen] = useState(false);
 	const textData = useAtomValue(TEXT_DATA);
 	const [initial, setInitial] = useState(true);
 	const lastUpdated = useAtomValue(LAST_UPDATED);
@@ -39,7 +36,6 @@ function MainLocal() {
 	const filter = useAtomValue(FILTER);
 	const search = useAtomValue(SEARCH);
 	const source = useAtomValue(SOURCE);
-	const setData = useSetAtom(DATA);
 	const [filteredList, setFilteredList] = useState([] as Mod[]);
 	const [visibleRange, setVisibleRange] = useState({ start: -1, end: -1 });
 	const [selected, setSelected] = useAtom(SELECTED);

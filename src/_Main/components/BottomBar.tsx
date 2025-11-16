@@ -17,7 +17,7 @@ function BottomBar() {
 	const categories = useAtomValue(CATEGORIES);
 	const localCategories = useMemo(() => {
 		return online
-			? categories
+			? categories.filter((_,index) => onlinePath.startsWith("Weapons")?(index>=categories.findIndex(c=>c._sName=="Bows")&& index<=categories.findIndex(c=>c._sName=="Swords") ): true)
 			: [
 					{ _sName: "All", _sIconUrl: "/icons/all.png", _special: true },
 					...(modList.some((mod) => mod.parent == UNCATEGORIZED)
@@ -25,11 +25,11 @@ function BottomBar() {
 						: []),
 					...categories.filter((cat) => modList.some((mod) => mod.parent == cat._sName)),
 			  ];
-	}, [categories, modList, online]);
+	}, [categories, modList, online,onlinePath]);
 	return (
 		<div className="min-h-20 flex items-center justify-center w-full h-20 p-2">
-			<div className="bg-sidebar trs z-100 text-accent flex items-center justify-center w-full h-full gap-1 p-2 border rounded-lg">
-				<label className="min-w-fit data-zzz:text-foreground gap-1">{textData.Category} :</label>
+			<div className="bg-sidebar trs data-gi:rounded-[3rem] z-100 text-accent flex items-center justify-center w-full h-full gap-1 p-2 border rounded-lg">
+				<label className="min-w-fit zzz-fg-text gap-1">{textData.Category} :</label>
 				<div
 					onWheel={(e) => {
 						if (e.deltaX != 0) return;
@@ -39,7 +39,7 @@ function BottomBar() {
 							// behavior: "smooth",
 						});
 					}}
-					className=" h-15 items-top thin flex items-center justify-start w-full gap-2 p-2 my-1 mr-1 overflow-x-auto overflow-y-hidden text-white"
+					className=" h-15 items-top thin data-gi:rounded-r-[3rem] flex items-center justify-start w-full gap-2 p-2 my-1 mr-1 overflow-x-auto overflow-y-hidden text-white"
 				>
 					<AnimatePresence mode="popLayout">
 						{localCategories.map((cat) => (
@@ -78,7 +78,7 @@ function BottomBar() {
 									}}
 									className={
 										" data-zzz:rounded-lg "+((online ? onlinePath.startsWith(`Skins/${cat._sName}`) : category == cat._sName)
-											? " bg-accent bgaccent    data-zzz:text-background text-background"
+											? " bg-accent bgaccent    text-background"
 											: "")
 									}
 								>

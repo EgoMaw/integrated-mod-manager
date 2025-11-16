@@ -92,7 +92,7 @@ function Help({ setPage }: { setPage: (page: number) => void }) {
 						</div>
 						<Button
 							size="sm"
-							className="w-24 text-destructive hover:bg-destructive data-zzz:hover:bg-destructive data-zzz:text-destructive data-zzz:hover:text-background hover:text-background"
+							className="w-24 text-destructive hover:bg-destructive hover:text-background"
 							onClick={() => resetWithBackup()}
 						>
 							Reset

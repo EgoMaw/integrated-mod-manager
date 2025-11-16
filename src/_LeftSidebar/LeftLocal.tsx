@@ -93,7 +93,7 @@ function LeftLocal() {
 							}}
 							className={
 								"w-25 data-zzz:text-xs " +
-								(filter == fil.name ? "bg-accent bgaccent data-zzz:text-background text-background " : "")
+								(filter == fil.name ? "bg-accent bgaccent text-background " : "")
 							}
 							style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
 						>
@@ -161,10 +161,10 @@ function LeftLocal() {
 										{leftSidebarOpen ? (
 											<div
 												className={
-													"w-full text-accent data-zzz:border-2 data-zzz:rounded-full duration-200 rounded-lg px-2 pointer-events-none items-center flex gap-1 " +
+													"w-full text-accent button-like duration-200 rounded-lg px-2 pointer-events-none items-center flex gap-1 " +
 													(currentPreset == index
 														? " bg-accent bgaccent text-background"
-														: "data-zzz:text-foreground bg-input/10")
+														: "zzz-fg-text bg-input/10")
 												}
 												style={{
 													transitionProperty: "background-color, border-radius",

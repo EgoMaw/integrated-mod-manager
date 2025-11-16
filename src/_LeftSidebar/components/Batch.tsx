@@ -378,7 +378,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 								<label className="text-[0.6rem] px-1 wuwa-font border rounded-full text-success border-success/50 pointer-events-none">
 									Source
 								</label>
-							) : item.path === managedTGT && source === target + "\\Mods" ? (
+							) : item.path === managedTGT && source === target ? (
 								<label className="text-[0.6rem] px-[5px] wuwa-font border rounded-full text-warn border-warn/50 pointer-events-none">
 									Target
 								</label>
@@ -462,7 +462,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 						<div className="flex justify-between w-full gap-4 mt-4">
 							<AlertDialogCancel className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
 							<AlertDialogAction
-								className="w-24 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
+								className="w-24 text-destructive hover:bg-destructive hover:text-background"
 								onClick={async () => {
 									if (!deleteValid || cleanChecked.length === 0) return;
 									setAlertOpen(false);
@@ -592,7 +592,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 									pointerEvents: moveValid ? "auto" : "none",
 									opacity: moveValid ? "" : 0.5,
 								}}
-								className="w-41 item h-10 overflow-hidden border-accent/25 active:border-border pointer-events-auto text-ellipsis select-none data-zzz:border-2 active:text-background active:bg-accent/80 active:scale-90 whitespace-nowrap rounded-md data-zzz:rounded-full font-medium transition-all px-3 py-2 text-sm bg-button text-accent shadow-xs hover:brightness-120  duration-300 flex items-center justify-center"
+								className="w-41 item h-10 overflow-hidden border-accent/25 active:border-border pointer-events-auto text-ellipsis select-none button-like active:text-background active:bg-accent/80 active:scale-90 whitespace-nowrap rounded-md font-medium transition-all px-3 py-2 text-sm bg-button text-accent shadow-xs hover:brightness-120  duration-300 flex items-center justify-center"
 							>
 								<Settings2Icon className=" h-5 mr-1" /> Set Category
 							</div>
@@ -639,7 +639,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													});
 													setPopoverOpen(false);
 												}}
-												className="data-zzz:rounded-full data-zzz:text-foreground data-zzz:mt-1 data-zzz:border-2"
+												className="button-like zzz-fg-text data-zzz:mt-1"
 											>
 												<img
 													className="aspect-square outline bg-accent/10 flex text-white items-center justify-center h-6 rounded-full pointer-events-none"

@@ -64,9 +64,10 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 							<div className="text-destructive	">{textData._Main._MainLocal.Irrev}</div>
 						</div>
 						<div className="flex justify-between w-full gap-4 mt-4">
-							<AlertDialogCancel className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
+							<AlertDialogCancel variant="default" className="w-24 duration-300">{textData.Cancel}</AlertDialogCancel>
 							<AlertDialogAction
-								className="w-24 text-destructive hover:bg-destructive data-zzz:hover:text-background hover:text-background"
+							variant="destructive"
+								className="w-24"
 								onClick={async () => {
 									if (selectedRestorePoint === null || selectedRestorePoint === undefined || !restorePoints[selectedRestorePoint]) return;
 									if(await deleteRestorePoint(restorePoints[selectedRestorePoint])){
@@ -91,20 +92,20 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 						<div className="min-h-10 flex items-center justify-between w-full mb-2">
 							{textData._LeftSideBar._components._Restore.RestorePoints}
 						</div>
-						<div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto data-zzz:border-0 text-gray-300 border rounded-sm">
+						<div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto border-0 text-gray-300 data-wuwa:border rounded-sm">
 							{ (
-								<div className="flex flex-col  w-full h-full data-zzz:gap-2 data-zzz:border-0 data-zzz:pr-1 overflow-x-hidden overflow-y-auto text-gray-300 border border-b-0 rounded-sm rounded-b-none">
+								<div className="flex flex-col  w-full h-full data-wuwa:gap-0 gap-2 data-wuwa:border data-wuwa:pr-0 pr-1 overflow-x-hidden overflow-y-auto text-gray-300 border-0 border-b-0 rounded-sm rounded-b-none">
 									{restorePoints.map((item, index) => (
 										<Button
 											onClick={() => {
 												setSelectedRestorePoint(index);
 											}}
 											style={{ backgroundColor: game=="WW"?selectedRestorePoint == index ? "var(--border)" : index % 2 == 0 ? "#1b1b1b50" : "#31313150":selectedRestorePoint == index?"var(--accent)":"",
-												color:game=="ZZ" && selectedRestorePoint == index?"var(--background)":"",
-												animation:game=="ZZ"&&selectedRestorePoint==index?"":"none"
+												color:game!="WW" && selectedRestorePoint == index?"var(--background)":"",
+												animation:game!="WW"&&selectedRestorePoint==index?"":"none"
 											 }}
 
-											className={"w-full h-10 border-b bgaccent bg-background/50 rounded-none  data-zzz:border-2 gap-2 flex items-center px-2"}
+											className={"w-full h-10 border-b  bgaccent bg-background/50 data-gi:bg-button rounded-none  zzz-border gap-2 flex items-center px-2"}
 											
 										>
 											<Label className="w-full pointer-events-none">{item}</Label>
@@ -113,7 +114,7 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 								</div>
 							)}
 							<Button
-								className="w-full min-h-10 bg-background/50 data-zzz:mt-2 text-sm gap-2 rounded-b-sm flex items-center justify-center px-2 border"
+								className="w-full min-h-10 data-wuwa:bg-background/50 data-wuwa:mt-0 mt-2 text-sm gap-2 rounded-b-sm flex items-center justify-center px-2 border"
 								onClick={() => {
 									if (disabled) return;
 									setDialogOpen(false);
@@ -140,13 +141,16 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 							{data.map((item, index) => (
 								<div
 									className={"w-full flex  flex-col"}
-									style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150" }}
+									style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150",
+										borderBottom: index == data.length-1 ?  "1px solid var(--border)":""
+									 }}
+
 								>
 									<div
 										className={
 											"w-full h-10 flex gap-2 items-center px-2 " +
 											(index !== 0 ? "border-t " : "") +
-											(index !== data.length - 1 || item.children?.length || 0 > 0 ? "border-b" : "")
+											(index !== data.length - 1 || (item.children?.length || 0) > 0 ? "border-b" : "")
 										}
 									>
 										{item.icon ? (
@@ -159,16 +163,16 @@ function Restore({ leftSidebarOpen,disabled=false }: { leftSidebarOpen: boolean,
 										<Label className={"w-full pointer-events-none " + ((index % 2) + 1)}>{item.name}</Label>
 									</div>
 									<div className="flex flex-col items-center w-full pl-4">
-										{item.children?.map((child, index) => (
+										{item.children?.map((child, index2) => (
 											<div
 												className={"w-full h-10 border-l flex gap-2 items-center px-2 "}
 												style={{
-													backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150",
-													borderBottom: index == item.children?.length || 0 - 1 ? "" : "1px dashed var(--border)",
+													backgroundColor: index2 % 2 == 0 ? "#1b1b1b50" : "#31313150",
+													borderBottom: index2 == item.children.length-1 ? "" : "1px dashed var(--border)",
 												}}
 											>
 												{child.isDir ? <FolderIcon className="w-4 h-4" /> : <FileIcon className="w-4 h-4" />}
-												<Label className={"w-full pointer-events-none" + ((index % 2) + 1)}>{child.name}</Label>
+												<Label className={"w-full pointer-events-none" + ((index2 % 2) + 1)}>{child.name}</Label>
 											</div>
 										))}
 									</div>

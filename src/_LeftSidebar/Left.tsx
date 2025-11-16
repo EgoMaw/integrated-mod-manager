@@ -12,7 +12,6 @@ import { ONLINE_TRANSITION } from "@/utils/consts";
 import { useInstalledItemsManager } from "@/utils/utils";
 import Downloads from "./components/Downloads";
 import BatchOperations from "./components/Batch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { launchGame } from "@/utils/init";
 import Restore from "./components/Restore";
 function LeftSidebar() {
@@ -42,7 +41,7 @@ function LeftSidebar() {
 							}}
 						>
 							<label className="text-2xl text-[#eaeaea] min-w-fit">
-								{{ "": "", WW: "WuWa", ZZ: "Z·Z·Z" }[game] || "Integrated"}
+								{{ "": "", WW: "WuWa", ZZ: "Z·Z·Z" , GI: "Genshin"}[game] || "Integrated"}
 							</label>
 							<label className="min-w-fit text-accent opacity-75 textaccent text-sm">Mod Manager</label>
 						</div>
@@ -62,7 +61,7 @@ function LeftSidebar() {
 								}}
 								className={
 									"w-full overflow-hidden text-ellipsis " +
-									(!online && "hover:brightness-125 bg-accent bgaccent   data-zzz:text-background text-background")
+									(!online && "hover:brightness-125 bg-accent bgaccent text-background")
 								}
 							>
 								<HardDriveDownload className="w-6 h-6" />
@@ -74,7 +73,7 @@ function LeftSidebar() {
 								}}
 								className={
 									"w-full overflow-hidden text-ellipsis " +
-									(online && "hover:brightness-125 bg-accent bgaccent   data-zzz:text-background text-background")
+									(online && "hover:brightness-125 bg-accent bgaccent  text-background")
 								}
 							>
 								<Globe className="w-6 h-6" />
@@ -121,10 +120,12 @@ function LeftSidebar() {
 							</>
 						) : (
 							<>
-								<Button className="min-h-12 min-w-12 peer">
+								
+								<div className="hidden-for-1s">
+									<Button className="min-h-12 min-w-12 peer">
 									<ArrowUpRightFromCircleIcon className="w-6 h-6" />
 								</Button>
-								<div className="fixed opacity-0 -mb-16 -ml-16 blur-md peer-hover:blur-none hover:blur-none peer-hover:mb-0 peer-hover:ml-0 pointer-events-none peer-hover:opacity-100 peer-hover:pointer-events-auto duration-300  hover:pointer-events-auto hover:opacity-100 hover:ml-0 hover:mb-0  -left-0.5 bottom-0.5 -translate-x-1/2 translate-y-1/2 rounded-full border w-72  aspect-square flex flex-col items-center gap-2 z-10  bg-sidebar/20 backdrop-blur-xs">
+									<div className="fixed opacity-0 -mb-16 -ml-16 blur-md peer-hover:blur-none hover:blur-none peer-hover:mb-0 peer-hover:ml-0 pointer-events-none peer-hover:opacity-100 peer-hover:pointer-events-auto duration-300  hover:pointer-events-auto hover:opacity-100 hover:ml-0 hover:mb-0  -left-0.5 bottom-0.5 -translate-x-1/2 translate-y-1/2 rounded-full border w-72  aspect-square flex flex-col items-center gap-2 z-10  bg-sidebar/20 backdrop-blur-xs">
 									<Button
 										onClick={() => launchGame()}
 										className="bg-tra absolute flex active:scale-100 items-center justify-end h-40 w-40 bg-transparent border rounded-full ml-0.5 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -144,6 +145,7 @@ function LeftSidebar() {
 											<Settings leftSidebarOpen={leftSidebarOpen} />
 										</div>
 									</div>
+								</div>
 								</div>
 							</>
 						)}

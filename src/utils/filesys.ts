@@ -12,6 +12,8 @@ import {
 	store,
 	TARGET,
 	TEXT_DATA,
+	XXMI_DIR,
+	XXMI_MODE,
 } from "./vars";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
@@ -92,16 +94,18 @@ export function getConfig(settings: Settings) {
 	const config: GlobalSettings = settings.global;
 	config["updatedAt"] = new Date().toISOString();
 	config["version"] = VERSION;
+	config["XXMI"] = store.get(XXMI_DIR) || "";
+	const xxmiMode = store.get(XXMI_MODE) || 0;
 	const gameConfig: GameConfig = {
 		version: VERSION,
+		custom: xxmiMode,
+		sourceDir: xxmiMode?store.get(SOURCE) || "" : "",
+		targetDir: xxmiMode?store.get(TARGET) || "" : "",
 		game: settings.global.game,
-		sourceDir: store.get(SOURCE),
-		targetDir: store.get(TARGET),
 		settings: settings.game,
 		data: store.get(DATA) || {},
 		presets: store.get(PRESETS) || [],
 		updatedAt: new Date().toISOString(),
-
 		categories: store.get(CATEGORIES) || [],
 	};
 	return { config, gameConfig };
@@ -508,8 +512,8 @@ export async function verifyDirStruct() {
 	try {
 		if (!(!!src && (await exists(src))) || !(!!tgt && (await exists(tgt))))
 			throw new Error("Source or Target not found");
-		const tgtDir = join(tgt, "Mods");
-		if (!(await exists(tgtDir))) throw new Error("Target Directory not found");
+		
+		if (!(await exists(tgt))) throw new Error("Target Directory not found");
 
 		const modDir = join(src, managedSRC);
 		const [modDirExists, isOldVersion] = await Promise.all([exists(modDir), checkOldVerDirs(src)]);
@@ -687,7 +691,7 @@ export async function createManagedDir() {
 		if (!src) return false;
 		await mkdir(join(src, managedSRC), { recursive: true });
 		if (!tgt) return false;
-		await mkdir(join(tgt, "Mods", managedTGT), { recursive: true });
+		await mkdir(join(tgt, managedTGT), { recursive: true });
 		return true;
 	} catch (error) {
 		console.error("[IMM] Error creating managed directories:", error);
@@ -705,11 +709,11 @@ export async function applyChanges(isMigration = false) {
 			map = (await verifyDirStruct()).map;
 		}
 		console.log("[IMM] Directory structure verified. Proceeding with applying changes...");
-		const target = join(tgt, "Mods", managedTGT);
+		const target = join(tgt, managedTGT);
 		if (!target) return true;
 		console.log("[IMM] Target exists, creating managed directories...");
 		await mkdir(join(src, managedSRC), { recursive: true });
-		await mkdir(join(tgt, "Mods", managedTGT), { recursive: true });
+		await mkdir(join(tgt, managedTGT), { recursive: true });
 		await categorizeDir(src, isMigration);
 
 		const entries = isMigration ? (await readDir(src)).map((item) => item.name) : Object.keys(map);
@@ -892,7 +896,7 @@ export async function refreshModList() {
 	try {
 		const data = store.get(DATA);
 		const modSrc = join(src, managedSRC);
-		const modTgt = join(tgt, "Mods", managedTGT);
+		const modTgt = join(tgt, managedTGT);
 
 		await categorizeDir(modSrc);
 
@@ -1041,7 +1045,7 @@ export async function deleteRestorePoint(point: string) {
 }
 export async function deleteMod(path: string) {
 	const modSrc = join(src, managedSRC, path);
-	const modTgt = join(tgt, "Mods", managedTGT, path);
+	const modTgt = join(tgt, managedTGT, path);
 
 	try {
 		await remove(modTgt);
@@ -1062,13 +1066,13 @@ export async function toggleMod(path: string, enabled: boolean) {
 	console.log("[IMM] Toggling mod:", path, "Enabled:", enabled);
 	try {
 		const modSrc = join(src, managedSRC, path);
-		const modTgt = join(tgt, "Mods", managedTGT, path);
+		const modTgt = join(tgt, managedTGT, path);
 
 		if (enabled) {
 			const [srcExists, tgtExists] = await Promise.all([exists(modSrc), exists(modTgt)]);
 
 			if (srcExists && !tgtExists) {
-				await mkdir(join(tgt, "Mods", managedTGT, ...path.split("\\").slice(0, -1)), { recursive: true });
+				await mkdir(join(tgt, managedTGT, ...path.split("\\").slice(0, -1)), { recursive: true });
 				try {
 					await invoke("create_symlink", {
 						linkPath: modTgt,
@@ -1127,8 +1131,8 @@ export async function savePreviewImage(path: string) {
 }
 export async function applyPreset(data: string[], name = "") {
 	try {
-		await remove(join(tgt, "Mods", managedTGT), { recursive: true });
-		await mkdir(join(tgt, "Mods", managedTGT), { recursive: true });
+		await remove(join(tgt, managedTGT), { recursive: true });
+		await mkdir(join(tgt, managedTGT), { recursive: true });
 
 		// Apply mods in parallel batches to improve performance
 		const batchSize = 10;

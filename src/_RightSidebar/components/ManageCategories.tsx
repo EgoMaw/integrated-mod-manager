@@ -165,8 +165,7 @@ function ManageCategories() {
 					</div>
 					<div className="flex justify-between items-center w-full gap-4 mt-4">
 						<AlertDialogCancel
-							variant="default"
-							className="w-24 duration-300 text-destructive hover:bg-destructive data-zzz:hover:bg-destructive data-zzz:text-destructive data-zzz:hover:text-background hover:text-background"
+							className="w-24"
 						>
 							{textData.Cancel}
 						</AlertDialogCancel>
@@ -178,7 +177,8 @@ function ManageCategories() {
 							Cannot delete, folder is not empty.
 						</label>
 						<AlertDialogAction
-							className="w-24 text-success hover:bg-success data-zzz:text-success data-zzz:hover:text-background hover:text-background"
+						variant="success"
+							className="w-24"
 							onClick={async () => {
 								if (alertData._sName.trim().length === 0 || (alertData.creating && categorySet.has(alertData._sName))) {
 									return;
@@ -208,7 +208,7 @@ function ManageCategories() {
 				</AlertDialogContent>
 			</AlertDialog>
 			<div className="min-h-fit text-accent my-6 text-3xl">Manage Categories</div>
-			<div className="flex flex-wrap gap-2 p-2 w-full h-full overflow-x-hidden overflow-y-scroll text-gray-300 border rounded-sm max-h-120 min-h-120">
+			<div className="flex flex-wrap gap-2 p-2 w-full h-full overflow-x-hidden overflow-y-scroll text-gray-300 rounded-sm max-h-120 min-h-120">
 				{categories.map((cat) => (
 					<div
 						key={cat._sName}
@@ -216,7 +216,7 @@ function ManageCategories() {
 							setAlertData(cat);
 							setAlertOpen(true);
 						}}
-						className="data-zzz:rounded-full border-1 rounded-md hover:bg-accent/30 active:bg-accent/50 active:scale-90 group select-none  duration-300 flex w-80 p-2 items-center gap-2 data-zzz:text-foreground data-zzz:mt-1 data-zzz:border-2"
+						className="button-like border-1 rounded-md bg-button hover:bg-accent/30 active:bg-accent/50 active:scale-90 group select-none  duration-300 flex w-80 p-2 items-center gap-2 zzz-fg-text data-zzz:mt-1"
 					>
 						<img
 							className="aspect-square outline bg-accent/10 z-10 flex text-white items-center justify-center h-12 rounded-full pointer-events-none"
@@ -233,6 +233,7 @@ function ManageCategories() {
 						>
 							{cat._sName}
 						</Label>
+							
 						<EditIcon className="z-20 h-full min-w-5 p-[3px] text-accent cursor-pointer" />
 					</div>
 				))}

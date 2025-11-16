@@ -191,7 +191,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 									filter: !globalPage ? "invert(1) hue-rotate(180deg)" : "",
 								}}
 							></div>
-							{{ WW: "WuWa", ZZ: "Z·Z·Z","":"" }[settings.global.game]}
+							{{ WW: "WuWa", ZZ: "Z·Z·Z","":"", GI: "Genshin" }[settings.global.game]}
 						</TabsTrigger>
 					</TabsList>
 					<AnimatePresence mode="wait" initial={false}>
@@ -501,10 +501,10 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													disabled={settings.game.launch == 0}
 													className="aspect-square flex items-center justify-center w-8 h-8"
 													onClick={async () => {
-														const path = await selectPath({multiple:false,directory:false,defaultPath:settings.global.exeXXMI,title:"Select XXMI Executable",filters:[{name:"Application",extensions:["exe"]}]});
+														const path = await selectPath({multiple:false,directory:false,defaultPath:settings.global.XXMI,title:"Select XXMI Executable",filters:[{name:"Application",extensions:["exe"]}]});
 														if (path) {
 															setSettings((prev) => {
-																prev.global.exeXXMI = path;
+																prev.global.XXMI = path;
 																return { ...prev };
 															});
 															saveConfigs();
@@ -521,7 +521,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													disabled={settings.game.launch == 0}
 													type="text"
 													className="w-72 overflow-hidden border-border/0 bg-input/50 cursor-default duration-200 text-ellipsis h-8"
-													value={settings.global.exeXXMI ?? ""}
+													value={settings.global.XXMI ?? ""}
 													placeholder={textData._LeftSideBar._components._Settings._LaunchGame.Placeholder}
 													style={{
 														width: leftSidebarOpen ? "" : "0px",
@@ -589,18 +589,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													{textData._LeftSideBar._components._Settings._ImportExport.Export}
 												</Button>
 											</div>
-											{/* <Button
-																			className="w-32"
-																			onClick={async () => {
-																				let path = ((await folderSelector(tgt)) as string) || tgt || "";
-																				setTgt(path);
-																				if (checked) {
-																					setSrc(path+"\\Mods");
-																				}
-																			}}
-																		>
-																			{textData.Browse}
-																		</Button> */}
+											
 										</div>
 										<div className="flex items-center gap-1">
 											{textData._LeftSideBar._components._Settings.HotKey}

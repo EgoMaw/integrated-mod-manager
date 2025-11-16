@@ -189,7 +189,7 @@ function Downloads() {
 										<div
 											ref={downloadRef}
 											key={"down" + JSON.stringify(downloadList[0])}
-											className="min-h-12 -mb-12 height-in data-zzz:rounded-full data-zzz:text-background bg-accent bgaccent    text-background hover:brightness-125 z-10 flex flex-col self-start justify-center overflow-hidden rounded-lg"
+											className="min-h-12 -mb-12 height-in zzz-rounded  bg-accent bgaccent    text-background hover:brightness-125 z-10 flex flex-col self-start justify-center overflow-hidden rounded-lg"
 											style={{ width: prev + "%" }}
 										>
 											<div className="min-w-79 fade-in flex items-center justify-center gap-1 pointer-events-none">
@@ -239,7 +239,7 @@ function Downloads() {
 										transition: "minHeight 0.3s, margin-bottom 0.3s, height 0.3s",
 									}}
 								>
-									<Label className=" w-full h-full flex items-center justify-center bg-button data-zzz:rounded-full data-zzz:text-foreground text-accent rounded-md pointer-events-none">{`${
+									<Label className=" w-full h-full flex items-center justify-center bg-button zzz-rounded zzz-fg-text text-accent rounded-md pointer-events-none">{`${
 										done + (downloadList[0].status == "downloading" ? 1 : 0)
 									}/${downloadList.length}`}</Label>
 								</div>
@@ -267,15 +267,15 @@ function Downloads() {
 							{textData._LeftSideBar._components._Downloads.Clear}
 						</Button>
 					</div>
-					<div className="flex flex-col w-full data-zzz:gap-2 h-full overflow-y-auto text-gray-300 data-zzz:border-0 border rounded-sm">
+					<div className="flex flex-col w-full data-wuwa:gap-0 gap-2 h-full overflow-y-auto text-gray-300 data-wuwa:border border-0 rounded-sm">
 						{downloadList.length > 0 ? (
 							<>
 								{
-									<div className="overflow-hidden data-zzz:rounded-full data-zzz:text-foreground  duration-0 flex items-center w-full min-h-16 min-w-0 -mb-16 data-zzz:-mb-18 border-b">
+									<div className="overflow-hidden data-zzz:zzz-rounded zzz-fg-text   data-gi:rounded-sm duration-0 flex items-center w-full min-h-16 min-w-0 data-wuwa:-mb-16 -mb-18 data-wuwa:border-b">
 										<div
 											key={"cur" + JSON.stringify(downloadList[0])}
 											ref={downloadRef2}
-											className="bg-accent bgaccent opacity-50 data-zzz:rounded-full data-zzz:text-foreground  duration-0 flex items-center w-0 min-h-16 min-w-0"
+											className="bg-accent bgaccent opacity-50 data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm  duration-0 flex items-center w-0 min-h-16 min-w-0"
 											style={{ width: prev + "%" }}
 										></div>
 									</div>
@@ -283,7 +283,7 @@ function Downloads() {
 								{downloadList.map((item, index) => (
 									<div
 										key={item.name.replaceAll("DISABLED_", "") + index}
-										className="hover:bg-background/20 data-zzz:rounded-full data-zzz:text-foreground data-zzz:border-2 flex justify-between items-center w-full  min-h-16 px-4 border-b"
+										className="hover:bg-background/20 zzz-fg-text data-zzz:button-like flex justify-between items-center w-full data-gi:border-1 data-gi:rounded-sm  min-h-16 px-4 data-wuwa:border-b"
 										style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150" }}
 									>
 										<div className="flex items-center w-full flex-1 gap-3 ">
@@ -308,7 +308,7 @@ function Downloads() {
 													variant="ghost"
 													size="sm"
 													onClick={() => cancelDownload(index)}
-													className="hover:text-destructive text-red-400"
+													className="hover:text-destructive"
 												>
 													<X className="w-4 h-4" />
 												</Button>

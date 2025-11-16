@@ -17,6 +17,8 @@ import {
 	UPDATER_OPEN,
 	FIRST_LOAD,
 	ONLINE_DATA,
+	XXMI_DIR,
+	XXMI_MODE,
 } from "./vars";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 
@@ -28,7 +30,7 @@ import { exists, writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 import defConfig from "../default.json";
 import defConfigXX from "../defaultXX.json";
 import { apiClient } from "./api";
-import { managedSRC, VERSION } from "./consts";
+import { GAMES, VERSION } from "./consts";
 import { switchGameTheme } from "./theme";
 import { executeXXMI, isGameProcessRunning } from "./autolaunch";
 // import { updateIni } from "./iniUpdater";
@@ -41,20 +43,44 @@ import { addToast } from "@/_Toaster/ToastProvider";
 import { Category, Games, Preset, Settings } from "./types";
 import { resetPageCounts } from "@/_Main/MainOnline";
 // import { v2_0_4_migration } from "./filesys";
-
+const paths = {
+	exe: "",
+	WW: "",
+	ZZ: "",
+	GI: "",
+	SR: "",
+	XX: "",
+};
 let config: any = { ...defConfig };
 let configXX: any = { ...defConfigXX };
 let dataDir = "";
+let appData = "";
+let prevGame = "";
+let categories: Category[] = [];
+let isInitialized = false;
+export async function readXXMIConfig(path: string) {
+	if (path && path != "" && (await exists(join(path, "XXMI Launcher Config.json")))) {
+		const data = JSON.parse(await readTextFile(join(path, "XXMI Launcher Config.json")));
+		console.log("[IMM] Loaded XXMI Launcher config:", data);
+		GAMES.forEach((game) => {
+			if (data.Importers[game + "MI"]) {
+				const xxPath = data.Importers[game + "MI"].Importer.importer_folder || "";
+				console.log(`[IMM] Resolved ${game}MI path:`, xxPath);
+				paths[game as "WW" | "ZZ" | "GI" | "SR"] =
+					xxPath == `${game}MI/` ? join(path, `${game}MI`) : join(...xxPath.split("/"));
+			}
+		});
+		paths.XX = path;
+		store.set(XXMI_DIR, path);
+	}
+	console.log("[IMM] Resolved game paths:", paths);
+}
 export function getDataDir() {
 	return dataDir;
 }
-let appData = "";
-let prevGame = "";
 export function getPrevGame() {
 	return prevGame;
 }
-let categories: Category[] = [];
-let isInitialized = false;
 export const window = getCurrentWebviewWindow();
 export function setWindowType(type: number) {
 	if (type == 0) {
@@ -92,7 +118,7 @@ export async function updateConfig(oconfig = null as any) {
 		toggleClick: oconfig.settings.toggle || 2,
 		ignore: "2.0.4",
 		clientDate: oconfig.settings.clientDate || "",
-		exeXXMI: oconfig.settings.appDir || "",
+		XXMI: "",
 		lang: oconfig.settings.lang || "",
 		game: "",
 	};
@@ -116,8 +142,6 @@ export async function updateConfig(oconfig = null as any) {
 		JSON.stringify(
 			{
 				version: VERSION,
-				sourceDir: "",
-				targetDir: "",
 				categories: [],
 				settings: {
 					launch: oconfig.settings.launch || 0,
@@ -135,6 +159,28 @@ export async function updateConfig(oconfig = null as any) {
 	store.set(FIRST_LOAD, true);
 	return config;
 }
+export async function verifyGameDir(game: any) {
+	const XXPath = paths[game as "WW" | "ZZ" | "GI" | "SR"];
+	const dirs = {
+		targetDir: "",
+		sourceDir: "",
+	};
+	try {
+		(await readTextFile(join(XXPath, "d3dx.ini"))).split("\n").forEach((line: string) => {
+			const [key, value] = line.split("=").map((x: string) => x.trim());
+			if (key == "include_recursive") {
+				const isPath = value.slice(1, 3) == ":\\";
+				dirs.targetDir = isPath ? value : join(XXPath, value);
+				dirs.sourceDir = isPath ? value : join(XXPath, value);
+			}
+		});
+	} catch (e) {
+		console.log(`[IMM] Failed to read d3dx.ini for ${game}:`, e);
+		dirs.sourceDir = "";
+		dirs.targetDir = "";
+	}
+	return dirs;
+}
 export async function initGame(game: Games) {
 	console.log(`[IMM] Initializing game: ${game}...`);
 	store.set(ONLINE_DATA, {});
@@ -143,19 +189,22 @@ export async function initGame(game: Games) {
 	} else configXX = { ...defConfigXX };
 	configXX.game = game;
 	switchGameTheme(game);
-	dataDir = `${appData}\\XXMI Launcher\\${game}MI`;
-	if (!(await exists(dataDir))) {
-		dataDir = "";
+
+	if (!configXX.custom) {
+		configXX = { ...configXX, ...(await verifyGameDir(game)) };
+	} else {
+		dataDir = configXX.targetDir;
 	}
 	writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
 	apiClient.setGame(game as any);
 	await setCategories(game);
 	// Validate source and target dirs
-	if (configXX.sourceDir && !(await exists(join(configXX.sourceDir, managedSRC)))) configXX.sourceDir = "";
-	if (configXX.targetDir && !(await exists(join(configXX.targetDir, "Mods")))) configXX.targetDir = "";
+	if (configXX.sourceDir && !(await exists(join(configXX.sourceDir)))) configXX.sourceDir = "";
+	if (configXX.targetDir && !(await exists(configXX.targetDir))) configXX.targetDir = "";
 	console.log("[IMM] Validating source and target directories...", configXX.sourceDir, configXX.targetDir);
 	store.set(SOURCE, configXX.sourceDir || "");
 	store.set(TARGET, configXX.targetDir || "");
+	store.set(XXMI_MODE, configXX.custom || 0);
 	store.set(
 		SETTINGS,
 		(prev) => ({ global: { ...prev.global, game }, game: { ...prev.game, ...configXX.settings } } as Settings)
@@ -218,10 +267,10 @@ function removeHelpers() {
 	resetPageCounts();
 }
 export async function launchGame() {
-	if (await exists(config.exeXXMI))
+	if (await exists(config.XXMI))
 		isGameProcessRunning(config.game).then((running) => {
 			if (!running) {
-				executeXXMI(config.exeXXMI);
+				executeXXMI(join(config.XXMI, "Resources\\Bin\\XXMI Launcher.exe"));
 				addToast({
 					type: "info",
 					message: "Launching Game",
@@ -254,16 +303,14 @@ export async function main() {
 	resetAtoms();
 	removeHelpers();
 	appData = await path.dataDir();
-	dataDir = `${appData}\\XXMI Launcher\\__MI`;
-
-	const exeXXMI = `${appData}\\XXMI Launcher\\Resources\\Bin\\XXMI Launcher.exe`;
+	const XXMI = `${appData}\\XXMI Launcher`;
 	if (!(await exists("config.json"))) {
 		console.log("[IMM] Creating default config.json...");
 		await writeTextFile("config.json", JSON.stringify(defConfig, null, 2));
 	}
 	config = safeLoadJson(defConfig, JSON.parse(await readTextFile("config.json")));
 	console.log("[IMM] Loaded config:", config);
-	if (!config.exeXXMI && !config.game && !config.lang) {
+	if (!config.XXMI && !config.game && !config.lang) {
 		console.log("[IMM] First time setup detected, checking for WWMM...");
 		store.set(FIRST_LOAD, true);
 		const temp = await checkWWMM();
@@ -272,12 +319,17 @@ export async function main() {
 		store.set(FIRST_LOAD, false);
 	}
 	apiClient.setClient(config.clientDate || "");
+	if ((config.XXMI == "" || !(await exists(config.XXMI))) && (await exists(XXMI))) {
+		config.XXMI = XXMI;
+	}
+	paths.XX = config.XXMI;
 	if (config.game) apiClient.setGame(config.game);
 	if (config.version < "2.1.0") {
 		config = await updateConfig();
 	}
 	console.log("[IMM] Saving config...");
 	writeTextFile("config.json", JSON.stringify(config, null, 2));
+	await readXXMIConfig(config.XXMI || "");
 	console.log("[IMM] Initializing game...");
 	if (config.game) configXX = await initGame(config.game);
 	console.log("[IMM] Setting window type...");
@@ -286,17 +338,6 @@ export async function main() {
 	if (bg)
 		bg.style.backgroundColor = "color-mix(in oklab, var(--background) " + config.bgOpacity * 100 + "%, transparent)";
 
-	if (config.game && (configXX.targetDir == "" || configXX.sourceDir == "")) {
-		if (await exists(dataDir)) {
-			configXX.targetDir = dataDir;
-			configXX.sourceDir = dataDir;
-		} else {
-			dataDir = "";
-		}
-	}
-	if (config.exeXXMI == "" && (await exists(exeXXMI))) {
-		config.exeXXMI = exeXXMI;
-	}
 	store.set(SETTINGS, (prev) => ({
 		global: { ...prev.global, ...config },
 		game: { ...prev.game, ...configXX.settings },
@@ -354,33 +395,4 @@ export async function main() {
 		}));
 	}
 	isInitialized = true;
-	// store.set(settingsDataAtom, config.settings as Settings);
-	// if(config.clientDate){
-	// 	//console.log("Client date exists:", config.clientDate);
-	// }
-	// else{
-	// 	//console.log("Client date does not exist, fetching...");
-	// }
-	// store.set(onlineTypeAtom, config.settings.onlineType ?? "Mod");
-	// if (!firstLoad) {
-	// 	if (config.settings.clientDate) fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/${config.settings.clientDate}`);
-	// 	else {
-	// 		fetch(`${HEALTH_CHECK}/${VERSION||"2.0.1"}/_${Date.now()}`)
-	// 			.then((res) => res.json())
-	// 			.then((data) => {
-	// 				if (data.client) {
-	// 					config.settings.clientDate = data.client;
-	// 					store.set(settingsDataAtom, config.settings as Settings);
-	// 					saveConfig();
-	// 				}
-	// 			});
-	// 	}
-	// }
-	// updateInfo("Getting directory info...");
-	// if (!firstLoad) {
-	// 	getDirResructurePlan();
-	// }
-	// updateInfo("Initialization complete.", 2000);
-
-	// setupImageServerListeners();
 }

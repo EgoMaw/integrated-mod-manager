@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { SidebarContent, SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
 import { modRouteFromURL } from "@/utils/utils";
 import {
+	GAME,
 	INSTALLED_ITEMS,
 	LEFT_SIDEBAR_OPEN,
 	ONLINE_PATH,
@@ -34,12 +35,18 @@ function LeftOnline() {
 	const installedItems = useAtomValue(INSTALLED_ITEMS);
 	const setSelected = useSetAtom(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
+	const game = useAtomValue(GAME)
 	return (
 		<>
-			<div className="min-h-fit flex flex-col w-full p-0">
+			<div className=" overflow-y-scroll thin flex flex-col w-full p-0"
+			style={{
+				maxHeight:leftSidebarOpen?"":"calc(100vh - 29.66rem)",
+				minHeight:leftSidebarOpen?"fit-content":""
+			}}
+			>
 				<SidebarGroupLabel>{textData._LeftSideBar._LeftOnline.Type}</SidebarGroupLabel>
 				<SidebarContent
-					className="grid grid-cols-3 px-2 data-zzz:grid-cols-2 items-center justify-center w-full   overflow-hidden"
+					className="grid min-h-fit data-wuwa:grid-cols-3 px-2 grid-cols-2 items-center justify-center w-full "
 					style={{
 						gridTemplateColumns: leftSidebarOpen ? "" : "repeat(1, minmax(0, 1fr))",
 					}}
@@ -58,16 +65,22 @@ function LeftOnline() {
 										setOnlinePath(`${category._sName}&_sort=${onlineSort}`);
 									}}
 									className={
-										"w-full min-w-fit  " +
+										"w-full min-w-fit justify-start	 " +
 										(onlinePath.startsWith(category._sName) &&
-											" bg-accent bgaccent   data-zzz:text-background text-background")
+											" bg-accent bgaccent   text-background")
 									}
-									style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
+									style={{ width: leftSidebarOpen ? "" : "2.5rem", paddingInline: leftSidebarOpen ? "" : "4px", justifyContent:leftSidebarOpen?"start":"center" }}
 								>
 									{
-										iconMap[category._sName] || <ShieldQuestion className="w-6 h-6" />
+										game == "GI"?
+										<img src={category._sIconUrl} className="w-8 h-8 duration-200 aspect-square" style={{
+											filter:onlinePath.startsWith(category._sName)?"invert(1) hue-rotate(180deg)":""
+										}} />
+										:(iconMap[category._sName] || <ShieldQuestion className="w-6 h-6" />)
 									}
-									{leftSidebarOpen && category._sName}
+									
+										{leftSidebarOpen &&<label className="text-center w-full"> {category._sName}</label>}
+										
 								</Button>
 							</div>
 						);
@@ -82,7 +95,11 @@ function LeftOnline() {
 					marginBlock: leftSidebarOpen ? "4px" : "",
 				}}
 			/>
-			<SidebarGroup className="pr-1 flex flex-col h-full overflow-hidden">
+			<SidebarGroup className="pr-1 flex flex-col h-full overflow-hidden"
+			style={{
+				height:leftSidebarOpen?"":"9rem"
+			}}
+			>
 				<SidebarGroupLabel className="flex items-center gap-1">
 					{textData.Installed}{" "}
 					<Label className="text-accent opacity-50 flex text-xs scale-75">
@@ -105,7 +122,7 @@ function LeftOnline() {
 										transition={{ duration: 0.2 }}
 										key={item.name}
 										className={
-											"w-full min-h-12 data-zzz:border-2 data-zzz:rounded-full data-zzz:text-foreground flex-col justify-center height-in overflow-hidden rounded-lg flex duration-200 " +
+											"w-full min-h-12 button-like zzz-fg-text flex-col justify-center height-in overflow-hidden rounded-lg flex duration-200 " +
 											" bg-input/50 text-accent hover:bg-input/80"
 										}
 										onClick={(e) => {
@@ -138,15 +155,15 @@ function LeftOnline() {
 							</>
 						) : (
 							<>
-								<div className="aspect-square min-h-10 flex-col data-zzz:rounded-full data-zzz:border-2 items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
+								<div className="aspect-square min-h-10 flex-col button-like items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
 									<UploadIcon className="min-h-2 min-w-2 w-4 h-4" />{" "}
 									{installedItems.filter((item) => item.modStatus === 2).length}
 								</div>
-								<div className="aspect-square min-h-10 flex-col data-zzz:rounded-full data-zzz:border-2 data-zzz:text-foreground items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
+								<div className="aspect-square min-h-10 flex-col button-like items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
 									<EyeIcon className="min-h-2 min-w-2 w-4 h-4" />
 									{installedItems.filter((item) => item.modStatus === 1).length}
 								</div>
-								<div className="aspect-square min-h-10 flex-col data-zzz:rounded-full data-zzz:border-2 data-zzz:text-foreground items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
+								<div className="aspect-square min-h-10 flex-col button-like items-center text-xs justify-center height-in overflow-hidden rounded-lg flex duration-200 bg-input/50 text-accent hover:bg-input/80">
 									<FolderCheckIcon className="min-h-2 min-w-2 w-4 h-4" />
 									{installedItems.filter((item) => item.modStatus === 0).length}
 								</div>{" "}

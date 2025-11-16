@@ -3,10 +3,10 @@ import { Games } from "./types";
 type GameTheme = "wuwa" | "zzz";
 export type Language = "en" | "cn" | "jp" | "kr" | "ru";
 function gameToTheme(game: Games): GameTheme {
-	return ({ WW: "wuwa", ZZ: "zzz", "": "" }[game] || "wuwa") as GameTheme;
+	return ({ WW: "wuwa", ZZ: "zzz", GI: "gi", "": "", }[game] || "wuwa") as GameTheme;
 }
 function themeToGame(theme: GameTheme): Games {
-	return ({ wuwa: "WW", zzz: "ZZ", "": "" }[theme] || "WW") as Games;
+	return ({ wuwa: "WW", zzz: "ZZ", gi: "GI", "": "" }[theme] || "WW") as Games;
 }
 
 /**
