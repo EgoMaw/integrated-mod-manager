@@ -148,7 +148,7 @@
 	--game-font-cn: wuwa;
 	--game-font-jp: wuwa;
 	--game-font-kr: wuwa;
-	--game-font-ru: wuwa;
+	--game-font-ru: gi-cn;
 	--radius-main: 0.5rem;
 	--border-w-main: 1px;
 	--button: #2d2a28;
@@ -163,7 +163,7 @@
 [data-theme="gi"] {
 	--game-font-en: gi-cn;
 	--game-font-cn: gi-cn;
-	--game-font-jp: gi-jp;
+	--game-font-jp: gi-cn;
 	--game-font-kr: gi-cn;
 	--game-font-ru: gi-cn;
 	--radius-main: 0.5rem;
@@ -437,10 +437,7 @@
 	font-family: gi-cn;
 	src: url("./fonts/gi/cn.ttf");
 }
-@font-face {
-	font-family: gi-jp;
-	src: url("./fonts/gi/jp.ttf");
-}
+
 .game-font {
 	font-family: var(--game-font), var(--game-font-en);
 }
@@ -666,6 +663,9 @@ a {
 
 [data-lang="ru"] {
 	--game-font: var(--game-font-ru);
+}
+.font-en{
+	font-family: var(--game-font-en);
 }
 
 ::-webkit-scrollbar {

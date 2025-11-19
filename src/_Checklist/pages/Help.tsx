@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { BANANA_LINK, DISCORD_LINK } from "@/utils/consts";
 import { resetWithBackup } from "@/utils/filesys";
 import { GAME, SOURCE, TARGET, TEXT_DATA, UPDATER_OPEN } from "@/utils/vars";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -95,24 +96,24 @@ function Help({ setPage }: { setPage: (page: number) => void }) {
 					<div className="flex items-center gap-2">
 						<label className="opacity-50">{textData._Checklist._Help.ContactDev}</label>
 						<a
-							href="https://gamebanana.com/mods/593490"
+							href={BANANA_LINK}
 							target="_blank"
 							className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 						>
 							{" "}
-							<img className="h-4" src="https://images.gamebanana.com/static/img/favicon/32x32.png" />{" "}
-							<img className="h-3" src="https://images.gamebanana.com/static/img/logo.png" />
+							<img className="h-4" src="/GBLogo.png" />{" "}
+							<img className="h-3" src="/GBTitle.png" />
 						</a>
 						<label className="opacity-50">-</label>
 						<a
-							href="https://discord.gg/QGkKzNapXZ"
+							href={DISCORD_LINK}
 							target="_blank"
 							className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 						>
 							{" "}
 							<img
 								className="h-6"
-								src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/67ece93be2524af5cf14dc1c_Logo-black-bg.svg"
+								src="/DCLogoTitle.svg"
 							/>
 						</a>
 					</div>

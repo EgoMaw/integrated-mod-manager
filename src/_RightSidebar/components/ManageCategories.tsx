@@ -130,7 +130,7 @@ function ManageCategories() {
 						>
 							{textData._RightSideBar._components._ManageCategories.CatExist}
 						</label>
-						<div className="w-120 flex flex-col items-start gap-2">
+						<div className="w-110 flex flex-col items-start gap-2">
 							<label className="min-w-fit text-xs -mb-2 ml-2 bg-background text-accent border border-b-0 rounded-t-md px-1.5 py-0.5">
 								{textData._RightSideBar._components._ManageCategories.IconURL}
 							</label>
@@ -142,12 +142,12 @@ function ManageCategories() {
 								onChange={(e) => {
 									debouncedIconUpdate((e.target as HTMLInputElement).value);
 								}}
-								className="disabled:border-0 min-w-fit text-ellipsis w-full overflow-hidden break-words"
+								className="disabled:border-0 min-w-fit max-w-110 text-ellipsis w-full overflow-hidden break-words"
 							/>
 
 							<Tooltip>
 								<TooltipTrigger
-									className="-mt-9 self-end -mr-6 duration-200"
+									className="-mt-9 self-end -mr-6.5 duration-200"
 									style={{
 										opacity: alertData._sAltIconUrl ? 1 : 0,
 										pointerEvents: alertData._sAltIconUrl ? "auto" : "none",

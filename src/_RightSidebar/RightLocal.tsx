@@ -18,6 +18,7 @@ import {
 	ChevronDownIcon,
 	EditIcon,
 	LinkIcon,
+	SearchIcon,
 	Settings2Icon,
 	TrashIcon,
 } from "lucide-react";
@@ -41,6 +42,7 @@ import { formatHotkeyDisplay, normalizeHotkey } from "@/utils/hotkeyUtils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimatePresence, motion } from "motion/react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 let text = "";
 function RightLocal() {
 	const [tab, setTab] = useState<"notes" | "hotkeys">("hotkeys");
@@ -137,7 +139,7 @@ function RightLocal() {
 			text = mod?.note || "";
 			setItem(mod);
 		} else setItem(undefined);
-	}, [selected]);
+	}, [selected,modList]);
 	useEffect(() => {
 		if (item) {
 			const cat = categories.find((c) => c._sName == item.parent) || { _sName: "-1", _sIconUrl: "" };
@@ -368,16 +370,50 @@ function RightLocal() {
 										key={item?.source}
 										defaultValue={item?.source}
 									/>
-									<div
-										className="bg-pat2 hover:brightness-150 p-2 duration-200 rounded-lg"
-										onClick={() => {
-											if (item?.source && item?.source != "") {
-												handleInAppLink(item.source || "");
-											}
-										}}
-									>
-										<LinkIcon className=" w-4 h-4" />
-									</div>
+									{item?.source ? (
+										<Button
+											className="bg-pat2"
+											onClick={() => {
+												if (item?.source && item?.source != "") {
+													handleInAppLink(item.source || "");
+												}
+											}}
+										>
+											
+											<Tooltip>
+												<TooltipTrigger>
+													<LinkIcon className=" w-4 h-4" />
+												</TooltipTrigger>
+												<TooltipContent className="w-20 flex items-center justify-center">
+													<p className="w-full max-w-20 text-center">{textData._RightSideBar._RightLocal.ViewModOnline}</p>
+												</TooltipContent>
+											</Tooltip>
+										</Button>
+									) : (
+										item&&<Button
+											onClick={() => {
+												setOnline(true);
+												const search = document.getElementById("search-input") as HTMLInputElement;
+												setTimeout(()=>{
+													search.focus();
+													search.value = `${item?.name.replaceAll("_"," ")} - ${item?.parent != "Uncategorized" ? item?.parent : ""}`;
+													search.blur();
+												},100)
+												// setRightSlideOverOpen(true);
+												setSelected("")
+											}}
+											className="bg-pat2"
+										>
+											<Tooltip>
+												<TooltipTrigger>
+													<SearchIcon className=" pointer-events-none w-4 h-4" />
+												</TooltipTrigger>
+												<TooltipContent className="w-15 flex items-center justify-center">
+													<p className="w-full max-w-15 text-center">{textData._RightSideBar._RightLocal.SearchOnline}</p>
+												</TooltipContent>
+											</Tooltip>
+										</Button>
+									)}
 									{}
 								</div>
 							</div>

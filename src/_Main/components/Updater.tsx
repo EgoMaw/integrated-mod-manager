@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { VERSION } from "@/utils/consts";
+import { BANANA_LINK, DISCORD_LINK, VERSION } from "@/utils/consts";
 import { getTimeDifference, isOlderThanOneDay } from "@/utils/utils";
 import { IMM_UPDATE, SETTINGS, TEXT_DATA, UPDATER_OPEN } from "@/utils/vars";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -190,24 +190,24 @@ function Updater() {
 								<label className="opacity-40">{textData.BFR}</label>
 								<label>:</label>
 								<a
-									href="https://gamebanana.com/mods/593490"
+									href={BANANA_LINK}
 									target="_blank"
 									className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 								>
 									{" "}
-									<img className="h-4" src="https://images.gamebanana.com/static/img/favicon/32x32.png" />{" "}
-									<img className="h-3" src="https://images.gamebanana.com/static/img/logo.png" />
+									<img className="h-4" src="/GBLogo.png" />{" "}
+									<img className="h-3" src="/GBTitle.png" />
 								</a>
 								|
 								<a
-									href="https://discord.gg/QGkKzNapXZ"
+									href={DISCORD_LINK}
 									target="_blank"
 									className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 								>
 									{" "}
 									<img
 										className="h-6"
-										src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/67ece93be2524af5cf14dc1c_Logo-black-bg.svg"
+										src="/DCLogoTitle.svg"
 									/>
 								</a>
 							</div>

@@ -197,7 +197,7 @@ function MainLocal() {
 								onClick={() => {
 									addToast({
 										type: "info",
-										message: "Refreshing Mod List",
+										message: textData._Toasts.RefreshMods,
 									});
 									// setModList([]);
 									refreshModList().then((data) => {

@@ -1,5 +1,4 @@
-
-import  TEXT  from "@/textData.json";
+import TEXT from "@/textData.json";
 import {
 	Category,
 	ChangeInfo,
@@ -17,6 +16,8 @@ export const IMAGE_SERVER = "http://127.0.0.1:1469/preview";
 export const OLD_RESTORE = "DISABLED_RESTORE";
 export const RESTORE = "RESTORE";
 export const IGNORE = "IGNORE";
+export const DISCORD_LINK = "https://discord.gg/QGkKzNapXZ";
+export const BANANA_LINK = "https://gamebanana.com/mods/593490";
 export const UNCATEGORIZED = "Uncategorized";
 export const managedSRC = "DISABLED (Managed by IMM)";
 export const managedTGT = "Mods (Managed by IMM)";
@@ -90,7 +91,7 @@ export const DEFAULTS = {
 	} as Settings,
 	SOURCE: "",
 	TARGET: "",
-	XXMI_MODE: 0 as 0|1,
+	XXMI_MODE: 0 as 0 | 1,
 	DATA: {} as ModDataObj,
 	PRESETS: [] as Preset[],
 	CATEGORIES: [] as Category[],

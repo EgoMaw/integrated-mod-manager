@@ -138,7 +138,9 @@ export function resetAtoms() {
 		store.set(atoms[atom as keyof typeof atoms] as any, DEFAULTS[atom as keyof typeof DEFAULTS])
 	);
 }
+const ERR = atom("");
 export {
+	ERR,
 	XXMI_DIR,
 	XXMI_MODE,
 	FIRST_LOAD,

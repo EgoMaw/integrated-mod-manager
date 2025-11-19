@@ -10,14 +10,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { LANG_LIST } from "@/utils/consts";
 import { getConfig, saveConfigs, setConfig } from "@/utils/filesys";
 import { encodeHotkeyForStorage, formatHotkeyDisplay, processHotkeyCode } from "@/utils/hotkeyUtils";
-import { setHotreload } from "@/utils/hotreload";
-import { setWindowType } from "@/utils/init";
-import  TEXT  from "@/textData.json";
+import { join, setHotreload } from "@/utils/hotreload";
+import { getCwd, setWindowType } from "@/utils/init";
+import TEXT from "@/textData.json";
 import { keySort } from "@/utils/utils";
 import { INIT_DONE, PRESETS, SETTINGS, SOURCE, store, TARGET, TEXT_DATA, XXMI_MODE } from "@/utils/vars";
 import { Separator } from "@radix-ui/react-separator";
-import { save } from "@tauri-apps/plugin-dialog";
-import {  writeTextFile } from "@tauri-apps/plugin-fs";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useAtom, useAtomValue } from "jotai";
 import {
 	AppWindowIcon,
@@ -48,7 +48,7 @@ let keys = [] as any[];
 let keysdown = [] as any[];
 function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	const textData = useAtomValue(TEXT_DATA);
-	const customMode = useAtomValue(XXMI_MODE)
+	const customMode = useAtomValue(XXMI_MODE);
 	const [presets, setPresets] = useAtom(PRESETS);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [_, setSource] = useAtom(SOURCE);
@@ -62,28 +62,33 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	});
 	const importConfig = async () => {
 		try {
-			var input = document.createElement("input");
-			input.type = "file";
-			input.accept = ".json";
-
-			input.onchange = (e: any) => {
-				if (!e.target) return;
-				var file = e.target.files[0];
-				var reader = new FileReader();
-				reader.readAsText(file, "UTF-8");
-				reader.onload = (readerEvent: any) => {
-					try {
-						setConfig(JSON.parse(readerEvent.target.result));
-						setSettingsOpen(false);
-					} catch {
-						addToast({ type: "error", message: textData._Toasts.InvalidConfig });
-					}
-				};
+			const dialogOptions: any = {
+				title: textData._LeftSideBar._components._Settings._ImportExport.ImportPop || "Import Config",
+				filters: [
+					{
+						name: "JSON files",
+						extensions: ["json", "json.bak"],
+					},
+				],
 			};
 
-			input.click();
-			return;
-		} catch (error) {}
+				dialogOptions.defaultPath = join(getCwd(), "backups");
+
+			const filePath = await open(dialogOptions);
+
+			if (filePath) {
+				const content = await readTextFile(filePath as string);
+				try {
+					setConfig(JSON.parse(content));
+					setSettingsOpen(false);
+					addToast({ type: "success", message: "Config imported successfully" });
+				} catch {
+					addToast({ type: "error", message: textData._Toasts.InvalidConfig });
+				}
+			}
+		} catch (error) {
+			addToast({ type: "error", message: "Error importing config" });
+		}
 	};
 	const exportConfig = useCallback(async () => {
 		try {
@@ -110,10 +115,9 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 		<Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
 			<DialogTrigger asChild>
 				<Button
-					onClick={() => {
-					}}
+					onClick={() => {}}
 					className="w-38.75 text-ellipsis peer h-12 overflow-hidden"
-					style={{ width: leftSidebarOpen ? "" : "3rem" ,borderRadius: leftSidebarOpen ? "" : "999px"}}
+					style={{ width: leftSidebarOpen ? "" : "3rem", borderRadius: leftSidebarOpen ? "" : "999px" }}
 				>
 					<SettingsIcon />
 					{leftSidebarOpen && textData.Settings}
@@ -187,7 +191,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 									filter: !globalPage ? "invert(1) hue-rotate(180deg)" : "",
 								}}
 							></div>
-							{{ WW: "WuWa", ZZ: "Z·Z·Z","":"", GI: "Genshin" }[settings.global.game]}
+							{{ WW: "WuWa", ZZ: "Z·Z·Z", "": "", GI: "Genshin" }[settings.global.game]}
 						</TabsTrigger>
 					</TabsList>
 					<AnimatePresence mode="wait" initial={false}>
@@ -471,10 +475,14 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 											<Tabs
 												defaultValue={settings.game.launch.toString()}
 												className=" w-full duration-200"
-												style={customMode?{
-													pointerEvents:"none",
-													filter: "brightness(0.5)"
-												}:{}}
+												style={
+													customMode
+														? {
+																pointerEvents: "none",
+																filter: "brightness(0.5)",
+														  }
+														: {}
+												}
 												onValueChange={(e) => {
 													setSettings((prev) => {
 														prev.game.launch = parseInt(e) as 0 | 1;
@@ -497,7 +505,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 										</div>
 										<div className="flex flex-col w-full gap-4">
 											<div className="flex items-center gap-1">
-												{textData._LeftSideBar._components._Settings[customMode?"ModDir":"XXMIDir"]}
+												{textData._LeftSideBar._components._Settings[customMode ? "ModDir" : "XXMIDir"]}
 											</div>
 											<div className="flex flex-row items-center w-full gap-2">
 												<Button
@@ -533,7 +541,6 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													{textData._LeftSideBar._components._Settings._ImportExport.Export}
 												</Button>
 											</div>
-											
 										</div>
 										<div className="flex items-center gap-1">
 											{textData._LeftSideBar._components._Settings.HotKey}

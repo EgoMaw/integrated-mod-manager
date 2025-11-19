@@ -19,6 +19,7 @@ import {
 	ONLINE_DATA,
 	XXMI_DIR,
 	XXMI_MODE,
+	ERR,
 } from "./vars";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 
@@ -26,7 +27,7 @@ import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { currentMonitor, PhysicalSize } from "@tauri-apps/api/window";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { exists, writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
+import { exists, writeTextFile, readTextFile, mkdir, remove } from "@tauri-apps/plugin-fs";
 import defConfig from "../default.json";
 import defConfigXX from "../defaultXX.json";
 import { apiClient } from "./api";
@@ -36,7 +37,7 @@ import { executeXXMI, isGameProcessRunning } from "./autolaunch";
 // import { updateIni } from "./iniUpdater";
 import { join, setHotreload, stopWindowMonitoring } from "./hotreload";
 import { registerGlobalHotkeys } from "./hotkeyUtils";
-import  TEXT  from "@/textData.json";
+import TEXT from "@/textData.json";
 import { unregisterAll } from "@tauri-apps/plugin-global-shortcut";
 import { isOlderThanOneDay, safeLoadJson, setImageServer } from "./utils";
 import { addToast } from "@/_Toaster/ToastProvider";
@@ -187,6 +188,12 @@ export async function initGame(game: Games) {
 	if (await exists(`config${game}.json`)) {
 		configXX = JSON.parse(await readTextFile(`config${game}.json`));
 	} else configXX = { ...defConfigXX };
+	const defKeys = Object.keys(defConfigXX);
+	defKeys.forEach((key) => {
+		if (!(key in configXX)) {
+			(configXX as any)[key] = (defConfigXX as any)[key];
+		}
+	});
 	configXX.game = game;
 	switchGameTheme(game);
 
@@ -244,7 +251,10 @@ export async function setCategories(game = prevGame) {
 		if (!categories || categories.length == 0) throw "No categories found, please verify the directories again";
 	} catch (e) {
 		console.log("[IMM] Failed to fetch categories from API, using local config if available.", e);
-		categories = configXX.categories && configXX.categories.length > 0 ? configXX.categories : [...apiClient.categoryList,...apiClient.generic.categories];
+		categories =
+			configXX.categories && configXX.categories.length > 0
+				? configXX.categories
+				: [...apiClient.categoryList, ...apiClient.generic.categories];
 	} finally {
 		//console.log("Using categories:", categories,apiClient.categoryList,configXX.categories);
 		if (!categories || categories.length == 0) return;
@@ -296,6 +306,88 @@ export async function checkWWMM() {
 	}
 	return null;
 }
+export async function maintainBackups() {
+	console.log("[IMM] Maintaining backups...");
+	const files = GAMES.map((g) => `config${g}.json`);
+	files.push("config.json");
+	mkdir("backups", { recursive: true });
+	const backupPath = "backups\\AUTO_";
+	for (const file of files) {
+		if (await exists(file)) {
+			try {
+				const data = JSON.parse(await readTextFile(file));
+				delete data.categories;
+				if (await exists(backupPath + file + ".bak")) {
+					try {
+						const backupData = JSON.parse(await readTextFile(backupPath + file + ".bak"));
+						if (
+							backupData.updatedAt &&
+							new Date().getTime() - new Date(backupData.updatedAt).getTime() > 24 * 60 * 60 * 1000
+						) {
+							console.log(`[IMM] Creating backup for: ${file}...`);
+							try {
+								remove(backupPath + file + ".bak.bak");
+							} catch {}
+							await writeTextFile(backupPath + file + ".bak.bak", await readTextFile(backupPath + file + ".bak"));
+							await writeTextFile(backupPath + file + ".bak", JSON.stringify(data, null, 2));
+						}
+					} catch {
+						console.log(`[IMM] Detected corrupted backup file: ${file}.bak, creating new backup...`);
+						await writeTextFile(backupPath + file + ".bak", JSON.stringify(data, null, 2));
+					}
+				} else {
+					console.log(`[IMM] Creating initial backup for: ${file}...`);
+					await writeTextFile(backupPath + file + ".bak", JSON.stringify(data, null, 2));
+				}
+			} catch (e) {
+				console.log(`[IMM] Detected corrupted config file: ${file}, restoring from backup...`);
+				if (await exists(backupPath + file + ".bak")) {
+					try {
+						const backupData = JSON.parse(await readTextFile(backupPath + file + ".bak"));
+						await writeTextFile(file, JSON.stringify(backupData, null, 2));
+						console.log(`[IMM] Successfully restored backup for: ${file}`);
+					} catch (e) {
+						console.log(`[IMM] Detected corrupted backup config file: ${file}.bak, restoring from secondary backup...`);
+						if (await exists(backupPath + file + ".bak.bak")) {
+							try {
+								const backupData2 = JSON.parse(await readTextFile(backupPath + file + ".bak.bak"));
+								await writeTextFile(file, JSON.stringify(backupData2, null, 2));
+								await writeTextFile(backupPath + file + ".bak", JSON.stringify(backupData2, null, 2));
+								console.log(`[IMM] Successfully restored secondary backup for: ${file}`);
+							} catch (e) {
+								console.log(`[IMM] Failed to restore secondary backup for: ${file}:`, e);
+								console.log(`[IMM] Manual intervention required to fix config file: ${file}`);
+								store.set(
+									ERR,
+									`Corrupted config file detected: ${file}, ${backupPath + file + ".bak"} & ${
+										backupPath + file + ".bak.bak"
+									}. Unable to proceed, please restore manually or press ESC x3 to reset IMM.`
+								);
+							}
+						} else {
+							store.set(
+								ERR,
+								`Corrupted config file detected: ${file} & ${
+									backupPath + file + ".bak"
+								}. Unable to proceed, please restore manually or press ESC x3 to reset IMM.`
+							);
+						}
+					}
+				} else {
+					console.log(`[IMM] No backup found for corrupted config file: ${file}. Manual intervention required.`);
+					store.set(
+						ERR,
+						`Corrupted config file detected: ${file}. Unable to proceed, please restore manually or press ESC x3 to reset IMM.`
+					);
+				}
+			}
+		}
+	}
+}
+let cwd="";
+export function getCwd(){
+	return cwd;
+}
 export async function main() {
 	isInitialized = false;
 	console.log("[IMM] Initializing application...");
@@ -303,11 +395,13 @@ export async function main() {
 	resetAtoms();
 	removeHelpers();
 	appData = await path.dataDir();
+	cwd = join(await path.localDataDir(), "Integrated Mod Manager (IMM)");
 	const XXMI = `${appData}\\XXMI Launcher`;
 	if (!(await exists("config.json"))) {
 		console.log("[IMM] Creating default config.json...");
 		await writeTextFile("config.json", JSON.stringify(defConfig, null, 2));
 	}
+	await maintainBackups();
 	config = safeLoadJson(defConfig, JSON.parse(await readTextFile("config.json")));
 	console.log("[IMM] Loaded config:", config);
 	if (!config.XXMI && !config.game && !config.lang) {

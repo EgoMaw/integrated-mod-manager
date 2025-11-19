@@ -27,7 +27,10 @@ import { useEffect, useState } from "react";
 import Updater from "./Updater";
 import Notice from "./Notice";
 import Help from "./Help";
-
+const searched = {
+	online: "",
+	offline: "",
+};
 function TopBar() {
 	const [leftSidebarOpen, setLeftSidebarOpen] = useAtom(LEFT_SIDEBAR_OPEN);
 	const [rightSidebarOpen, setRightSidebarOpen] = useAtom(RIGHT_SIDEBAR_OPEN);
@@ -60,7 +63,12 @@ function TopBar() {
 	useEffect(() => {
 		let searchInput = (document.getElementById("search-input") as HTMLInputElement) || null;
 		if (searchInput) {
-			searchInput.value = "";
+			searched[online ? "offline" : "online"] = online
+				? search
+				: onlinePath.startsWith("search/")
+				? onlinePath.split("search/")[1].split("&_type=")[0]
+				: "";
+			searchInput.value = online ? searched.online : searched.offline;
 		}
 	}, [online]);
 	useEffect(() => {
@@ -77,12 +85,16 @@ function TopBar() {
 				else if (event.code === "Escape" && activeEl === searchInput) {
 					searchInput.value = "";
 					searchInput.blur();
+					if(online)
+						setOnlinePath("home&_type=" + onlineType);
+					else
+						setSearch("");
 				}
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, []);
+	}, [online]);
 	return (
 		<div className="text-accent min-h-16 flex items-center justify-center w-full h-16 gap-2 p-2">
 			<Button

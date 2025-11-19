@@ -54,7 +54,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 	return (
-		<div className="text-muted-foreground fixed flex flex-col items-center justify-center w-screen h-screen gap-2">
+		<div className="text-muted-foreground  font-en fixed flex flex-col items-center justify-center w-screen h-screen gap-2">
 			<div className="text-foreground flex text-6xl">
 				{"Integrated".split("").map((letter, index) => (
 					<span

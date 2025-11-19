@@ -35,7 +35,7 @@ function LeftSidebar() {
 							}}
 						></div>
 						<div
-							className="max-w-28 min-w-28 flex flex-col text-center duration-200 ease-linear"
+							className="max-w-28 font-en min-w-28 flex flex-col text-center duration-200 ease-linear"
 							style={{
 								marginRight: leftSidebarOpen ? "" : "-8.125rem",
 								opacity: leftSidebarOpen ? "" : "0",

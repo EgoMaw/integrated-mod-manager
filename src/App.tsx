@@ -2,6 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import "./App.css";
 import {
 	CHANGES,
+	ERR,
 	GAME,
 	INIT_DONE,
 	LANG,
@@ -33,6 +34,7 @@ main();
 function App() {
 	const initDone = useAtomValue(INIT_DONE);
 	const lang = useAtomValue(LANG);
+	const err = useAtomValue(ERR);
 	const online = useAtomValue(ONLINE);
 	const game = useAtomValue(GAME);
 	const changes = useAtomValue(CHANGES);
@@ -50,6 +52,11 @@ function App() {
 		setModList(await refreshModList());
 		return Promise.resolve();
 	}, []);
+	useEffect(() => {
+		if (err) {
+			throw new Error(err);
+		}
+	}, [err]);
 	useEffect(() => {
 		if (previousOnline !== online) {
 			setShowModeSwitch(true);

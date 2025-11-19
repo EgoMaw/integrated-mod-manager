@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import { fetchMod, formatSize, getTimeDifference, modRouteFromURL } from "@/utils/utils";
+import { fetchMod, formatSize, getImageUrl, getTimeDifference, modRouteFromURL } from "@/utils/utils";
 import {
 	DATA,
 	DOWNLOAD_LIST,
@@ -13,7 +13,7 @@ import {
 	RIGHT_SLIDEOVER_OPEN,
 	TEXT_DATA,
 } from "@/utils/vars";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
 	ChevronDownIcon,
 	DiscIcon,
@@ -36,25 +36,30 @@ import { refreshModList, saveConfigs } from "@/utils/filesys";
 import { Separator } from "@radix-ui/react-separator";
 import { UNCATEGORIZED } from "@/utils/consts";
 import { addToast } from "@/_Toaster/ToastProvider";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 // import { OnlineMod } from "@/utils/types";
 let now = Date.now() / 1000;
 function RightOnline({ open }: { open: boolean }) {
 	const textData = useAtomValue(TEXT_DATA);
 	const selected = useAtomValue(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
-	const setModList = useSetAtom(MOD_LIST);
+	const [modList, setModList] = useAtom(MOD_LIST);
 	const setData = useSetAtom(DATA);
 	const onlineData = useAtomValue(ONLINE_DATA);
 	const [aboutOpen, setAboutOpen] = useState(false);
 	const [updateOpen, setUpdateOpen] = useState(false);
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [altPopoverOpen, setAltPopoverOpen] = useState(false);
+	const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+	const [linkExistingPopoverOpen, setLinkExistingPopoverOpen] = useState(false);
+	const [cmdValue, setCmdValue] = useState("");
 	const game = useAtomValue(GAME);
 	const setDownloadList = useSetAtom(DOWNLOAD_LIST);
 	const installedItems = useAtomValue(INSTALLED_ITEMS);
 	const item = onlineData[selected] as any;
 	const installedItem = installedItems.find((it) => it.source && modRouteFromURL(it.source) == selected) || null;
 	const type = installedItem ? (installedItem.modStatus ? "Update" : "Reinstall") : "Install";
+
 	useEffect(() => {
 		now = Date.now() / 1000;
 		const controller = new AbortController();
@@ -244,15 +249,116 @@ function RightOnline({ open }: { open: boolean }) {
 									<Label key={item._sName} className="w-full text-xl text-center">
 										{item._sName}
 									</Label>
-									<Button
-										onClick={() => {
-											navigator.clipboard.writeText(item._sProfileUrl || "");
-											addToast({ type: "success", message: textData._RightSideBar._RightOnline.LinkCopied });
-										}}
-										className="min-w-fit aspect-square bg-button zzz-border flex items-center gap-2 p-2 rounded-md"
-									>
-										<LinkIcon />
-									</Button>
+
+									<Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
+										<PopoverTrigger className="focus-within:outline-none">
+											<Button className="min-w-fit ring-transparent outline-transparent aspect-square bg-button zzz-border flex items-center gap-2 p-2 rounded-md">
+												<LinkIcon />
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent className="w-fit bg-sidebar p-2 flex flex-col">
+											<Button
+												onClick={() => {
+													navigator.clipboard.writeText(item._sProfileUrl || "");
+													addToast({ type: "success", message: textData._RightSideBar._RightOnline.LinkCopied });
+													setLinkPopoverOpen(false);
+													setLinkExistingPopoverOpen(false);
+												}}
+											>
+												{textData._RightSideBar._RightOnline.CopyLink}
+											</Button>
+											<Button
+												className="w-full mt-2"
+												onClick={() => {
+													const a = document.createElement("a");
+													a.href = item._sProfileUrl || "";
+													a.target = "_blank";
+													document.body.appendChild(a);
+													a.click();
+													document.body.removeChild(a);
+													setLinkPopoverOpen(false);
+													setLinkExistingPopoverOpen(false);
+												}}
+											>
+												{textData._RightSideBar._RightOnline.OpenBrowser}
+											</Button>
+
+											<Popover
+												open={linkExistingPopoverOpen}
+												onOpenChange={(open) => {
+													setLinkExistingPopoverOpen(open);
+													setCmdValue(item._sName);
+												}}
+											>
+												<PopoverTrigger>
+													<Button className="w-full min-w-fit mt-2">{textData._RightSideBar._RightOnline.LinkToMod}</Button>
+												</PopoverTrigger>
+												<PopoverContent className="w-84 -mt-37.5 min-h-40 bg-sidebar p-2 flex flex-col">
+													<Command>
+														<CommandInput
+															placeholder={textData.Search}
+															value={cmdValue}
+															onValueChange={setCmdValue}
+															className="h-12"
+														/>
+														<CommandList>
+															<CommandEmpty>{textData._RightSideBar._RightLocal.NoCat}</CommandEmpty>
+															<CommandGroup>
+																{modList.map((mod) => (
+																	<CommandItem
+																		key={mod.name}
+																		value={mod.path}
+																		onSelect={(currentValue) => {
+																			setData((prev) => {
+																				prev[currentValue] = {
+																					...prev[currentValue],
+																					source: item._sProfileUrl,
+																					updatedAt: Date.now(),
+																					viewedAt: 0,
+																				};
+																				return { ...prev };
+																			});
+																			setModList((prev) => {
+																				return prev.map((m) => {
+																					if (m.path == currentValue) {
+																						return { ...m, source:item._sProfileUrl };
+																					}
+																					return m;
+																				});
+																			});
+																			saveConfigs();
+																			addToast({ type: "success", message: textData._RightSideBar._RightOnline.LinkToModSuccess });
+																			setLinkPopoverOpen(false);
+																			setLinkExistingPopoverOpen(false);
+																		}}
+																		className="button-like zzz-fg-text data-zzz:mt-1"
+																	>
+																		<img
+																			className="aspect-square object-cover outline bg-accent/10 flex items-center justify-center h-12 text-white rounded-full pointer-events-none"
+																			onError={(e) => {
+																				e.currentTarget.src = "/who.jpg";
+																			}}
+																			src={getImageUrl(mod.path) || "err"}
+																			style={{}}
+																		/>
+
+																		<div className="w-full text-ellipsis overflow-hidden whitespace-nowrap max-w-56 break-words">
+																			{mod.name}
+																		</div>
+																		{/* <CheckIcon
+																	className={cn("ml-auto", category.name === cat._sName ? "opacity-100" : "opacity-0")}
+																/> */}
+																	</CommandItem>
+																))}
+															</CommandGroup>
+														</CommandList>
+
+														{/* <div className="pr-5">{manageCategoriesButton({})}</div> */}
+													</Command>
+												</PopoverContent>
+											</Popover>
+										</PopoverContent>
+									</Popover>
 									<div className="min-w-fit trs bg-button zzz-border flex items-center gap-2 p-2 rounded-md">
 										<img
 											className="aspect-square min-w-6 max-w-6 scale-120 ctrs h-full rounded-full pointer-events-none"

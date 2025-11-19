@@ -4,9 +4,11 @@ Script to update version across multiple files in the project
 Usage: 
   python upd.py -v <version>              # Simple version update
   python upd.py -l                        # Full release with changelog
+  python upd.py -la                       # Append to existing changelog
 Example: 
   python upd.py -v 2.1.3
   python upd.py -l
+  python upd.py -la
 """
 
 import sys
@@ -96,6 +98,75 @@ def get_rounded_utc_time():
     minute = 0 if now.minute < 30 else 30
     rounded = now.replace(minute=minute, second=0, microsecond=0)
     return rounded.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def append_to_release_data():
+    """Append to existing release data in latest.json"""
+    print("\n=== Appending to Existing Release ===\n")
+    
+    root = Path(__file__).parent
+    latest_path = root / "latest.json"
+    
+    # Load existing latest.json
+    if not latest_path.exists():
+        print(f"Error: {latest_path} not found. Use -l flag to create a new release first.")
+        sys.exit(1)
+    
+    try:
+        with open(latest_path, 'r', encoding='utf-8') as f:
+            existing_data = json.load(f)
+    except Exception as e:
+        print(f"Error reading {latest_path}: {e}")
+        sys.exit(1)
+    
+    # Parse existing notes
+    try:
+        notes_obj = json.loads(existing_data.get('notes', '{}'))
+    except Exception as e:
+        print(f"Error parsing notes: {e}")
+        sys.exit(1)
+    
+    version = existing_data.get('version', 'unknown')
+    print(f"Current version: {version}")
+    print(f"Current major changes: {notes_obj.get('major', [])}")
+    print(f"Current minor changes: {notes_obj.get('minor', [])}")
+    print(f"Current patch changes: {notes_obj.get('patch', [])}")
+    
+    # Get new changelog items
+    print()
+    major_changes = get_list_input("Additional Major Changes")
+    minor_changes = get_list_input("Additional Minor Changes")
+    patch_changes = get_list_input("Additional Patches")
+    
+    # Append to existing lists
+    notes_obj['major'] = notes_obj.get('major', []) + major_changes
+    notes_obj['minor'] = notes_obj.get('minor', []) + minor_changes
+    notes_obj['patch'] = notes_obj.get('patch', []) + patch_changes
+    
+    # Update notes in existing data
+    existing_data['notes'] = json.dumps(notes_obj, ensure_ascii=False)
+    
+    # Print summary
+    print("\n" + "="*60)
+    print("UPDATED SUMMARY:")
+    print("="*60)
+    print(f"version: {version}")
+    print(f"major: {notes_obj['major']}")
+    print(f"minor: {notes_obj['minor']}")
+    print(f"patch: {notes_obj['patch']}")
+    print("="*60)
+    
+    # Save updated latest.json
+    try:
+        with open(latest_path, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, indent='\t', ensure_ascii=False)
+            f.write('\n')
+        print(f"\n✓ Updated {latest_path}")
+    except Exception as e:
+        print(f"\n✗ Failed to update {latest_path}: {e}")
+        sys.exit(1)
+    
+    return version
 
 
 def create_release_data():
@@ -285,9 +356,11 @@ def main():
         print("Usage:")
         print("  python upd.py -v <version>    # Simple version update")
         print("  python upd.py -l              # Full release with changelog")
+        print("  python upd.py -la             # Append to existing changelog")
         print("\nExamples:")
         print("  python upd.py -v 2.1.3")
         print("  python upd.py -l")
+        print("  python upd.py -la")
         sys.exit(1)
     
     flag = sys.argv[1]
@@ -319,6 +392,30 @@ def main():
                 with open(latest_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 data['version'] = version
+                
+                # Check for signature file
+                sig_pattern = f"Integrated Mod Manager (IMM)_{version}_x64-setup.exe.sig"
+                print(f"\nChecking for signature file: {sig_pattern}")
+                sig_path = root / "src-tauri" / "target" / "release" / "bundle" / "nsis" / sig_pattern
+                
+                sig = ""
+                if sig_path.exists():
+                    try:
+                        with open(sig_path, 'r', encoding='utf-8') as f:
+                            sig = f.read().strip()
+                        print(f"✓ Found signature file: {sig_pattern}")
+                    except Exception as e:
+                        print(f"⚠ Error reading signature file: {e}")
+                        print("exe sig not found, leaving it blank")
+                else:
+                    print("exe sig not found, leaving it blank")
+                
+                # Update signature and URL in platforms
+                url = f"https://github.com/jpbhatt21/integrated-mod-manager/releases/latest/download/Integrated.Mod.Manager.IMM._{version}_x64-setup.exe"
+                if 'platforms' in data and 'windows-x86_64' in data['platforms']:
+                    data['platforms']['windows-x86_64']['signature'] = sig
+                    data['platforms']['windows-x86_64']['url'] = url
+                
                 with open(latest_path, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent='\t', ensure_ascii=False)
                     f.write('\n')

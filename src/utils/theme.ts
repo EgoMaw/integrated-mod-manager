@@ -1,4 +1,5 @@
 import { Games } from "./types";
+import { LANG, store } from "./vars";
 
 type GameTheme = "wuwa" | "zzz";
 export type Language = "en" | "cn" | "jp" | "kr" | "ru";
@@ -44,6 +45,10 @@ export function switchLanguage(language: Language): void {
 
 	//console.log(`Switched to ${language.toUpperCase()} language`);
 }
+
+store.sub(LANG,()=>{
+	switchLanguage(store.get(LANG) as Language);
+})
 
 /**
  * Get the current active theme

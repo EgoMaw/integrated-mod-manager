@@ -79,6 +79,8 @@ export async function setConfig(config: any) {
 		return;
 	}
 	let { gameConfig: curConfig } = getConfig(store.get(SETTINGS));
+	console.log( "[IMM] Current config:", {...curConfig});
+	console.log( "[IMM] New config:", config);
 	if (!curConfig.game || !config.game || curConfig.game !== config.game) {
 		addToast({ type: "error", message: textData._Toasts.GameConfigMismatch });
 		return;
@@ -256,10 +258,10 @@ export async function getRestorePoints(): Promise<string[]> {
 }
 export async function resetWithBackup() {
 	console.log("[IMM] Resetting with backup...");
-	const configs = ["", "WW", "ZZ"];
+	const configs = ["", "WW", "ZZ","GI"];
 	for (let cfg of configs) {
 		try {
-			await rename(`config${cfg}.json`, `config${cfg}_BACKUP_${Date.now()}.json`);
+			await rename(`config${cfg}.json`, `backups/MAN_${Date.now()}_config${cfg}.json.bak`);
 		} catch {}
 	}
 	window.location.reload();

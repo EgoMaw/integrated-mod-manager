@@ -43,6 +43,8 @@
 			"InvalidConfig": "Invalid config file",
 			"ConfigExported": "Config exported!",
 			"ErrorExporting": "Error exporting config",
+			"ConfigImported": "Config imported successfully!",
+			"ErrorImporting": "Error importing config",
 			"SuccessPort": "Successfully ported old config!",
 			"GameConfigMismatch": "Game configuration mismatch!",
 			"ConfigLoaded": "Configuration loaded successfully!",
@@ -128,6 +130,14 @@
 			"UpdateMods": {
 				"title": "Updating Mods",
 				"content": ["Get notified when an installed mod has updates available!"]
+			},
+			"ManageCats":{
+				"title": "Managing Categories",
+				"content": ["Create custom categories to organize your mods as you wish.","Add custom icons to default categories."]
+			},
+			"BatchOps":{
+				"title": "Batch Operations",
+				"content": ["Select multiple mods to perform various actions (like toggle, switch categories) on them in bulk."]
 			},
 			"Restore": {
 				"title": "Restore Points",
@@ -392,7 +402,9 @@
 				"Action": "Action",
 				"NoSource": "No source",
 				"NoNotes": "No notes",
-				"Manage": "Manage"
+				"Manage": "Manage",
+				"ViewModOnline": "View Mod Online",
+				"SearchOnline": "Search Online"
 			},
 			"_RightOnline": {
 				"Reinstall": "Reinstall",
@@ -402,7 +414,11 @@
 				"LatestUpd": "Latest Update",
 				"Sep": "Install Separately",
 				"NoItem": "No item selected",
-				"LinkCopied": "Link copied to clipboard!"
+				"LinkCopied": "Link copied to clipboard!",
+				"CopyLink": "Copy Link",
+				"OpenBrowser": "Open in Browser",
+				"LinkToMod": "Link to Existing Mod",
+				"LinkToModSuccess": "Successfully linked!"
 			}
 		},
 		"_Tutorial": {
@@ -508,6 +524,8 @@
 			"InvalidConfig": "配置文件无效",
 			"ConfigExported": "配置已导出！",
 			"ErrorExporting": "导出配置时出错",
+			"ConfigImported": "配置导入成功！",
+			"ErrorImporting": "导入配置时出错",
 			"SuccessPort": "成功移植旧配置！",
 			"GameConfigMismatch": "游戏配置不匹配！",
 			"ConfigLoaded": "配置加载成功！",
@@ -593,6 +611,14 @@
 			"Settings": {
 				"title": "设置",
 				"content": ["更改全局/IMM 设置。", "配置特定游戏设置：WuWa", "配置特定游戏设置：Z·Z·Z"]
+			},
+			"ManageCats": {
+				"title": "管理分类",
+				"content": ["创建自定义分类，按您的意愿组织模组。", "为默认分类添加自定义图标。"]
+			},
+			"BatchOps": {
+				"title": "批量操作",
+				"content": ["选择多个模组批量执行各种操作（如切换、切换分类）。"]
 			},
 			"Updater": {
 				"title": "IMM 更新器",
@@ -844,7 +870,9 @@
 				"Action": "操作",
 				"NoSource": "无来源",
 				"NoNotes": "无备注",
-				"Manage": "管理"
+				"Manage": "管理",
+				"ViewModOnline": "在线查看模组",
+				"SearchOnline": "在线搜索"
 			},
 			"_RightOnline": {
 				"Reinstall": "重新安装",
@@ -854,7 +882,11 @@
 				"LatestUpd": "最新更新",
 				"Sep": "单独安装",
 				"NoItem": "未选择项目",
-				"LinkCopied": "链接已复制到剪贴板！"
+				"LinkCopied": "链接已复制到剪贴板！",
+				"CopyLink": "复制链接",
+				"OpenBrowser": "在浏览器中打开",
+				"LinkToMod": "链接到现有模组",
+				"LinkToModSuccess": "成功链接！"
 			}
 		},
 		"_Tutorial": {
@@ -960,6 +992,8 @@
 			"InvalidConfig": "Недействительный файл конфигурации",
 			"ConfigExported": "Конфигурация экспортирована!",
 			"ErrorExporting": "Ошибка экспорта конфигурации",
+			"ConfigImported": "Конфигурация успешно импортирована!",
+			"ErrorImporting": "Ошибка импорта конфигурации",
 			"SuccessPort": "Старая конфигурация успешно перенесена!",
 			"GameConfigMismatch": "Несоответствие конфигурации игры!",
 			"ConfigLoaded": "Конфигурация успешно загружена!",
@@ -1068,6 +1102,14 @@
 					"Настройка параметров для конкретной игры: WuWa",
 					"Настройка параметров для конкретной игры: Z·Z·Z"
 				]
+			},
+			"ManageCats": {
+				"title": "Управление категориями",
+				"content": ["Создавайте пользовательские категории для организации модов по своему усмотрению.", "Добавляйте пользовательские значки к категориям по умолчанию."]
+			},
+			"BatchOps": {
+				"title": "Массовые операции",
+				"content": ["Выбирайте несколько модов для выполнения различных действий (таких как переключение, смена категорий) над ними массово."]
 			},
 			"Updater": {
 				"title": "Обновлятор IMM",
@@ -1319,7 +1361,9 @@
 				"Action": "Действие",
 				"NoSource": "Нет источника",
 				"NoNotes": "Нет заметок",
-				"Manage": "Управление"
+				"Manage": "Управление",
+				"ViewModOnline": "Посмотреть мод онлайн",
+				"SearchOnline": "Поиск онлайн"
 			},
 			"_RightOnline": {
 				"Reinstall": "Переустановить",
@@ -1329,7 +1373,11 @@
 				"LatestUpd": "Последнее обновление",
 				"Sep": "Установить отдельно",
 				"NoItem": "Элемент не выбран",
-				"LinkCopied": "Ссылка скопирована в буфер обмена!"
+				"LinkCopied": "Ссылка скопирована в буфер обмена!",
+				"CopyLink": "Скопировать ссылку",
+				"OpenBrowser": "Открыть в браузере",
+				"LinkToMod": "Связать с существующим модом",
+				"LinkToModSuccess": "Успешно связано!"
 			}
 		},
 		"_Tutorial": {
@@ -1435,6 +1483,8 @@
 			"InvalidConfig": "無効な設定ファイル",
 			"ConfigExported": "設定をエクスポートしました！",
 			"ErrorExporting": "設定のエクスポート中にエラーが発生しました",
+			"ConfigImported": "設定を正常にインポートしました！",
+			"ErrorImporting": "設定のインポート中にエラーが発生しました",
 			"SuccessPort": "古い設定の移行に成功しました！",
 			"GameConfigMismatch": "ゲーム設定の不一致！",
 			"ConfigLoaded": "設定が正常に読み込まれました！",
@@ -1534,6 +1584,14 @@
 			"Settings": {
 				"title": "設定",
 				"content": ["グローバル/IMM設定を変更します。", "ゲーム固有の設定を構成：WuWa", "ゲーム固有の設定を構成：Z·Z·Z"]
+			},
+			"ManageCats": {
+				"title": "カテゴリの管理",
+				"content": ["カスタムカテゴリを作成して、お好みでModを整理します。", "デフォルトカテゴリにカスタムアイコンを追加します。"]
+			},
+			"BatchOps": {
+				"title": "バッチ操作",
+				"content": ["複数のModを選択して、様々なアクション（切り替え、カテゴリの変更など）を一括で実行します。"]
 			},
 			"Updater": {
 				"title": "IMMアップデーター",
@@ -1785,7 +1843,9 @@
 				"Action": "アクション",
 				"NoSource": "ソースなし",
 				"NoNotes": "ノートなし",
-				"Manage": "管理"
+				"Manage": "管理",
+				"ViewModOnline": "Modをオンラインで表示",
+				"SearchOnline": "オンライン検索"
 			},
 			"_RightOnline": {
 				"Reinstall": "再インストール",
@@ -1795,7 +1855,11 @@
 				"LatestUpd": "最新アップデート",
 				"Sep": "個別にインストール",
 				"NoItem": "アイテムが選択されていません",
-				"LinkCopied": "リンクをクリップボードにコピーしました！"
+				"LinkCopied": "リンクをクリップボードにコピーしました！",
+				"CopyLink": "リンクをコピー",
+				"OpenBrowser": "ブラウザで開く",
+				"LinkToMod": "既存のModにリンク",
+				"LinkToModSuccess": "正常にリンクされました！"
 			}
 		},
 		"_Tutorial": {
@@ -1901,6 +1965,8 @@
 			"InvalidConfig": "잘못된 설정 파일",
 			"ConfigExported": "설정이 내보내졌습니다!",
 			"ErrorExporting": "설정 내보내기 오류",
+			"ConfigImported": "설정을 성공적으로 가져왔습니다!",
+			"ErrorImporting": "설정 가져오기 오류",
 			"SuccessPort": "이전 설정을 성공적으로 이식했습니다!",
 			"GameConfigMismatch": "게임 설정 불일치!",
 			"ConfigLoaded": "설정이 성공적으로 로드되었습니다!",
@@ -1998,6 +2064,14 @@
 			"Settings": {
 				"title": "설정",
 				"content": ["글로벌/IMM 설정을 변경합니다.", "게임별 설정 구성: WuWa", "게임별 설정 구성: Z·Z·Z"]
+			},
+			"ManageCats": {
+				"title": "카테고리 관리",
+				"content": ["원하는 대로 모드를 정리할 수 있는 사용자 정의 카테고리를 만듭니다.", "기본 카테고리에 사용자 정의 아이콘을 추가합니다."]
+			},
+			"BatchOps": {
+				"title": "일괄 작업",
+				"content": ["여러 모드를 선택하여 다양한 작업(토글, 카테고리 전환 등)을 일괄적으로 수행합니다."]
 			},
 			"Updater": {
 				"title": "IMM 업데이터",
@@ -2249,7 +2323,9 @@
 				"Action": "액션",
 				"NoSource": "소스 없음",
 				"NoNotes": "노트 없음",
-				"Manage": "관리"
+				"Manage": "관리",
+				"ViewModOnline": "온라인에서 모드 보기",
+				"SearchOnline": "온라인 검색"
 			},
 			"_RightOnline": {
 				"Reinstall": "재설치",
@@ -2259,7 +2335,11 @@
 				"LatestUpd": "최신 업데이트",
 				"Sep": "개별 설치",
 				"NoItem": "선택된 항목 없음",
-				"LinkCopied": "링크가 클립보드에 복사되었습니다!"
+				"LinkCopied": "링크가 클립보드에 복사되었습니다!",
+				"CopyLink": "링크 복사",
+				"OpenBrowser": "브라우저에서 열기",
+				"LinkToMod": "기존 모드에 링크",
+				"LinkToModSuccess": "성공적으로 링크되었습니다!"
 			}
 		},
 		"_Tutorial": {

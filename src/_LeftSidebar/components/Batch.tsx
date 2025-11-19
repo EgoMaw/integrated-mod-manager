@@ -107,6 +107,7 @@ function normalizeManagedMods(targets: string[], tree: BatchNode[], categories: 
 	return Array.from(normalized.keys()) || [];
 }
 let prevSelectedIndices = [] as number[];
+let init = false;
 function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [refresh, setRefresh] = useState(0);
@@ -171,6 +172,10 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	}, [checked, curSelectedIndices, shiftDown, treeData]);
 	useEffect(() => {
 		if (!dialogOpen) {
+			if(!init){
+				init=true
+				return;
+			}
 			addToast({
 				type: "info",
 				message: textData._Toasts.RefreshMods,
@@ -526,7 +531,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 							onClick={() => {
 								addToast({
 									type: "info",
-									message: "Refreshing Mod List",
+									message: textData._Toasts.RefreshMods,
 								});
 								// setModList([]);
 								refreshModList().then((data) => {
