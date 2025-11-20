@@ -433,8 +433,12 @@ def main():
         # # Update version in all other files
         # success = update_version_files(version)
         
-        sys.exit(1)
-    
+        sys.exit(0)
+    elif flag == "-la":
+        # Append to existing changelog
+        version = append_to_release_data()
+        
+        sys.exit(0)
     else:
         print(f"Error: Unknown flag '{flag}'")
         print("Use -v for version update or -l for full release")

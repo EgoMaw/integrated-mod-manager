@@ -107,7 +107,8 @@ function normalizeManagedMods(targets: string[], tree: BatchNode[], categories: 
 	return Array.from(normalized.keys()) || [];
 }
 let prevSelectedIndices = [] as number[];
-let init = false;
+let prevState = false;
+
 function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [refresh, setRefresh] = useState(0);
@@ -172,8 +173,8 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 	}, [checked, curSelectedIndices, shiftDown, treeData]);
 	useEffect(() => {
 		if (!dialogOpen) {
-			if(!init){
-				init=true
+			if(!prevState){
+				prevState = false;
 				return;
 			}
 			addToast({
@@ -188,7 +189,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 			refreshModList().then((data) => {
 				setModList(data);
 			});
-
+			prevState = false;
 			return;
 		}
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -218,6 +219,7 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 		window.addEventListener("keydown", handleKeyDown);
 		window.addEventListener("keyup", handleKeyUp);
 		loadTree();
+		prevState = true;
 		return () => {
 			cancelled = true;
 			window.removeEventListener("keydown", handleKeyDown);

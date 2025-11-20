@@ -32,11 +32,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Carousel from "./components/Carousel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { refreshModList, saveConfigs } from "@/utils/filesys";
+import { createModDownloadDir, refreshModList, saveConfigs } from "@/utils/filesys";
 import { Separator } from "@radix-ui/react-separator";
 import { UNCATEGORIZED } from "@/utils/consts";
 import { addToast } from "@/_Toaster/ToastProvider";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { invoke } from "@tauri-apps/api/core";
 // import { OnlineMod } from "@/utils/types";
 let now = Date.now() / 1000;
 function RightOnline({ open }: { open: boolean }) {
@@ -291,7 +292,9 @@ function RightOnline({ open }: { open: boolean }) {
 												}}
 											>
 												<PopoverTrigger>
-													<Button className="w-full min-w-fit mt-2">{textData._RightSideBar._RightOnline.LinkToMod}</Button>
+													<Button className="w-full min-w-fit mt-2">
+														{textData._RightSideBar._RightOnline.LinkToMod}
+													</Button>
 												</PopoverTrigger>
 												<PopoverContent className="w-84 -mt-37.5 min-h-40 bg-sidebar p-2 flex flex-col">
 													<Command>
@@ -307,8 +310,24 @@ function RightOnline({ open }: { open: boolean }) {
 																{modList.map((mod) => (
 																	<CommandItem
 																		key={mod.name}
-																		value={mod.path}
-																		onSelect={(currentValue) => {
+																		value={mod.path + " " + mod.path.replaceAll("/", " ").replaceAll("_", " ")}
+																		onSelect={async () => {
+																			const currentValue = mod.path;
+																			if (
+																				item._aPreviewMedia &&
+																				item._aPreviewMedia._aImages &&
+																				item._aPreviewMedia._aImages.length > 0
+																			) {
+																				invoke("download_and_unzip", {
+																					fileName: "preview",
+																					downloadUrl:
+																						item._aPreviewMedia._aImages[0]._sBaseUrl +
+																						"/" +
+																						item._aPreviewMedia._aImages[0]._sFile,
+																					savePath: await createModDownloadDir(mod.parent, mod.name),
+																					emit: false,
+																				});
+																			}
 																			setData((prev) => {
 																				prev[currentValue] = {
 																					...prev[currentValue],
@@ -321,13 +340,16 @@ function RightOnline({ open }: { open: boolean }) {
 																			setModList((prev) => {
 																				return prev.map((m) => {
 																					if (m.path == currentValue) {
-																						return { ...m, source:item._sProfileUrl };
+																						return { ...m, source: item._sProfileUrl };
 																					}
 																					return m;
 																				});
 																			});
 																			saveConfigs();
-																			addToast({ type: "success", message: textData._RightSideBar._RightOnline.LinkToModSuccess });
+																			addToast({
+																				type: "success",
+																				message: textData._RightSideBar._RightOnline.LinkToModSuccess,
+																			});
 																			setLinkPopoverOpen(false);
 																			setLinkExistingPopoverOpen(false);
 																		}}

@@ -16,7 +16,16 @@ import {
 } from "@/utils/vars";
 import { Separator } from "@radix-ui/react-separator";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { AppWindowIcon, BotIcon, EyeIcon, FolderCheckIcon, ShieldQuestion, ShirtIcon, UploadIcon, UserIcon } from "lucide-react";
+import {
+	AppWindowIcon,
+	BotIcon,
+	EyeIcon,
+	FolderCheckIcon,
+	ShieldQuestion,
+	ShirtIcon,
+	UploadIcon,
+	UserIcon,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 const iconMap: { [key: string]: JSX.Element } = {
 	Skin: <ShirtIcon className="w-6 h-6" />,
@@ -24,7 +33,7 @@ const iconMap: { [key: string]: JSX.Element } = {
 	Bangboo: <BotIcon className="w-6 h-6" />,
 	UI: <AppWindowIcon className="w-6 h-6" />,
 	Other: <ShieldQuestion className="w-6 h-6" />,
-}
+};
 function LeftOnline() {
 	const textData = useAtomValue(TEXT_DATA);
 	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
@@ -35,14 +44,15 @@ function LeftOnline() {
 	const installedItems = useAtomValue(INSTALLED_ITEMS);
 	const setSelected = useSetAtom(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
-	const game = useAtomValue(GAME)
+	const game = useAtomValue(GAME);
 	return (
 		<>
-			<div className=" thin flex flex-col w-full p-0 overflow-y-scroll"
-			style={{
-				maxHeight:leftSidebarOpen?"":"calc(100vh - 29.66rem)",
-				minHeight:leftSidebarOpen?"fit-content":""
-			}}
+			<div
+				className=" thin flex flex-col w-full p-0 overflow-y-scroll"
+				style={{
+					maxHeight: leftSidebarOpen ? "" : "calc(100vh - 29.66rem)",
+					minHeight: leftSidebarOpen ? "fit-content" : "",
+				}}
 			>
 				<SidebarGroupLabel>{textData._LeftSideBar._LeftOnline.Type}</SidebarGroupLabel>
 				<SidebarContent
@@ -66,21 +76,27 @@ function LeftOnline() {
 									}}
 									className={
 										"w-full min-w-fit justify-start	 " +
-										(onlinePath.startsWith(category._sName) &&
-											" bg-accent bgaccent   text-background")
+										(onlinePath.startsWith(category._sName) && " bg-accent bgaccent   text-background")
 									}
-									style={{ width: leftSidebarOpen ? "" : "2.5rem", paddingInline: leftSidebarOpen ? "" : "4px", justifyContent:leftSidebarOpen?"start":"center" }}
+									style={{
+										width: leftSidebarOpen ? "" : "2.5rem",
+										paddingInline: leftSidebarOpen ? "" : "4px",
+										justifyContent: leftSidebarOpen ? "start" : "center",
+									}}
 								>
-									{
-										game == "GI"?
-										<img src={category._sIconUrl} className="aspect-square w-8 h-8 duration-200" style={{
-											filter:onlinePath.startsWith(category._sName)?"invert(1) hue-rotate(180deg)":""
-										}} />
-										:(iconMap[category._sName] || <ShieldQuestion className="w-6 h-6" />)
-									}
-									
-										{leftSidebarOpen &&<label className="w-full text-center"> {category._sName}</label>}
-										
+									{game == "GI" ? (
+										<img
+											src={category._sIconUrl}
+											className="aspect-square w-8 h-8 duration-200"
+											style={{
+												filter: onlinePath.startsWith(category._sName) ? "invert(1) hue-rotate(180deg)" : "",
+											}}
+										/>
+									) : (
+										iconMap[category._sName] || <ShieldQuestion className="w-6 h-6" />
+									)}
+
+									{leftSidebarOpen && <label className="w-full text-center"> {category._sName}</label>}
 								</Button>
 							</div>
 						);
@@ -95,18 +111,22 @@ function LeftOnline() {
 					marginBlock: leftSidebarOpen ? "4px" : "",
 				}}
 			/>
-			<SidebarGroup className="flex flex-col h-full pr-1 overflow-hidden"
-			style={{
-				height:leftSidebarOpen?"":"9rem"
-			}}
+			<SidebarGroup
+				className="flex flex-col h-full pr-1 overflow-hidden"
+				style={{
+					height: leftSidebarOpen ? "" : "9rem",
+				}}
 			>
 				<SidebarGroupLabel className="flex items-center gap-1">
 					{textData.Installed}{" "}
 					<Label className="text-accent flex text-xs scale-75 opacity-50">
 						<UploadIcon className="min-h-2 min-w-2 w-4 h-4" />{" "}
-						{installedItems.filter((item) => item.modStatus === 2).length} |{" "}
+						{installedItems.filter((item) => item.modStatus === 2).length} <span> | </span>
 						<EyeIcon className="min-h-2 min-w-2 w-4 h-4" />
 						{installedItems.filter((item) => item.modStatus === 1).length}
+						<span> | </span>
+						<FolderCheckIcon className="min-h-2 min-w-2 w-4 h-4" />
+						{installedItems.filter((item) => item.modStatus === 0).length}
 					</Label>
 				</SidebarGroupLabel>
 				<SidebarContent className="min-w-14 flex flex-col items-center w-full h-full gap-2 pl-2 pr-1 mb-2 overflow-hidden overflow-y-auto duration-200">

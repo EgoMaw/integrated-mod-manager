@@ -1,7 +1,7 @@
 [![logo](./preview/IMM.png)]()  
 
 ## Overview
-Integrated Mod Manager is a desktop application that streamlines mod management for Wuthering Waves & Zenless Zone Zero. With one-click toggles, customizable presets, and built-in previews, it makes applying, organizing, and managing mods effortless. It also features an integrated online mod browser, allowing users to discover and install mods directly from Gamebanana without leaving the app.
+Integrated Mod Manager is a desktop application that streamlines mod management for Wuthering Waves, Genshin Impact & Zenless Zone Zero. With one-click toggles, customizable presets, and built-in previews, it makes applying, organizing, and managing mods effortless. It also features an integrated online mod browser, allowing users to discover and install mods directly from Gamebanana without leaving the app.
 
 ## Features
 

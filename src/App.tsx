@@ -127,6 +127,18 @@ function App() {
 				</AnimatePresence>
 			</div>
 			
+			
+			<div id="mods-progress-container" className="fixed -bottom-0 duration-300 text-[8px] opacity-50 rounded-tl-md flex pl-2 gap-1.5 flex-row items-center right-0 h-8 w-72 bg-sidebar border z-10">
+				Mods Checked :
+				<div className="w-42 border flex h-4 rounded-sm overflow-hidden">
+					<div id="mods-progress" className="bg-accent duration-100 h-full rounded-r-sm"></div>
+				</div>
+				<div className="flex font-en min-w-fit text-center flex-col">
+					<label id="mods-checked">88</label>
+					<div className="w-full h-[1px] bg-border rounded-full"></div>
+					<label id="mods-total">9999</label>
+				</div>
+			</div>
 			<AnimatePresence>{(!initDone || !lang || !game) && <Checklist />}</AnimatePresence>
 			<AnimatePresence>{changes.title && <Changes afterInit={afterInit} />}</AnimatePresence>
 			<AnimatePresence>{progressOverlay.open && <Progress />}</AnimatePresence>

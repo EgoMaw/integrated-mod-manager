@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { UNCATEGORIZED } from "@/utils/consts";
 import { CATEGORIES, CATEGORY, MOD_LIST, ONLINE, ONLINE_PATH, ONLINE_SORT, ONLINE_TYPE, TEXT_DATA } from "@/utils/vars";
 import { useAtom, useAtomValue } from "jotai";
-import { FileQuestionIcon, GroupIcon } from "lucide-react";
+import { ChevronUpIcon, FileQuestionIcon, GroupIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 function BottomBar() {
 	const textData = useAtomValue(TEXT_DATA);
@@ -15,11 +15,14 @@ function BottomBar() {
 	const online = useAtomValue(ONLINE);
 	const modList = useAtomValue(MOD_LIST);
 	const categories = useAtomValue(CATEGORIES);
+	const [expanded, setExpanded] = useState(false);
 	const localCategories = useMemo(() => {
 		// console.log("Online Path:", onlinePath);
 		return online
 			? categories.filter((_, index) =>
-					["Weapons", "Bows","Catalysts","Claymores","Polearms", "Swords"].includes(onlinePath.split("&")[0].split("/").pop() as string)
+					["Weapons", "Bows", "Catalysts", "Claymores", "Polearms", "Swords"].includes(
+						onlinePath.split("&")[0].split("/").pop() as string
+					)
 						? index >= categories.findIndex((c) => c._sName == "Bows") &&
 						  index <= categories.findIndex((c) => c._sName == "Swords")
 						: true
@@ -33,7 +36,11 @@ function BottomBar() {
 			  ];
 	}, [categories, modList, online, onlinePath]);
 	return (
-		<div className="min-h-20 flex items-center justify-center w-full h-20 p-2">
+		<div className="min-h-20 duration-200 flex items-center justify-center w-full h-20 p-2"
+		style={{
+			height:expanded?"256px":""
+		}}
+		>
 			<div className="bg-sidebar trs data-gi:rounded-[3rem] z-100 text-accent flex items-center justify-center w-full h-full gap-1 p-2 border rounded-lg">
 				<label className="min-w-fit zzz-fg-text gap-1">{textData.Category} :</label>
 				<div
@@ -45,7 +52,12 @@ function BottomBar() {
 							// behavior: "smooth",
 						});
 					}}
-					className=" h-15 items-top thin data-gi:rounded-r-[3rem] flex items-center justify-start w-full gap-2 p-2 my-1 mr-1 overflow-x-auto overflow-y-hidden text-white"
+					style={{
+						flexWrap:expanded?"wrap":"nowrap",
+						overflowY:expanded?"auto":"hidden",
+						overflowX:expanded?"hidden":"auto",
+					}}
+					className=" min-h-15 h-full items-top thin flex items-center justify-start w-full gap-2 p-2 my-1 mr-1 overflow-x-auto overflow-y-hidden text-white"
 				>
 					<AnimatePresence mode="popLayout">
 						{localCategories.map((cat) => (
@@ -53,7 +65,7 @@ function BottomBar() {
 								initial={{ opacity: 0, y: "100%" }}
 								animate={{ opacity: 1, y: "0%" }}
 								exit={{ opacity: 0, y: "100%" }}
-								key={cat._sName}
+								key={cat._sName+" "+expanded}
 								layout
 							>
 								<Button
@@ -71,11 +83,6 @@ function BottomBar() {
 										} else {
 											setCategory(cat._sName);
 										}
-										// if (online) {
-
-										// } else {
-										// 	setSelectedCategory(category._sName);
-										// }
 									}}
 									style={{
 										scale: online && cat._special ? "0" : "1",
@@ -108,6 +115,17 @@ function BottomBar() {
 						))}
 					</AnimatePresence>
 				</div>
+				<Button
+				onClick={()=>{
+					setExpanded(prev => (!prev))
+				}}
+				>
+					<ChevronUpIcon className="ctrs h-5 w-5 duration-200 pointer-events-none"
+					style={{
+						transform:expanded?"rotate(180deg)":""
+					}}
+					/>
+				</Button>
 			</div>
 		</div>
 	);

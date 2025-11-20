@@ -396,7 +396,7 @@ function RightLocal() {
 												const search = document.getElementById("search-input") as HTMLInputElement;
 												setTimeout(()=>{
 													search.focus();
-													search.value = `${item?.name.replaceAll("_"," ")} - ${item?.parent != "Uncategorized" ? item?.parent : ""}`;
+													search.value = item?.name.replaceAll("_"," ");
 													search.blur();
 												},100)
 												// setRightSlideOverOpen(true);

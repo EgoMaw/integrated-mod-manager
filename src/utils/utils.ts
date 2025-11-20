@@ -5,7 +5,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { apiClient } from "./api";
 import { join } from "./hotreload";
 import { addToast } from "@/_Toaster/ToastProvider";
-import  TEXT  from "@/textData.json";
+import TEXT from "@/textData.json";
 export { join };
 let IMAGE_SERVER_URL = IMAGE_SERVER;
 export function setImageServer(url: string) {
@@ -161,18 +161,22 @@ export function isOlderThanOneDay(dateStr: string) {
 	return Number.isFinite(updateAgeMs) && updateAgeMs > 86_400_000;
 }
 let initialCheck = true;
+const checked: Record<string, number> = {};
+
 export function useInstalledItemsManager() {
 	const [installedItems, setInstalledItems] = useAtom(INSTALLED_ITEMS);
 	const localData = useAtomValue(DATA);
-	const onlineData = useAtomValue(ONLINE_DATA);
 	async function checkModStatus(item: any) {
 		console.log("[IMM] Checking mod status for", item.name);
 		let modStatus = 0;
-		if (onlineData[item.name]) {
-			modStatus = item.updated < onlineData[item.name] ? (item.viewed < onlineData[item.name] ? 2 : 1) : 0;
+		if (checked.hasOwnProperty(item.name)) {
+			console.log("[IMM] Mod status found in cache for", item.name);
+			modStatus = checked[item.name] || 0;
 		} else {
 			try {
+				// console.log("[IMM] Fetching mod url ", modRouteFromURL(item.source));
 				const data = (await fetchMod(modRouteFromURL(item.source))) as any;
+				// console.log("[IMM] Fetched mod data for", item.name, data);
 				if (data._tsDateModified) {
 					let latest = item.updated || 0;
 					data._aFiles.forEach((file: any) => {
@@ -180,6 +184,7 @@ export function useInstalledItemsManager() {
 					});
 					// setUpdateCache((prev) => ({ ...prev, [item.name]: latest }));
 					modStatus = item.updated < latest ? (item.viewed < latest ? 2 : 1) : 0;
+					checked[item.name] = modStatus;
 				}
 			} catch (error) {
 				return 0;
@@ -198,18 +203,55 @@ export function useInstalledItemsManager() {
 				viewed: localDataSnapshot[key].viewedAt || 0,
 				modStatus: 0,
 			}));
-		const processedItems = await Promise.all(
-			itemsToProcess.map(async (item) => {
-				const modStatus = await checkModStatus(item);
 
-				return { ...item, modStatus };
-			})
-		);
+		// Process items in batches of 10
+		const batchSize = 10;
+		const processedItems: any[] = [];
+		const totalItems = itemsToProcess.length;
+		const startTime = Date.now();
+		const modsProgressContainer = document.getElementById("mods-progress-container");
+		const modsProgressBar = document.getElementById("mods-progress");
+		const modsCheckedLabel = document.getElementById("mods-checked");
+		const modsTotalLabel = document.getElementById("mods-total");
+		if (modsProgressContainer && modsTotalLabel) {
+			modsTotalLabel.innerText = totalItems.toString();
+			modsProgressContainer.style.bottom = "0px";
+		}
+		for (let i = 0; i < itemsToProcess.length; i += batchSize) {
+			const batch = itemsToProcess.slice(i, i + batchSize);
+			const newInBatch = batch.filter((item) => !checked.hasOwnProperty(item.name));
+			const batchResults = await Promise.all(
+				batch.map(async (item) => {
+					const modStatus = await checkModStatus(item);
+					return { ...item, modStatus };
+				})
+			);
+			processedItems.push(...batchResults);
+			const checkedCount = Math.min(i + batchSize, totalItems);
+			// const newCount = processedItems.filter((item) => item.modStatus === 2).length;
+
+			if (modsProgressBar && modsCheckedLabel) {
+				modsProgressBar.style.width = `${(checkedCount / totalItems) * 100}%`;
+				modsCheckedLabel.innerText = checkedCount.toString();
+			}
+			// Add 1s delay between batches (except after the last batch)
+			if (i + batchSize < itemsToProcess.length && newInBatch.length > 0) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+			setInstalledItems(
+				processedItems.sort((a: any, b: any) => {
+					const flagDiff = b.modStatus - a.modStatus;
+					if (flagDiff !== 0) return flagDiff;
+					return a.name
+						.toLocaleLowerCase()
+						.split("\\")
+						.slice(-1)[0]
+						.localeCompare(b.name.toLocaleLowerCase().split("\\").slice(-1)[0]);
+				})
+			);
+		}
 		const newCount = processedItems.filter((item) => item.modStatus === 2).length;
-		// const pendingCount = processedItems.filter((item) => item.modStatus === 1).length;
-
 		if (initialCheck) {
-			//console.log("Showing toast for new updates");
 			initialCheck = false;
 			setTimeout(() => {
 				if (newCount > 0)
@@ -223,19 +265,13 @@ export function useInstalledItemsManager() {
 					});
 				else
 					addToast({ type: "info", message: TEXT[(store.get(LANG) || "en") as keyof typeof TEXT]._Toasts.ModsLoaded });
-			}, 3500);
+			}, Math.max(3500 - (Date.now() - startTime), 0));
 		}
-		setInstalledItems(
-			processedItems.sort((a: any, b: any) => {
-				const flagDiff = b.modStatus - a.modStatus;
-				if (flagDiff !== 0) return flagDiff;
-				return a.name
-					.toLocaleLowerCase()
-					.split("\\")
-					.slice(-1)[0]
-					.localeCompare(b.name.toLocaleLowerCase().split("\\").slice(-1)[0]);
-			})
-		);
+		if (modsProgressContainer) {
+			setTimeout(() => {
+				modsProgressContainer.style.bottom = "-48px";
+			}, 500);
+		}
 	}
 	useEffect(() => {
 		if (installedItems.length == 0) initialCheck = true;
