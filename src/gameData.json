@@ -1666,6 +1666,22 @@
 					"_nCategoryCount": 0,
 					"_sUrl": "https://gamebanana.com/mods/cats/24279",
 					"_sIconUrl": "/IconWaverider.png"
+				},
+				{
+					"_idRow": 18140,
+					"_sName": "Characters",
+					"_nItemCount": 9387,
+					"_nCategoryCount": 110,
+					"_sUrl": "https://gamebanana.com/mods/cats/18140",
+					"_sIconUrl": "/IconChars.png"
+				},
+				{
+					"_idRow": 18137,
+					"_sName": "Weapons",
+					"_nItemCount": 1108,
+					"_nCategoryCount": 5,
+					"_sUrl": "https://gamebanana.com/mods/cats/18137",
+					"_sIconUrl": "/IconWeapons.png"
 				}
 			],
 			"types": [
