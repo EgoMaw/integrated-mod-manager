@@ -92,14 +92,14 @@ function Downloads() {
 			if (!path || !downloadElement) return;
 			validateModDownload(path);
 			path = "";
+			prev = 0;
+			prevText = " • ";
 			if (speedRef.current) speedRef.current.textContent = " • ";
 			if (downloadRef.current) downloadRef.current.style.width = "0%";
 			if (downloadRef2.current) downloadRef2.current.style.width = "0%";
 			if (downloadRef3.current) {
 				downloadRef3.current.style.background = "conic-gradient( var(--accent) 0% 0%, var(--button) 0% 100%)";
 			}
-			prev = 0;
-			prevText = " • ";
 			setData((prevData) => {
 				if (downloadElement.path)
 					prevData[downloadElement.path] = {
@@ -293,7 +293,7 @@ function Downloads() {
 												</Label>
 												<div className="flex gap-1 text-xs text-gray-400 capitalize">
 													{item.status}
-													<div ref={index == 0 ? speedRef : null}>{prevText}</div>
+													<div ref={index == 0 ? speedRef : null}>{index==0?prevText:" • "}</div>
 													{item.category}
 												</div>
 											</div>
