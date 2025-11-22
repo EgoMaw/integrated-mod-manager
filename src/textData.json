@@ -507,14 +507,14 @@
 		"Category": "分类",
 		"Downloads": "下载",
 		"Installed": "已安装",
-		"Warning1": "AI已用于翻译为此语言。可能存在一些错误。",
-		"Warning2": "某些UI元素在此语言中可能无法正确对齐。",
+		"Warning1": "中文界面基于AI翻译，由118ununoctium后期校对。可能存在一些错误。",
+		"Warning2": "某些UI元素在中文界面可能无法正确对齐。",
 		"Language": "语言",
 		"Current": "中文",
 		"Flag": "https://flagsapi.com/CN/flat/64.png",
 		"Change": "更改语言为 ",
 		"SelectLang": "选择语言",
-		"BFR": "报告错误或请求功能",
+		"BFR": "反馈Bug或建议新功能",
 		"GetPre": "获取预发布版本",
 		"Start": "启动游戏",
 		"Refresh": "刷新模组列表",
@@ -527,7 +527,7 @@
 		},
 		"_Toasts": {
 			"ModsLoaded": "模组加载成功",
-			"ApplyingChanges": "正在应用更改...",
+			"ApplyingChanges": "正在启用更改...",
 			"InvalidConfig": "配置文件无效",
 			"ConfigExported": "配置已导出！",
 			"ErrorExporting": "导出配置时出错",
@@ -536,13 +536,13 @@
 			"SuccessPort": "成功移植旧配置！",
 			"GameConfigMismatch": "游戏配置不匹配！",
 			"ConfigLoaded": "配置加载成功！",
-			"ErrDownload": "验证模组下载时出错",
+			"ErrDownload": "模组下载验证时出错",
 			"DownloadComplete": "下载完成",
 			"Deleted": "删除成功！",
 			"ErrOcc": "发生错误。",
 			"ImgSaved": "预览图片已保存！",
 			"PresetApplied": "预设已应用！",
-			"NewUpdates": "<new/> 个新更新可用！",
+			"NewUpdates": "<new/> 新版本可用！",
 			"CannotMove": "错误：无法将文件夹移动到自身或其子文件夹中。",
 			"Moving": "正在移动 <length/> 个模组",
 			"Deleting": "正在删除 <length/> 个模组",
@@ -561,7 +561,7 @@
 			},
 			"ToggleMods": {
 				"title": "切换模组",
-				"content": ["右键点击模组以启用/禁用它。"]
+				"content": ["右键点击模组以启用/禁用。"]
 			},
 			"DeleteMod": {
 				"title": "删除模组",
@@ -597,14 +597,14 @@
 			},
 			"SearchMods": {
 				"title": "搜索模组",
-				"content": ["在任意位置开始输入以搜索模组。在在线和已安装模式下均可使用。"]
+				"content": ["在任意位置开始输入以搜索模组。在线和已安装模式下均可使用。"]
 			},
 			"DLMods": {
 				"title": "下载和安装模组",
 				"content": [
 					"点击'安装'并选择一个选项。",
 					"模组将被添加到下载队列。",
-					"自动解压并将模组安装到模组文件夹，同时下载预览图片。"
+					"程序将自动解压并将模组安装到模组文件夹，同时下载预览图片。"
 				]
 			},
 			"UpdateMods": {
@@ -612,8 +612,8 @@
 				"content": ["当已安装的模组有可用更新时会收到通知！"]
 			},
 			"Restore": {
-				"title": "还原点",
-				"content": ["创建和管理还原点（备份）。", "从保存的还原点恢复您的模组。"]
+				"title": "备份点",
+				"content": ["创建和管理备份点。", "从保存的备份点恢复您的模组。"]
 			},
 			"Settings": {
 				"title": "设置",
@@ -634,7 +634,7 @@
 		},
 		"_Changes": {
 			"ConfirmChanges": "确认更改",
-			"CreateRestore": "应用更改前创建还原点"
+			"CreateRestore": "应用更改前创建备份点"
 		},
 		"_Checklist": {
 			"Greeting": "你好，",
@@ -657,7 +657,7 @@
 			"XXMILauncher": "XXMI 启动器",
 			"InstallOpen": "安装并打开",
 			"RspMod": "，下载相应的模块（WWMI、ZZMI、GIMI 等）。",
-			"OnceComplete": "完成后，按下面的重新加载按钮。",
+			"OnceComplete": "完成后，点按下面的重新加载按钮。",
 			"Reload": "重新加载",
 			"Confirm": "确认",
 			"XXMILDir": "XXMI 启动器目录",
@@ -670,7 +670,7 @@
 			"Incorrect": "不正确",
 			"DoNotSelectFolders": "请勿选择 GIMI/WWMI/ZZMI 文件夹。",
 			"UsingXXMILauncher": "我正在使用 XXMI 启动器",
-			"ThisDirTarget": "此目录是您用于注入模组的程序期望模组文件所在的位置。",
+			"ThisDirTarget": "此目录是模组注入器将要加载的模组文件的位置。",
 			"TargetDir": "目标目录：",
 			"ThisDirSource": "此目录是您存储模组文件的位置。当您在 IMM 中启用模组时，它将从此目录创建符号链接到目标目录。",
 			"SourceDir": "源目录：",
@@ -701,16 +701,16 @@
 					"Queue": "队列",
 					"Downloading": "下载中",
 					"Downloaded": "已下载",
-					"NoQ": "队列中没有下载",
-					"Clear": "清除已完成"
+					"NoQ": "无下载任务",
+					"Clear": "清除已完成的下载任务"
 				},
 				"_Restore": {
-					"Restore": "还原",
-					"RestorePoints": "还原点",
-					"CreateRestorePoint": "创建还原点",
-					"RestorePointContent": "还原点内容",
+					"Restore": "备份",
+					"RestorePoints": "备份点",
+					"CreateRestorePoint": "创建备份点",
+					"RestorePointContent": "备份点内容",
 					"Restricted": "教程模式下受限",
-					"PleaseSelect": "请选择一个有效的还原点。"
+					"PleaseSelect": "请选择一个有效的备份点。"
 				},
 				"_Batch": {
 					"BatchOperations": " 批量操作",
@@ -778,16 +778,16 @@
 						"LaunchMsg3": "(通常为 ...\\XXMI Launcher\\Resources\\Bin\\XXMI Launcher.exe)",
 						"Placeholder": "XXMI 可执行文件路径"
 					},
-					"HotKey": "热键",
+					"HotKey": "快捷键",
 					"_HotKey": {
-						"HKMsg1": "仅在自动重载设置为",
-						"HKMsg2": "或",
-						"HKMsg3": "时工作",
+						"HKMsg1": "仅在自动重载时",
+						"HKMsg2": "设为",
+						"HKMsg3": "或",
 						"HKMsg4": "避免使用常见快捷键",
 						"HKMsg5": "例如",
 						"HKMsg6": "等...",
-						"ClearHK": "清除热键",
-						"HKEmpty": "创建预设以设置热键。"
+						"ClearHK": "清除快捷键",
+						"HKEmpty": "创建预设以设置快捷键。"
 					}
 				}
 			},
@@ -796,7 +796,7 @@
 				"Online": "在线"
 			},
 			"_LeftLocal": {
-				"Filter": "过滤器",
+				"Filter": "筛选",
 				"_Filter": {
 					"Enabled": "已启用",
 					"Disabled": "已禁用"
@@ -804,7 +804,7 @@
 				"Presets": "预设",
 				"_Presets": {
 					"DisableAll": "禁用所有模组",
-					"Empty": "这里很孤单，创建一个预设吧！",
+					"Empty": "这里空荡荡的，创建一个预设吧！=v=）",
 					"New": "新建",
 					"Save": "保存"
 				}
@@ -840,7 +840,7 @@
 					"Min": "次要更改",
 					"Patch": "补丁",
 					"Lat": "您使用的是最新版本。",
-					"Soon": "更新将很快安装",
+					"Soon": "即将安装更新",
 					"In": "更新将在 <time> 秒后安装",
 					"Use": "您可以在下载更新时使用应用程序。"
 				}
@@ -853,13 +853,13 @@
 		},
 		"_Progress": {
 			"Close": "关闭",
-			"CreatingRestorePoint": "正在创建还原点",
-			"RestorePointCreated": "还原点已创建",
-			"RestoringFrom": "正在从以下位置还原",
+			"CreatingRestorePoint": "正在创建备份点",
+			"RestorePointCreated": "备份点已创建",
+			"RestoringFrom": "正在从以下位置还原备份",
 			"RemovingCurrentFiles": "正在移除当前文件",
 			"DiscoveringFiles": "正在发现文件",
 			"OperationCancelled": "操作已取消",
-			"RestorationCompleted": "还原已完成",
+			"RestorationCompleted": "已还原备份",
 			"File": "文件"
 		},
 		"_RightSideBar": {
@@ -879,7 +879,7 @@
 				"NoCat": "没有此类别",
 				"Source": "来源",
 				"Notes": "备注",
-				"HotKeys": "热键",
+				"HotKeys": "快捷键",
 				"Key": "按键",
 				"Action": "操作",
 				"NoSource": "无来源",
