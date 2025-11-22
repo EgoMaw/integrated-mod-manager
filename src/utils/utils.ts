@@ -161,17 +161,53 @@ export function isOlderThanOneDay(dateStr: string) {
 	return Number.isFinite(updateAgeMs) && updateAgeMs > 86_400_000;
 }
 let initialCheck = true;
-const checked: Record<string, number> = {};
 
+// Load cached data from localStorage and clean up old entries (> 30 minutes)
+const oneHour = 60 * 60 * 1000;
+function loadCheckedCache(): Record<string, { updated: number; status: number }> {
+	try {
+		const cached = localStorage.getItem("mod_check_cache");
+		if (!cached) return {};
+		
+		const parsed = JSON.parse(cached);
+		const now = Date.now();
+		
+		// Filter out entries older than 30 minutes
+		const cleaned: Record<string, { updated: number; status: number }> = {};
+		for (const [key, value] of Object.entries(parsed)) {
+			if (typeof value === "object" && value !== null && "updated" in value && "status" in value) {
+				if (now - (value as any).updated < oneHour) {
+					cleaned[key] = value as { updated: number; status: number };
+				}
+			}
+		}
+		console.log("[IMM] Loaded checked cache:", cleaned);
+		return cleaned;
+	} catch {
+		return {};
+	}
+}
+
+// Save cached data to localStorage
+function saveCheckedCache(cache: Record<string, { updated: number; status: number }>) {
+	try {
+		localStorage.setItem("mod_check_cache", JSON.stringify(cache));
+	} catch (error) {
+		console.error("[IMM] Error saving cache to localStorage:", error);
+	}
+}
+
+const checked: Record<string, { updated: number; status: number }> = loadCheckedCache();
+let now = Date.now();
 export function useInstalledItemsManager() {
 	const [installedItems, setInstalledItems] = useAtom(INSTALLED_ITEMS);
 	const localData = useAtomValue(DATA);
 	async function checkModStatus(item: any) {
 		console.log("[IMM] Checking mod status for", item.name);
 		let modStatus = 0;
-		if (checked.hasOwnProperty(item.name)) {
+		if (checked.hasOwnProperty(item.name) && now - (checked[item.name]?.updated || 0) < oneHour) {
 			console.log("[IMM] Mod status found in cache for", item.name);
-			modStatus = checked[item.name] || 0;
+			modStatus = checked[item.name].status || 0;
 		} else {
 			try {
 				// console.log("[IMM] Fetching mod url ", modRouteFromURL(item.source));
@@ -184,7 +220,7 @@ export function useInstalledItemsManager() {
 					});
 					// setUpdateCache((prev) => ({ ...prev, [item.name]: latest }));
 					modStatus = item.updated < latest ? (item.viewed < latest ? 2 : 1) : 0;
-					checked[item.name] = modStatus;
+					checked[item.name] = { updated: Date.now(), status: modStatus };
 				}
 			} catch (error) {
 				return 0;
@@ -213,6 +249,7 @@ export function useInstalledItemsManager() {
 		const modsProgressBar = document.getElementById("mods-progress");
 		const modsCheckedLabel = document.getElementById("mods-checked");
 		const modsTotalLabel = document.getElementById("mods-total");
+		now = Date.now();
 		if (modsProgressContainer && modsTotalLabel) {
 			modsTotalLabel.innerText = totalItems.toString();
 			modsProgressContainer.style.bottom = "0px";
@@ -251,6 +288,10 @@ export function useInstalledItemsManager() {
 			);
 		}
 		const newCount = processedItems.filter((item) => item.modStatus === 2).length;
+		
+		// Save the updated cache to localStorage
+		saveCheckedCache(checked);
+		
 		if (initialCheck) {
 			initialCheck = false;
 			setTimeout(() => {

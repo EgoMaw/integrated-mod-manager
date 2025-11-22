@@ -29,7 +29,7 @@
 		"GetPre": "Get pre-releases",
 		"Start": "Start Game",
 		"Refresh": "Refresh mod list",
-
+		"v2.1.2Warning":"If you are upgrading from v2.1.2 or lower, please close all file explorer windows and refresh IMM.",
 		"Languages": {
 			"cn": "Chinese (Simplified)",
 			"en": "English",
@@ -518,6 +518,7 @@
 		"GetPre": "获取预发布版本",
 		"Start": "启动游戏",
 		"Refresh": "刷新模组列表",
+		"v2.1.2Warning": "如果您从v2.1.2或更低版本升级，请关闭所有文件资源管理器窗口并刷新IMM。",
 		"Languages": {
 			"cn": "中文（简体）",
 			"en": "英语",
@@ -993,6 +994,7 @@
 		"GetPre": "Скачивать пререлизы",
 		"Start": "Запустить игру",
 		"Refresh": "Обновить список модов",
+		"v2.1.2Warning": "Если вы обновляетесь с версии v2.1.2 или ниже, пожалуйста, закройте все окна проводника и обновите IMM.",
 		"Languages": {
 			"cn": "Китайский (упрощенный)",
 			"en": "Английский",
@@ -1491,6 +1493,7 @@
 		"GetPre": "プレリリースを取得",
 		"Start": "ゲームを起動",
 		"Refresh": "Modリストを更新",
+		"v2.1.2Warning": "v2.1.2以前からアップグレードする場合は、すべてのファイルエクスプローラーウィンドウを閉じてIMMを更新してください。",
 		"Languages": {
 			"cn": "中国語（簡体字）",
 			"en": "英語",
@@ -1980,6 +1983,7 @@
 		"GetPre": "프리릴리스 받기",
 		"Start": "게임 시작",
 		"Refresh": "모드 목록 새로 고침",
+		"v2.1.2Warning": "v2.1.2 이하 버전에서 업그레이드하는 경우 모든 파일 탐색기 창을 닫고 IMM을 새로 고침하세요.",
 		"Languages": {
 			"cn": "중국어 (간체)",
 			"en": "영어",

@@ -4,6 +4,7 @@ import {
 	CATEGORIES,
 	DATA,
 	DOWNLOAD_LIST,
+	ERR,
 	LAST_UPDATED,
 	PRESETS,
 	PROGRESS_OVERLAY,
@@ -509,29 +510,39 @@ export async function verifyDirStruct() {
 	};
 	try {
 		if (!(!!src && (await exists(src))) || !(!!tgt && (await exists(tgt))))
-			throw new Error("Source or Target not found");
+			throw new Error("Source or Target not found: " + src + " | " + tgt);
 
-		if (!(await exists(tgt))) throw new Error("Target Directory not found");
-		const oldTgtPath = join(tgt, OLD_managedTGT);
-		if (await exists(oldTgtPath)) {
-			await rename(oldTgtPath, join(tgt, managedTGT));
-			//add code to read the file d3dx_user.ini in the parent folder of oldTgtPath, and replace all instances of OLD_managedTGT with managedTGT
-			const parentDir = tgt.split("\\").slice(0, -1).join("\\");
-			const iniPath = join(parentDir, "d3dx_user.ini");
-			console.log("[IMM] Updating d3dx_user.ini at:", iniPath);
-			try {
-				if (await exists(iniPath)) {
-					let iniContent = await readTextFile(iniPath);
-					const updatedContent = iniContent.split(OLD_managedTGT.toLowerCase()).join(managedTGT.toLowerCase());
-					await writeTextFile(iniPath, updatedContent);
+		if (!(await exists(tgt))) throw new Error("Target Directory not found: " + tgt);
+		try{
+
+			const oldTgtPath = join(tgt, OLD_managedTGT);
+			if (await exists(oldTgtPath)) {
+				await rename(oldTgtPath, join(tgt, managedTGT));
+				//add code to read the file d3dx_user.ini in the parent folder of oldTgtPath, and replace all instances of OLD_managedTGT with managedTGT
+				const parentDir = tgt.split("\\").slice(0, -1).join("\\");
+				const iniPath = join(parentDir, "d3dx_user.ini");
+				console.log("[IMM] Updating d3dx_user.ini at:", iniPath);
+				try {
+					if (await exists(iniPath)) {
+						let iniContent = await readTextFile(iniPath);
+						const updatedContent = iniContent.split(OLD_managedTGT.toLowerCase()).join(managedTGT.toLowerCase());
+						await writeTextFile(iniPath, updatedContent);
+					}
+				} catch (e) {
+					//console.error("Error updating d3dx_user.ini:", e);
 				}
-			} catch (e) {
-				//console.error("Error updating d3dx_user.ini:", e);
 			}
-		}
-		const oldSrcPath = join(src, OLD_managedSRC);
-		if (await exists(oldSrcPath)) {
-			await rename(oldSrcPath, join(src, managedSRC));
+			const oldSrcPath = join(src, OLD_managedSRC);
+			if (await exists(oldSrcPath)) {
+				await rename(oldSrcPath, join(src, managedSRC));
+			}
+		} catch (e:any){
+			if(e.startsWith("failed to rename old path")){
+				store.set(ERR,textData["v2.1.2Warning"])
+			}
+			else{
+				store.set(ERR,e.toString())
+			}
 		}
 		const modDir = join(src, managedSRC);
 		const [modDirExists, isOldVersion] = await Promise.all([exists(modDir), checkOldVerDirs(src)]);
@@ -703,7 +714,7 @@ export async function verifyDirStruct() {
 		status.after[0].children?.sort(sortMods);
 		status.after.sort(sortMods);
 	} catch (e) {
-		//console.log(e);
+		console.log("[ERR] ", e);
 	} finally {
 		console.log("[IMM] Directory structure verified:", status);
 		return status;
