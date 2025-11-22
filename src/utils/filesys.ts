@@ -1,5 +1,5 @@
 import { copyFile, exists, mkdir, readDir, readTextFile, remove, rename, writeTextFile } from "@tauri-apps/plugin-fs";
-import { IGNORE, managedSRC, managedTGT, OLD_RESTORE, RESTORE, UNCATEGORIZED, VERSION } from "./consts";
+import { IGNORE, managedSRC, managedTGT, OLD_managedSRC, OLD_managedTGT, OLD_RESTORE, RESTORE, UNCATEGORIZED, VERSION } from "./consts";
 import {
 	CATEGORIES,
 	DATA,
@@ -512,7 +512,27 @@ export async function verifyDirStruct() {
 			throw new Error("Source or Target not found");
 
 		if (!(await exists(tgt))) throw new Error("Target Directory not found");
-
+		const oldTgtPath = join(tgt, OLD_managedTGT);
+		if (await exists(oldTgtPath)) {
+			await rename(oldTgtPath, join(tgt, managedTGT));
+			//add code to read the file d3dx_user.ini in the parent folder of oldTgtPath, and replace all instances of OLD_managedTGT with managedTGT
+			const parentDir = tgt.split("\\").slice(0, -1).join("\\");
+			const iniPath = join(parentDir, "d3dx_user.ini");
+			console.log("[IMM] Updating d3dx_user.ini at:", iniPath);
+			try {
+				if (await exists(iniPath)) {
+					let iniContent = await readTextFile(iniPath);
+					const updatedContent = iniContent.split(OLD_managedTGT.toLowerCase()).join(managedTGT.toLowerCase());
+					await writeTextFile(iniPath, updatedContent);
+				}
+			} catch (e) {
+				//console.error("Error updating d3dx_user.ini:", e);
+			}
+		}
+		const oldSrcPath = join(src, OLD_managedSRC);
+		if (await exists(oldSrcPath)) {
+			await rename(oldSrcPath, join(src, managedSRC));
+		}
 		const modDir = join(src, managedSRC);
 		const [modDirExists, isOldVersion] = await Promise.all([exists(modDir), checkOldVerDirs(src)]);
 

@@ -26,3 +26,8 @@ src-tauri/config*.json
 src-tauri/backups*
 src/tempText.json
 latestcopy.json
+temp2.bat
+ini2.ini
+ini.ini
+rename_disabled.bat
+temp.py
