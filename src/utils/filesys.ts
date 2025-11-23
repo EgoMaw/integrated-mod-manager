@@ -1,5 +1,15 @@
 import { copyFile, exists, mkdir, readDir, readTextFile, remove, rename, writeTextFile } from "@tauri-apps/plugin-fs";
-import { IGNORE, managedSRC, managedTGT, OLD_managedSRC, OLD_managedTGT, OLD_RESTORE, RESTORE, UNCATEGORIZED, VERSION } from "./consts";
+import {
+	IGNORE,
+	managedSRC,
+	managedTGT,
+	OLD_managedSRC,
+	OLD_managedTGT,
+	OLD_RESTORE,
+	RESTORE,
+	UNCATEGORIZED,
+	VERSION,
+} from "./consts";
 import {
 	CATEGORIES,
 	DATA,
@@ -80,8 +90,8 @@ export async function setConfig(config: any) {
 		return;
 	}
 	let { gameConfig: curConfig } = getConfig(store.get(SETTINGS));
-	console.log( "[IMM] Current config:", {...curConfig});
-	console.log( "[IMM] New config:", config);
+	console.log("[IMM] Current config:", { ...curConfig });
+	console.log("[IMM] New config:", config);
 	if (!curConfig.game || !config.game || curConfig.game !== config.game) {
 		addToast({ type: "error", message: textData._Toasts.GameConfigMismatch });
 		return;
@@ -259,7 +269,7 @@ export async function getRestorePoints(): Promise<string[]> {
 }
 export async function resetWithBackup() {
 	console.log("[IMM] Resetting with backup...");
-	const configs = ["", "WW", "ZZ","GI"];
+	const configs = ["", "WW", "ZZ", "GI"];
 	for (let cfg of configs) {
 		try {
 			await rename(`config${cfg}.json`, `backups/MAN_${Date.now()}_config${cfg}.json.bak`);
@@ -513,15 +523,16 @@ export async function verifyDirStruct() {
 			throw new Error("Source or Target not found: " + src + " | " + tgt);
 
 		if (!(await exists(tgt))) throw new Error("Target Directory not found: " + tgt);
-		try{
-
+		try {
 			const oldTgtPath = join(tgt, OLD_managedTGT);
+			const newTgtPath = join(tgt, managedTGT);
 			if (await exists(oldTgtPath)) {
-				await rename(oldTgtPath, join(tgt, managedTGT));
+				await rename(oldTgtPath, newTgtPath);
 				//add code to read the file d3dx_user.ini in the parent folder of oldTgtPath, and replace all instances of OLD_managedTGT with managedTGT
 				const parentDir = tgt.split("\\").slice(0, -1).join("\\");
 				const iniPath = join(parentDir, "d3dx_user.ini");
 				console.log("[IMM] Updating d3dx_user.ini at:", iniPath);
+
 				try {
 					if (await exists(iniPath)) {
 						let iniContent = await readTextFile(iniPath);
@@ -529,19 +540,35 @@ export async function verifyDirStruct() {
 						await writeTextFile(iniPath, updatedContent);
 					}
 				} catch (e) {
-					//console.error("Error updating d3dx_user.ini:", e);
+					console.error("Error updating d3dx_user.ini:", e);
 				}
 			}
 			const oldSrcPath = join(src, OLD_managedSRC);
+			const newSrcPath = join(src, managedSRC);
 			if (await exists(oldSrcPath)) {
-				await rename(oldSrcPath, join(src, managedSRC));
+				await rename(oldSrcPath, newSrcPath);
+				const targetEntries = (await readDirRecr(newTgtPath, "", 2)).flatMap((x) => x.children || []);
+				console.log("[IMM] Fixing symlinks in target directory. Broken: ", targetEntries);
+				for (const entry of targetEntries) {
+					const linkPath = join(newTgtPath, entry.path);
+					await remove(linkPath);
+					await mkdir(join(newTgtPath, entry.parent), { recursive: true });
+					try {
+						await invoke("create_symlink", {
+							linkPath: linkPath,
+							targetPath: join(newSrcPath, entry.path),
+						});
+						console.log("[IMM] Fixed symlink:", linkPath, "->", join(newSrcPath, entry.path));
+					} catch (error) {
+						console.error("[IMM] Error creating symlink:", error);
+					}
+				}
 			}
-		} catch (e:any){
-			if(e.startsWith("failed to rename old path")){
-				store.set(ERR,textData["v2.1.2Warning"])
-			}
-			else{
-				store.set(ERR,e.toString())
+		} catch (e: any) {
+			if (e.startsWith("failed to rename old path")) {
+				store.set(ERR, textData["v2.1.2Warning"]);
+			} else {
+				store.set(ERR, e.toString());
 			}
 		}
 		const modDir = join(src, managedSRC);
