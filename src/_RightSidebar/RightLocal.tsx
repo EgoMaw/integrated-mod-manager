@@ -109,14 +109,6 @@ function RightLocal() {
 	function renameMod(path: string, newPath: string) {
 		changeModName(path, newPath).then((newPath) => {
 			if (newPath) {
-				setData((prev) => {
-					if (prev[path]) {
-						prev[newPath] = { ...prev[path] };
-						delete prev[path];
-					}
-					return prev;
-				});
-				saveConfigs();
 				const name = newPath.split("\\").pop();
 				name &&
 					newPath &&

@@ -55,6 +55,7 @@ export interface ModData {
 	updatedAt?: number;
 	viewedAt?: number;
 	note?: string;
+	state?: { [key: string]: any };
 }
 export interface ModDataObj {
 	[key: string]: ModData;

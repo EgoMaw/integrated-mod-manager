@@ -1074,12 +1074,27 @@ export async function changeModName(path: string, newPath: string, add = false) 
 		const enabled = add || (await toggleMod(path, false));
 		await mkdir(join(src, managedSRC, ...newPath.split("\\").slice(0, -1)), { recursive: true });
 		await rename(add ? join(src, path) : join(src, managedSRC, path), join(src, managedSRC, newPath));
+		store.set(DATA, (prev) => {
+			if (prev[path]) {
+				prev[newPath] = { ...prev[path] };
+				delete prev[path];
+			}
+			return prev;
+		});
+		store.set(PRESETS, (prev) => {
+			for (let i = 0; i < prev.length; i++) {
+				if (prev[i].data.includes(path)) {
+					prev[i].data = prev[i].data.filter((p) => p !== path);
+					prev[i].data.push(newPath);
+				}
+			}
+			return prev;
+		});
+		saveConfigs();
 		if (enabled) await toggleMod(newPath, true);
-		// addToast({ type: "success", message: "Mod renamed successfully!" });
 		return newPath;
 	} catch (error) {
 		console.error("[IMM] Error changing mod name:", error);
-		// addToast({ type: "error", message: "Error changing mod name." });
 		throw error;
 	}
 }
@@ -1124,6 +1139,60 @@ export async function deleteMod(path: string) {
 		throw error;
 	}
 }
+async function updateDataFromIni(modPath: string) {
+	const root = join(...tgt.split("\\").slice(0, -1), "d3dx_user.ini");
+	if (!(await exists(root))) return;
+	const lines = (await readTextFile(root)).split("\n");
+	const data: Record<string, Record<string, any>> = {};
+	for (let line of lines) {
+		if (!line.includes(modPath.toLowerCase() + "\\")) continue;
+		const split = line.trim().split("=");
+		const [KeyVar, Val] = [split[0].split(modPath.toLowerCase() + "\\")[1].split("\\"), split[1]];
+		const Var = KeyVar.pop() || "";
+		const Key = KeyVar.join("\\");
+		if (Key && Var && Val) {
+			if (!data.hasOwnProperty(Key)) data[Key] = {};
+			data[Key.trim()][Var.toLowerCase().trim()] = Val.trim();
+		}
+	}
+	if (data && Object.keys(data).length > 0) {
+		store.set(DATA, (prev) => {
+			prev[modPath] = {
+				...prev[modPath],
+				state: data,
+			};
+			return { ...prev };
+		});
+		saveConfigs();
+	}
+	console.log("[IMM] Updating data from ini for mod data:", data);
+}
+async function updateIniFromData(modPath: string) {
+	const data = store.get(DATA)[modPath];
+	if (!data || !data.state) return;
+	const root = join(modRoot, modPath);
+	for (let key of Object.keys(data.state)) {
+		const iniFile = join(root, key);
+		if (!(await exists(iniFile))) continue;
+		const lines = (await readTextFile(iniFile)).split("\n");
+		for (let i = 0; i < lines.length; i++) {
+			let line = lines[i]
+				.split(" ")
+				.filter((l) => l.trim() !== "")
+				.join(" ");
+			if (line.includes("global persist $")) {
+				const split = line.split("global persist $");
+				const header = split[0] + "global persist $";
+				const Var = split[1].split("=")[0].trim().toLowerCase();
+				if (data.state[key].hasOwnProperty(Var)) {
+					lines[i] = `${header}${Var} = ${data.state[key][Var.toLowerCase()]}`;
+					console.log(`[IMM] Updating Mod: ${modPath} | File: ${key} | Line${i}: ${lines[i]}`);
+				}
+			}
+		}
+		await writeTextFile(iniFile, lines.join("\n"));
+	}
+}
 export async function toggleMod(path: string, enabled: boolean) {
 	console.log("[IMM] Toggling mod:", path, "Enabled:", enabled);
 	try {
@@ -1132,8 +1201,8 @@ export async function toggleMod(path: string, enabled: boolean) {
 
 		if (enabled) {
 			const [srcExists, tgtExists] = await Promise.all([exists(modSrc), exists(modTgt)]);
-
 			if (srcExists && !tgtExists) {
+				await updateIniFromData(path);
 				await mkdir(join(tgt, managedTGT, ...path.split("\\").slice(0, -1)), { recursive: true });
 				try {
 					await invoke("create_symlink", {
@@ -1146,6 +1215,7 @@ export async function toggleMod(path: string, enabled: boolean) {
 				}
 			}
 		} else {
+			await updateDataFromIni(path);
 			try {
 				await remove(modTgt);
 			} catch (error) {
@@ -1193,6 +1263,9 @@ export async function savePreviewImage(path: string) {
 }
 export async function applyPreset(data: string[], name = "") {
 	try {
+		const entries = (await readDirRecr(join(tgt, managedTGT), "", 2)).flatMap((x) => x.children || []);
+		const disablePromises: Promise<boolean>[] = entries.map((entry) => toggleMod(entry.path, false));
+		await Promise.all(disablePromises);
 		await remove(join(tgt, managedTGT), { recursive: true });
 		await mkdir(join(tgt, managedTGT), { recursive: true });
 

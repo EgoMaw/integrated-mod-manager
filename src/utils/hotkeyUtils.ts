@@ -118,7 +118,7 @@ export async function registerGlobalHotkeys(): Promise<void> {
 	try {
 		await unregisterAll();
 	} catch (error) {
-		//logger.log("Error unregistering hotkeys:", error);
+		console.log("Error unregistering hotkeys:", error);
 	}
 
 	const currentPresets = store.get(PRESETS);
