@@ -49,7 +49,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { switchGameTheme } from "@/utils/theme";
 import { main } from "@/utils/init";
 import { addToast } from "@/_Toaster/ToastProvider";
 let text = "";
@@ -61,7 +60,8 @@ function RightLocal() {
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
 	const setFileToDl = useSetAtom(FILE_TO_DL);
 	const game = useAtomValue(GAME);
-	const [initDone, setInitDone] = useAtom(INIT_DONE);
+	const lang = useAtomValue(SETTINGS).global.lang
+	const initDone = useAtomValue(INIT_DONE);
 	const setSettings = useSetAtom(SETTINGS);
 
 	function handleInAppLink(url: string) {
@@ -88,7 +88,6 @@ function RightLocal() {
 	const handleURLGame = useCallback(async (urls: string[]) => {
 		const final = urls[urls.length - 1];
 		if (final) getCurrentWebviewWindow()?.setFocus();
-
 		if (final.includes("/game/")) {
 			const url: any = final.split("/game/");
 			url[1] = url[1].split("/");
@@ -107,7 +106,7 @@ function RightLocal() {
 				}, 0);
 			}
 		}
-	}, [game]);
+	}, [game,lang]);
 	useEffect(() => {
 		let unlisten: (() => void) | undefined;
 
@@ -119,7 +118,7 @@ function RightLocal() {
 			const initialUrls = await getCurrent();
 			const isDeepLinkHandled = sessionStorage.getItem("deep-link-initial-handled");
 
-			if (initialUrls && !isDeepLinkHandled) {
+			if (initialUrls && !isDeepLinkHandled && lang) {
 				console.log("Launched with URLs:", initialUrls);
 				await handleURLGame(initialUrls);
 				setUrls((prev) => [...prev, ...initialUrls]);
@@ -165,7 +164,7 @@ function RightLocal() {
 	const categories = useAtomValue(CATEGORIES);
 	const source = useAtomValue(SOURCE);
 	const [deleteItemData, setDeleteItemData] = useState<Mod | null>(null);
-
+	// const decor = useAtomValue(SETTINGS).global.winType
 	const [modList, setModList] = useAtom(MOD_LIST);
 	const [selected, setSelected] = useAtom(SELECTED);
 	const textData = useAtomValue(TEXT_DATA);
@@ -230,7 +229,8 @@ function RightLocal() {
 		}
 	}, [item, modList]);
 	return (
-		<Sidebar side="right" className="bg-sidebar duration-300">
+		<Sidebar side="right" className="duration-300 pt-6"
+		>
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<ManageCategories />
 			</Dialog>
@@ -277,7 +277,7 @@ function RightLocal() {
 					</div>
 				</AlertDialogContent>
 			</AlertDialog>
-			<SidebarContent className="polka flex flex-row w-full h-full gap-0 p-0 overflow-hidden duration-300 border border-l-0">
+			<SidebarContent className="polka bg-sidebar flex flex-row w-full h-full gap-0 p-0 overflow-hidden duration-300 border border-t-0">
 				<div className=" flex flex-col items-center h-full min-w-full overflow-y-hidden" key={item?.path || "no-item"}>
 					<div className="text-accent min-h-16 flex items-center justify-center h-16 min-w-full gap-3 px-3 border-b">
 						{item ? (

@@ -180,6 +180,7 @@ function MainOnline() {
 		//console.log("fetching3");
 		//console.log("fetching", onlinePath, types);
 		if (!onlineData[onlinePath]) {
+			console.log("fetching", onlinePath);
 			pageCount[onlinePath] = 1;
 			loadingRef.current = true;
 			if (onlinePath.startsWith("home")) {

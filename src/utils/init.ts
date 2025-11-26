@@ -25,7 +25,7 @@ import { check, type Update } from "@tauri-apps/plugin-updater";
 
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { currentMonitor, PhysicalSize } from "@tauri-apps/api/window";
+// import { currentMonitor, PhysicalSize } from "@tauri-apps/api/window";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { exists, writeTextFile, readTextFile, mkdir, remove } from "@tauri-apps/plugin-fs";
 import defConfig from "../default.json";
@@ -83,21 +83,22 @@ export function getPrevGame() {
 	return prevGame;
 }
 export const window = getCurrentWebviewWindow();
-export function setWindowType(type: number) {
+export async function setWindowType(type: number) {
 	if (type == 0) {
-		window.setFullscreen(false);
-		window.setDecorations(true);
-		currentMonitor().then((x) => {
-			if (x?.size) window.setSize(new PhysicalSize(x.size.width * 0.8, x.size.height * 0.8));
-		});
+		// window.setFullscreen(false);
+		// // window.setDecorations(true);
+		// currentMonitor().then((x) => {
+		// 	if (x?.size) window.setSize(new PhysicalSize(x.size.width * 0.8, x.size.height * 0.8));
+		// });
 	} else if (type == 1) {
-		window.setFullscreen(false);
-		window.setDecorations(false);
-		currentMonitor().then((x) => {
-			if (x?.size) window.setSize(new PhysicalSize(x.size.width * 0.8, x.size.height * 0.8));
-		});
+		// window.setFullscreen(false);
+		// window.setDecorations(false);
+		// currentMonitor().then((x) => {
+		// 	if (x?.size) window.setSize(new PhysicalSize(x.size.width * 0.8, x.size.height * 0.8));
+		// });
 	} else if (type == 2) {
-		window.setFullscreen(true);
+		window.maximize();
+		// window.setFullscreen(true);
 	}
 }
 invoke<string>("get_image_server_url").then((url) => {
@@ -384,8 +385,8 @@ export async function maintainBackups() {
 		}
 	}
 }
-let cwd="";
-export function getCwd(){
+let cwd = "";
+export function getCwd() {
 	return cwd;
 }
 export async function main() {

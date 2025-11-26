@@ -7,6 +7,7 @@ import ErrorBoundary from "./utils/errorCatcher";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { addToast } from "./_Toaster/ToastProvider";
+import Decorations from "./utils/decorations";
 /*
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -74,6 +75,7 @@ initLogCapture();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<Provider store={store}>
 		<ThemeProvider defaultTheme="dark">
+			<Decorations />
 			<ErrorBoundary>
 				<App />
 			</ErrorBoundary>

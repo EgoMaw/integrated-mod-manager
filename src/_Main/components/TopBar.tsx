@@ -2,24 +2,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-	LEFT_SIDEBAR_OPEN,
+	MOD_LIST,
+	// LEFT_SIDEBAR_OPEN,
 	ONLINE,
+	ONLINE_DATA,
 	ONLINE_PATH,
 	ONLINE_SORT,
 	ONLINE_TYPE,
-	RIGHT_SIDEBAR_OPEN,
-	RIGHT_SLIDEOVER_OPEN,
+	// RIGHT_SIDEBAR_OPEN,
+	// RIGHT_SLIDEOVER_OPEN,
 	SEARCH,
 	TEXT_DATA,
 } from "@/utils/vars";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
 	DownloadIcon,
 	EyeIcon,
-	PanelLeftCloseIcon,
-	PanelLeftOpenIcon,
-	PanelRightCloseIcon,
-	PanelRightOpenIcon,
+	// PanelLeftCloseIcon,
+	// PanelLeftOpenIcon,
+	// PanelRightCloseIcon,
+	// PanelRightOpenIcon,
+	RefreshCwIcon,
 	SearchIcon,
 	ThumbsUpIcon,
 } from "lucide-react";
@@ -27,14 +30,17 @@ import { useEffect, useState } from "react";
 import Updater from "./Updater";
 import Notice from "./Notice";
 import Help from "./Help";
+// import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { addToast } from "@/_Toaster/ToastProvider";
+import { refreshModList } from "@/utils/filesys";
 const searched = {
 	online: "",
 	offline: "",
 };
 function TopBar() {
-	const [leftSidebarOpen, setLeftSidebarOpen] = useAtom(LEFT_SIDEBAR_OPEN);
-	const [rightSidebarOpen, setRightSidebarOpen] = useAtom(RIGHT_SIDEBAR_OPEN);
-	const [rightSlideOverOpen, setRightSlideOverOpen] = useAtom(RIGHT_SLIDEOVER_OPEN);
+	// const [leftSidebarOpen, setLeftSidebarOpen] = useAtom(LEFT_SIDEBAR_OPEN);
+	// const [rightSidebarOpen, setRightSidebarOpen] = useAtom(RIGHT_SIDEBAR_OPEN);
+	// const [rightSlideOverOpen, setRightSlideOverOpen] = useAtom(RIGHT_SLIDEOVER_OPEN);
 	const [onlineType, setOnlineType] = useAtom(ONLINE_TYPE);
 	const [onlineSort, setOnlineSort] = useAtom(ONLINE_SORT);
 	const [popoverOpen, setPopoverOpen] = useState(false);
@@ -43,6 +49,8 @@ function TopBar() {
 	const [term, setTerm] = useState("");
 	const textData = useAtomValue(TEXT_DATA);
 	const online = useAtomValue(ONLINE);
+	const setModList = useSetAtom(MOD_LIST);
+	const setOnlineData = useSetAtom(ONLINE_DATA)
 	useEffect(() => {
 		const handler = setTimeout(
 			() => {
@@ -85,10 +93,8 @@ function TopBar() {
 				else if (event.code === "Escape" && activeEl === searchInput) {
 					searchInput.value = "";
 					searchInput.blur();
-					if(online)
-						setOnlinePath("home&_type=" + onlineType);
-					else
-						setSearch("");
+					if (online) setOnlinePath("home&_type=" + onlineType);
+					else setSearch("");
 				}
 			}
 		};
@@ -97,7 +103,7 @@ function TopBar() {
 	}, [online]);
 	return (
 		<div className="text-accent min-h-16 flex items-center justify-center w-full h-16 gap-2 p-2">
-			<Button
+			{/* <Button
 				onClick={(e) => {
 					e.stopPropagation();
 					setLeftSidebarOpen((prev: boolean) => !prev);
@@ -116,7 +122,7 @@ function TopBar() {
 						width: leftSidebarOpen ? "0rem" : "1.5rem",
 					}}
 				/>
-			</Button>
+			</Button> */}
 			<div className="bg-sidebar button-like flex items-center justify-between w-full h-full px-3 py-1 overflow-hidden border rounded-lg">
 				<SearchIcon className="text-muted-foreground flex-shrink-0 w-4 h-4 mr-2" />
 				<Input
@@ -241,6 +247,36 @@ function TopBar() {
 			<Notice />
 			<Help />
 			<Button
+				onClick={() => {
+					if(online){
+						const curPath = onlinePath;
+						setOnlinePath("");
+						setOnlineData(prev=>{
+							delete prev[curPath];
+							if(curPath.startsWith("home"))
+								delete prev.banner;
+							return {...prev};
+						})
+						setTimeout(()=>{
+							setOnlinePath(curPath);
+						},50);
+					}else{
+						addToast({
+						type: "info",
+						message: textData._Toasts.RefreshMods,
+					});
+					refreshModList().then((data) => {
+						setModList(data);
+					});
+					}
+				}}
+				className="bg-sidebar flex items-center justify-center w-12 h-12 gap-0 duration-200 border rounded-lg"
+			>
+				{/* <Tooltip> */}
+					<RefreshCwIcon></RefreshCwIcon>
+				{/* </Tooltip> */}
+			</Button>
+			{/* <Button
 				onClick={(e) => {
 					e.stopPropagation();
 
@@ -260,7 +296,7 @@ function TopBar() {
 						width: (online ? rightSlideOverOpen : rightSidebarOpen) ? "1.5rem" : "0rem",
 					}}
 				/>
-			</Button>
+			</Button> */}
 		</div>
 	);
 }

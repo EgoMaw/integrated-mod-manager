@@ -15,15 +15,15 @@ import { AnimatePresence, motion } from "motion/react";
 import CardLocal from "./components/CardLocal";
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { preventContextMenu } from "@/utils/utils";
-import { refreshModList, toggleMod } from "@/utils/filesys";
+import { toggleMod } from "@/utils/filesys";
 import MiniSearch from "minisearch";
 import { join, setChange } from "@/utils/hotreload";
 import { managedSRC } from "@/utils/consts";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { Mod } from "@/utils/types";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { RefreshCwIcon } from "lucide-react";
-import { addToast } from "@/_Toaster/ToastProvider";
+// import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+// import { RefreshCwIcon } from "lucide-react";
+// import { addToast } from "@/_Toaster/ToastProvider";
 
 let searchDB: any = null;
 let prev = "prev";
@@ -192,7 +192,7 @@ function MainLocal() {
 				<label className="text-muted z-200 flex flex-col items-center gap-1">
 					<label className="flex items-center">
 						{filteredList.length} {textData.Items}{" "}
-						<Tooltip>
+						{/* <Tooltip>
 							<TooltipTrigger
 								onClick={() => {
 									addToast({
@@ -208,7 +208,7 @@ function MainLocal() {
 								<RefreshCwIcon className="text-link hover:opacity-100 h-4 duration-200 opacity-50"></RefreshCwIcon>
 							</TooltipTrigger>
 							<TooltipContent>{textData.Refresh}</TooltipContent>
-						</Tooltip>
+						</Tooltip> */}
 					</label>
 					<label className="text-xs">
 						in{" "}

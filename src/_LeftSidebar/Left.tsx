@@ -21,10 +21,12 @@ function LeftSidebar() {
 	const customMode = useAtomValue(XXMI_MODE);
 	const setGame = useSetAtom(GAME);
 	const game = useAtomValue(SETTINGS).global.game;
+	// const decor = useAtomValue(SETTINGS).global.winType
 	useInstalledItemsManager();
 	return (
-		<Sidebar collapsible="icon" className="pointer-events-auto">
-			<SidebarContent className="bg-sidebar polka h-full gap-0 overflow-hidden border border-r-0">
+		<Sidebar collapsible="icon" className="pointer-events-auto pt-6"
+		>
+			<SidebarContent className="bg-sidebar polka h-full gap-0 overflow-hidden border border-t-0">
 				<div className="flex flex-col w-full max-h-full min-h-full">
 					<div className="min-h-16 min-w-16 flex items-center justify-center h-16 gap-5 p-0 border-b">
 						<div

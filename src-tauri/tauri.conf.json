@@ -17,10 +17,9 @@
 		"windows": [
 			{
 				"title": "Integrated Mod Manager",
-				"width": 1280,
-				"height": 720,
 				"resizable": true,
 				"fullscreen": false,
+				"decorations": false,
 				"transparent": true,
 				"minWidth": 1200,
 				"minHeight": 720
@@ -56,7 +55,7 @@
 		},
 		"deep-link": {
 			"desktop": {
-				"schemes": ["imm","wwmm"]
+				"schemes": ["imm", "wwmm"]
 			}
 		}
 	}

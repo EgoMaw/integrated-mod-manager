@@ -9,9 +9,9 @@ use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
 use tauri::Emitter;
+use tauri_plugin_deep_link::DeepLinkExt;
 use unrar::Archive as RarArchive;
 use zip::ZipArchive;
-use tauri_plugin_deep_link::DeepLinkExt;
 mod hotreload;
 mod image_server;
 
@@ -287,7 +287,6 @@ async fn download_and_unzip(
         downloaded += chunk.len() as u64;
 
         if emit && (downloaded - last_progress_update) >= PROGRESS_UPDATE_THRESHOLD {
-            
             // Calculate speed and ETA asynchronously to avoid blocking download
             let total_elapsed = start_time.elapsed().as_secs_f64();
             let avg_speed = if total_elapsed > 0.0 {
@@ -295,27 +294,27 @@ async fn download_and_unzip(
             } else {
                 0.0
             };
-            
+
             let remaining_bytes = total_size.saturating_sub(downloaded);
             let eta_secs = if avg_speed > 0.0 {
                 (remaining_bytes as f64 / avg_speed) as u64
             } else {
                 0
             };
-            
+
             let progress_data = DownloadProgress {
                 downloaded: downloaded as f64,
-                total:total_size as f64,
+                total: total_size as f64,
                 speed: format_speed(avg_speed),
                 eta: format_duration(eta_secs),
             };
-            
+
             // Emit asynchronously to not block download
             let app_handle_clone = app_handle.clone();
             tauri::async_runtime::spawn(async move {
                 let _ = app_handle_clone.emit("download-progress", progress_data);
             });
-            
+
             last_progress_update = downloaded;
         }
     }
@@ -538,12 +537,18 @@ async fn create_symlink(link_path: String, target_path: String) -> Result<(), St
 
     Ok(())
 }
-
+use tauri_plugin_window_state::{Builder, StateFlags};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::init();
-    
+
     tauri::Builder::default()
+        .plugin(
+            Builder::default()
+                // sets the flags to only track and restore size
+                .with_state_flags(StateFlags::SIZE) 
+                .build(),
+        )
         .plugin(tauri_plugin_single_instance::init(|_app, argv, _cwd| {
           println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
           // when defining deep link schemes at runtime, you must also check `argv` here

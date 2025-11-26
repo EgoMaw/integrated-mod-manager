@@ -89,7 +89,7 @@ function App() {
 		[rightSidebarOpen]
 	);
 	return (
-		<div id="background" className="game-font fixed flex flex-row items-start justify-start w-full h-full">
+		<div id="background" className="game-font fixed border-b flex flex-row items-start justify-start w-full h-full">
 			<div
 				className="bg-bgg fixed w-screen h-screen"
 				style={{

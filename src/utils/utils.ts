@@ -168,10 +168,8 @@ function loadCheckedCache(): Record<string, { updated: number; status: number }>
 	try {
 		const cached = localStorage.getItem("mod_check_cache");
 		if (!cached) return {};
-		
 		const parsed = JSON.parse(cached);
 		const now = Date.now();
-		
 		// Filter out entries older than 30 minutes
 		const cleaned: Record<string, { updated: number; status: number }> = {};
 		for (const [key, value] of Object.entries(parsed)) {
@@ -182,7 +180,7 @@ function loadCheckedCache(): Record<string, { updated: number; status: number }>
 			}
 		}
 		console.log("[IMM] Loaded checked cache:", cleaned);
-		return cleaned;
+		return  cleaned;
 	} catch {
 		return {};
 	}
@@ -207,7 +205,7 @@ export function useInstalledItemsManager() {
 		let modStatus = 0;
 		if (checked.hasOwnProperty(item.name) && now - (checked[item.name]?.updated || 0) < oneHour) {
 			console.log("[IMM] Mod status found in cache for", item.name);
-			modStatus = checked[item.name].status || 0;
+			modStatus =  item.updated < checked[item.name].status ? (item.viewed < checked[item.name].status ? 2 : 1) : 0;
 		} else {
 			try {
 				// console.log("[IMM] Fetching mod url ", modRouteFromURL(item.source));
@@ -220,7 +218,7 @@ export function useInstalledItemsManager() {
 					});
 					// setUpdateCache((prev) => ({ ...prev, [item.name]: latest }));
 					modStatus = item.updated < latest ? (item.viewed < latest ? 2 : 1) : 0;
-					checked[item.name] = { updated: Date.now(), status: modStatus };
+					checked[item.name] = { updated: Date.now(), status: latest };
 				}
 			} catch (error) {
 				return 0;

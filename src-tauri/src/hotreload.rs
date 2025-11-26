@@ -58,7 +58,12 @@ pub fn set_window_target(target_game: i32) -> Result<(), String> {
                 2 => ZZ_TITLE.to_string(),
                 3 => GI_TITLE.to_string(),
                 4 => SR_TITLE.to_string(),
-                _ => return Err(format!("Invalid target_game value: {}. Must be 0-4", target_game)),
+                _ => {
+                    return Err(format!(
+                        "Invalid target_game value: {}. Must be 0-4",
+                        target_game
+                    ))
+                }
             };
             log::info!("Window target set to: {}", *window_target);
             Ok(())
@@ -212,7 +217,7 @@ pub fn is_game_process_running(game_id: i32) -> bool {
         3 => SR_TITLE,
         _ => return false, // Invalid game_id
     };
-    
+
     check_process_running(game_title)
 }
 
@@ -282,7 +287,7 @@ fn check_process_windows(process_id: u32, target_title_lower: &str) -> bool {
 
                 let mut window_process_id = 0;
                 GetWindowThreadProcessId(hwnd, &mut window_process_id);
-                
+
                 if window_process_id == *target_process_id {
                     let mut buffer = [0u16; 512];
                     let len = GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
