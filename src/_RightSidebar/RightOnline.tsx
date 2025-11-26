@@ -5,6 +5,7 @@ import { fetchMod, formatSize, getImageUrl, getTimeDifference, modRouteFromURL }
 import {
 	DATA,
 	DOWNLOAD_LIST,
+	FILE_TO_DL,
 	GAME,
 	INSTALLED_ITEMS,
 	MOD_LIST,
@@ -29,7 +30,7 @@ import {
 	UploadIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Carousel from "./components/Carousel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createModDownloadDir, refreshModList, saveConfigs } from "@/utils/filesys";
@@ -40,6 +41,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { invoke } from "@tauri-apps/api/core";
 // import { OnlineMod } from "@/utils/types";
 let now = Date.now() / 1000;
+
 function RightOnline({ open }: { open: boolean }) {
 	const textData = useAtomValue(TEXT_DATA);
 	const selected = useAtomValue(ONLINE_SELECTED);
@@ -57,10 +59,52 @@ function RightOnline({ open }: { open: boolean }) {
 	const game = useAtomValue(GAME);
 	const setDownloadList = useSetAtom(DOWNLOAD_LIST);
 	const installedItems = useAtomValue(INSTALLED_ITEMS);
+	const [fileToDl, setFileToDl] = useAtom(FILE_TO_DL);
 	const item = onlineData[selected] as any;
 	const installedItem = installedItems.find((it) => it.source && modRouteFromURL(it.source) == selected) || null;
 	const type = installedItem ? (installedItem.modStatus ? "Update" : "Reinstall") : "Install";
+	const addToDownloadQueue = useCallback(
+		async (file: any) => {
+			setDownloadList((prev: any) => {
+				//300ms promise await
+				// await new Promise(resolve => setTimeout(resolve, 300));
+				
+				let dlitem = {
+					status: "pending",
+					addon: altPopoverOpen,
+					preview:
+						item._aPreviewMedia && item._aPreviewMedia._aImages && item._aPreviewMedia._aImages.length > 0
+							? item._aPreviewMedia._aImages[0]._sBaseUrl + "/" + item._aPreviewMedia._aImages[0]._sFile
+							: "",
+					category: item._aCategory?._sName.replaceAll("Skins", UNCATEGORIZED) || UNCATEGORIZED,
+					source: item._sProfileUrl || "",
+					file: file._sDownloadUrl,
+					updated: file._tsDateAdded,
+					name: item._sName + (altPopoverOpen ? ` - ${file._sFile}` : ""),
+					fname: file._sFile,
+				} as any;
+				let count = 1;
+				let downloadList = [];
+				if (prev?.downloading && Object.keys(prev.downloading).length > 0)
+					downloadList.push({ ...prev.downloading, status: "downloading" });
+				if (prev?.queue)
+					downloadList = [...downloadList, ...prev.queue.map((item: any) => ({ ...item, status: "pending" }))];
+				if (prev?.completed)
+					downloadList = [...downloadList, ...prev.completed.map((item: any) => ({ ...item, status: "completed" }))];
+				while (downloadList.find((x) => x.name == dlitem.name && x.fname == dlitem.fname)) {
+					dlitem.name = `${item._sName} (${count})`;
+					count++;
+				}
 
+				return {
+					downloading: prev?.downloading || null,
+					completed: prev?.completed || [],
+					queue: [...(prev?.queue || []), dlitem],
+				};
+			});
+		},
+		[altPopoverOpen, item, setDownloadList]
+	);
 	useEffect(() => {
 		now = Date.now() / 1000;
 		const controller = new AbortController();
@@ -94,6 +138,18 @@ function RightOnline({ open }: { open: boolean }) {
 			saveConfigs();
 		}
 	}, [selected]);
+	useEffect(()=>{
+		console.log(item?._aFiles)
+		if(item?._aFiles){
+			const file = item._aFiles.find((f:any)=>f._idRow==fileToDl)
+			if(file){
+				addToDownloadQueue(file);
+				setFileToDl("");
+				addToast({type:"success",message:"File added to download queue."} );
+			}
+		}
+
+	},[item?._aFiles])
 	const popoverContent = item?._aFiles?.map((file: any) => (
 		<Button
 			className="min-h-fit data-wuwa:p-2 flex items-center justify-center min-w-full gap-1 p-4 overflow-hidden"
@@ -101,39 +157,7 @@ function RightOnline({ open }: { open: boolean }) {
 				borderRadius: game == "GI" ? "4px" : "",
 			}}
 			onClick={() => {
-				setDownloadList((prev: any) => {
-					let dlitem = {
-						status: "pending",
-						addon: altPopoverOpen,
-						preview:
-							item._aPreviewMedia && item._aPreviewMedia._aImages && item._aPreviewMedia._aImages.length > 0
-								? item._aPreviewMedia._aImages[0]._sBaseUrl + "/" + item._aPreviewMedia._aImages[0]._sFile
-								: "",
-						category: item._aCategory?._sName.replaceAll("Skins", UNCATEGORIZED) || UNCATEGORIZED,
-						source: item._sProfileUrl || "",
-						file: file._sDownloadUrl,
-						updated: file._tsDateAdded,
-						name: item._sName + (altPopoverOpen ? ` - ${file._sFile}` : ""),
-						fname: file._sFile,
-					} as any;
-					let count = 1;
-					let downloadList = [];
-					if (prev?.downloading && Object.keys(prev.downloading).length > 0)
-						downloadList.push({ ...prev.downloading, status: "downloading" });
-					if (prev?.queue)
-						downloadList = [...downloadList, ...prev.queue.map((item: any) => ({ ...item, status: "pending" }))];
-					if (prev?.completed)
-						downloadList = [...downloadList, ...prev.completed.map((item: any) => ({ ...item, status: "completed" }))];
-					while (downloadList.find((x) => x.name == dlitem.name && x.fname == dlitem.fname)) {
-						dlitem.name = `${item._sName} (${count})`;
-						count++;
-					}
-
-					return {
-						...prev,
-						queue: [...(prev?.queue || []), dlitem],
-					};
-				});
+				addToDownloadQueue(file);
 				setPopoverOpen(false);
 				setAltPopoverOpen(false);
 			}}

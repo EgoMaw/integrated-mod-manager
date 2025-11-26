@@ -25,6 +25,12 @@ export const managedSRC = "DISABLED - ALL MODS ARE STORED HERE (Managed by IMM)"
 export const managedTGT = "DO NOT MODIFY (Managed by IMM)";
 export const VERSION = "2.2.0";
 export const GAMES: Games[] = ["WW", "ZZ", "GI"];
+export const GAME_GB_IDS: { [key: number]: Games } = {
+	20357: "WW",
+	19567: "ZZ",
+	8552: "GI",
+	0: "",
+};
 export const PRIORITY_KEYS = ["Alt", "Ctrl", "Shift", "Capslock", "Tab", "Up", "Down", "Left", "Right"] as const;
 export const LANG_LIST: { Name: string; Flag: string; Code: Language }[] = [
 	{
@@ -100,9 +106,7 @@ export const DEFAULTS = {
 	TYPES: [] as Category[],
 	CHANGES: { before: [], after: [], map: {}, skip: false, title: "" } as ChangeInfo,
 	DOWNLOAD_LIST: {
-		queue: [] as DownloadItem[],
-		downloading: {} as DownloadItem | null,
-		completed: [] as DownloadItem[],
+		...{ queue: [] as DownloadItem[], downloading: null as DownloadItem | null, completed: [] as DownloadItem[] },
 	},
 	ONLINE: false,
 	CURRENT_PRESET: -1,

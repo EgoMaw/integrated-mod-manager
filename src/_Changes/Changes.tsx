@@ -27,7 +27,6 @@ function Changes({ afterInit }: { afterInit: () => Promise<void> }) {
 			setTimeout(() => {
 				setInitDone(true);
 				if (firstLoad && !getChecked()) setHelpOpen(true);
-
 				setChanges({
 					...changes,
 					skip: false,

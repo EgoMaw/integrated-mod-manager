@@ -11,7 +11,7 @@ use std::time::Instant;
 use tauri::Emitter;
 use unrar::Archive as RarArchive;
 use zip::ZipArchive;
-
+use tauri_plugin_deep_link::DeepLinkExt;
 mod hotreload;
 mod image_server;
 
@@ -542,16 +542,23 @@ async fn create_symlink(link_path: String, target_path: String) -> Result<(), St
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::init();
-
+    
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|_app, argv, _cwd| {
+          println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
+          // when defining deep link schemes at runtime, you must also check `argv` here
+        }))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_deep_link::init())
         .setup(|app| {
             let app_handle = app.handle().clone();
+            #[cfg(desktop)]
+            app.deep_link().register_all()?;
             tauri::async_runtime::spawn(async move {
                 if let Err(e) = image_server::start_image_server(IMAGE_SERVER_PORT).await {
                     log::error!("Failed to start image server: {}", e);

@@ -6,7 +6,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { DATA, DOWNLOAD_LIST, LEFT_SIDEBAR_OPEN, MOD_LIST, TEXT_DATA } from "@/utils/vars";
+import { DATA, DOWNLOAD_LIST, GAME, LEFT_SIDEBAR_OPEN, MOD_LIST, TEXT_DATA } from "@/utils/vars";
 import { formatBytes, sanitizeFileName } from "@/utils/utils";
 import { createModDownloadDir, refreshModList, saveConfigs, validateModDownload } from "@/utils/filesys";
 import { DownloadItem } from "@/utils/types";
@@ -27,6 +27,7 @@ function Downloads() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
 	const modList = useSetAtom(MOD_LIST);
+	const game = useAtomValue(GAME);
 	const downloadRef = useRef<HTMLDivElement>(null);
 	const downloadRef2 = useRef<HTMLDivElement>(null);
 	const downloadRef3 = useRef<HTMLDivElement>(null);
@@ -121,6 +122,12 @@ function Downloads() {
 		});
 	}, []);
 	useEffect(() => {
+		path = "";
+		downloadElement = null;
+		prev = 0;
+		prevText = " • ";
+	}, [game]);
+	useEffect(() => {
 		if (downloads && downloads.queue.length < 1) return;
 		if (path !== "") return;
 		if (!downloads.downloading || Object.keys(downloads.downloading).length < 1) {
@@ -149,7 +156,7 @@ function Downloads() {
 			});
 			downloadFile(item as DownloadItem);
 		}
-	}, [downloads]);
+	}, [downloads, path]);
 	const clearCompleted = () => {
 		setDownloads((prev) => ({ ...prev, completed: [] }));
 	};
@@ -293,7 +300,7 @@ function Downloads() {
 												</Label>
 												<div className="flex gap-1 text-xs text-gray-400 capitalize">
 													{item.status}
-													<div ref={index == 0 ? speedRef : null}>{index==0?prevText:" • "}</div>
+													<div ref={index == 0 ? speedRef : null}>{index == 0 ? prevText : " • "}</div>
 													{item.category}
 												</div>
 											</div>

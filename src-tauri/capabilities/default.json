@@ -98,6 +98,7 @@
     "fs:allow-exists",
     "fs:allow-watch",
     "fs:read-dirs",
+    "deep-link:default",
     {
       "identifier": "fs:scope",
       "allow": [

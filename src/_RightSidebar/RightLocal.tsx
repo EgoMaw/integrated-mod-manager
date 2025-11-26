@@ -2,12 +2,16 @@ import { Input } from "@/components/ui/input";
 import {
 	CATEGORIES,
 	DATA,
+	FILE_TO_DL,
+	GAME,
+	INIT_DONE,
 	LAST_UPDATED,
 	MOD_LIST,
 	ONLINE,
 	ONLINE_SELECTED,
 	RIGHT_SLIDEOVER_OPEN,
 	SELECTED,
+	SETTINGS,
 	SOURCE,
 	TEXT_DATA,
 } from "@/utils/vars";
@@ -22,12 +26,13 @@ import {
 	Settings2Icon,
 	TrashIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { managedSRC } from "@/utils/consts";
+import { GAME_GB_IDS, managedSRC } from "@/utils/consts";
 import { getImageUrl, handleImageError, join, modRouteFromURL } from "@/utils/utils";
 import { Sidebar, SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
-
+// @ts-ignore: no type declarations available for this optional Tauri plugin
+import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
 // import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -43,13 +48,34 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimatePresence, motion } from "motion/react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { switchGameTheme } from "@/utils/theme";
+import { main } from "@/utils/init";
+import { addToast } from "@/_Toaster/ToastProvider";
 let text = "";
+let curUrlIndex = 0;
 function RightLocal() {
 	const [tab, setTab] = useState<"notes" | "hotkeys">("hotkeys");
 	const setOnline = useSetAtom(ONLINE);
 	const setOnlineSelected = useSetAtom(ONLINE_SELECTED);
 	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
+	const setFileToDl = useSetAtom(FILE_TO_DL);
+	const game = useAtomValue(GAME);
+	const [initDone, setInitDone] = useAtom(INIT_DONE);
+	const setSettings = useSetAtom(SETTINGS);
+
 	function handleInAppLink(url: string) {
+		if (url.startsWith("imm://")) {
+			url = url.replace("imm://", "");
+			if (!url.startsWith("http")) {
+				url = "https://" + url;
+			}
+			const temp = url.split("/dl/");
+			url = temp[0];
+			if (temp[1]) {
+				setFileToDl(temp[1]);
+			}
+		}
 		if (!url.startsWith("http")) return;
 		let mod = modRouteFromURL(url);
 		if (mod) {
@@ -58,6 +84,69 @@ function RightLocal() {
 			setRightSlideOverOpen(true);
 		}
 	}
+	const [urls, setUrls] = useState<string[]>([]);
+	const handleURLGame = useCallback(async (urls: string[]) => {
+		const final = urls[urls.length - 1];
+		if (final) getCurrentWebviewWindow()?.setFocus();
+
+		if (final.includes("/game/")) {
+			const url: any = final.split("/game/");
+			url[1] = url[1].split("/");
+			const urlGame = GAME_GB_IDS[url[1].shift()];
+			console.log("urlGame:", urlGame, "game: ",game);
+			url[1] = url[1].join("/");
+			urls[urls.length - 1] = url.join("/");
+			if (urlGame && urlGame != game) {
+				addToast({
+					message: `Switching to game: ${urlGame}`,
+				});
+				setSettings((prev) => ({ ...prev, global: { ...prev.global, game: urlGame } }));
+				await saveConfigs(true);
+				setTimeout(() => {
+					main();
+				}, 0);
+			}
+		}
+	}, [game]);
+	useEffect(() => {
+		let unlisten: (() => void) | undefined;
+
+		const initDeepLink = async () => {
+			// 1. Check if app was launched via deep link
+			// We use sessionStorage to ensure we only process the launch URL once per session.
+			// This prevents the deep link from re-triggering on page reload (F5),
+			// as the CLI args (returned by getCurrent) persist for the process lifetime.
+			const initialUrls = await getCurrent();
+			const isDeepLinkHandled = sessionStorage.getItem("deep-link-initial-handled");
+
+			if (initialUrls && !isDeepLinkHandled) {
+				console.log("Launched with URLs:", initialUrls);
+				await handleURLGame(initialUrls);
+				setUrls((prev) => [...prev, ...initialUrls]);
+				sessionStorage.setItem("deep-link-initial-handled", "true");
+			}
+
+			// 2. Listen for deep links while app is running
+			// The single-instance plugin forwards Windows deep links here automatically
+			unlisten = await onOpenUrl(async (newUrls) => {
+				console.log("Received new URLs:", newUrls);
+				await handleURLGame(newUrls);
+				setUrls((prev) => [...prev, ...newUrls]);
+			});
+		};
+
+		initDeepLink();
+
+		return () => {
+			if (unlisten) unlisten();
+		};
+	}, [handleURLGame]);
+	useEffect(() => {
+		if (!initDone || urls.length === 0 || curUrlIndex >= urls.length) return;
+		console.log("Processing URLs after init:", urls);
+		handleInAppLink(urls[urls.length - 1]);
+		setUrls([]);
+	}, [urls, initDone]);
 	useEffect(() => {
 		const handlePaste = (event: ClipboardEvent) => {
 			let activeEl = document.activeElement;
@@ -131,7 +220,7 @@ function RightLocal() {
 			text = mod?.note || "";
 			setItem(mod);
 		} else setItem(undefined);
-	}, [selected,modList]);
+	}, [selected, modList]);
 	useEffect(() => {
 		if (item) {
 			const cat = categories.find((c) => c._sName == item.parent) || { _sName: "-1", _sIconUrl: "" };
@@ -371,40 +460,45 @@ function RightLocal() {
 												}
 											}}
 										>
-											
 											<Tooltip>
 												<TooltipTrigger>
 													<LinkIcon className=" w-4 h-4" />
 												</TooltipTrigger>
 												<TooltipContent className="w-20 flex items-center justify-center">
-													<p className="w-full max-w-20 text-center">{textData._RightSideBar._RightLocal.ViewModOnline}</p>
+													<p className="w-full max-w-20 text-center">
+														{textData._RightSideBar._RightLocal.ViewModOnline}
+													</p>
 												</TooltipContent>
 											</Tooltip>
 										</Button>
 									) : (
-										item&&<Button
-											onClick={() => {
-												setOnline(true);
-												const search = document.getElementById("search-input") as HTMLInputElement;
-												setTimeout(()=>{
-													search.focus();
-													search.value = item?.name.replaceAll("_"," ");
-													search.blur();
-												},100)
-												// setRightSlideOverOpen(true);
-												setSelected("")
-											}}
-											className="bg-pat2"
-										>
-											<Tooltip>
-												<TooltipTrigger>
-													<SearchIcon className=" pointer-events-none w-4 h-4" />
-												</TooltipTrigger>
-												<TooltipContent className="w-15 flex items-center justify-center">
-													<p className="w-full max-w-15 text-center">{textData._RightSideBar._RightLocal.SearchOnline}</p>
-												</TooltipContent>
-											</Tooltip>
-										</Button>
+										item && (
+											<Button
+												onClick={() => {
+													setOnline(true);
+													const search = document.getElementById("search-input") as HTMLInputElement;
+													setTimeout(() => {
+														search.focus();
+														search.value = item?.name.replaceAll("_", " ");
+														search.blur();
+													}, 100);
+													// setRightSlideOverOpen(true);
+													setSelected("");
+												}}
+												className="bg-pat2"
+											>
+												<Tooltip>
+													<TooltipTrigger>
+														<SearchIcon className=" pointer-events-none w-4 h-4" />
+													</TooltipTrigger>
+													<TooltipContent className="w-15 flex items-center justify-center">
+														<p className="w-full max-w-15 text-center">
+															{textData._RightSideBar._RightLocal.SearchOnline}
+														</p>
+													</TooltipContent>
+												</Tooltip>
+											</Button>
+										)
 									)}
 									{}
 								</div>

@@ -105,6 +105,7 @@ const NOTICE = atom({
 const HELP_OPEN = atom(false);
 const TUTORIAL_OPEN = atom(false);
 const NOTICE_OPEN = atom(false);
+const FILE_TO_DL = atom("");
 export function resetAtoms() {
 	const atoms = {
 		INIT_DONE,
@@ -134,12 +135,14 @@ export function resetAtoms() {
 		ONLINE_SELECTED,
 		XXMI_MODE
 	};
+	store.set(FILE_TO_DL, "");
 	Object.keys(atoms).forEach((atom) =>
 		store.set(atoms[atom as keyof typeof atoms] as any, DEFAULTS[atom as keyof typeof DEFAULTS])
 	);
 }
 const ERR = atom("");
 export {
+	FILE_TO_DL,
 	ERR,
 	XXMI_DIR,
 	XXMI_MODE,
