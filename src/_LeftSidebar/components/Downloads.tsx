@@ -274,11 +274,11 @@ function Downloads() {
 						{downloadList.length > 0 ? (
 							<>
 								{
-									<div className="data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 data-wuwa:-mb-16 -mb-18 data-wuwa:border-b flex items-center w-full min-w-0 overflow-hidden">
+									<div className="button-like zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 data-wuwa:-mb-16 h-16 -mb-18 data-wuwa:border-b flex items-center w-full min-w-0 overflow-hidden">
 										<div
 											key={"cur" + JSON.stringify(downloadList[0])}
 											ref={downloadRef2}
-											className="bg-accent bgaccent data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 flex items-center w-0 min-w-0 opacity-50"
+											className="bg-accent bgaccent data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 h-16 flex items-center w-0 min-w-0 opacity-50"
 											style={{ width: prev + "%" }}
 										></div>
 									</div>
@@ -286,7 +286,7 @@ function Downloads() {
 								{downloadList.map((item, index) => (
 									<div
 										key={item.name.replaceAll("DISABLED_", "") + index}
-										className="hover:bg-background/20 zzz-fg-text data-zzz:button-like data-gi:border-1 data-gi:rounded-sm min-h-16 data-wuwa:border-b flex items-center justify-between w-full px-4"
+										className="hover:bg-background/20 zzz-fg-text  data-gi:border-1 data-gi:rounded-sm min-h-16 data-wuwa:border-b flex items-center justify-between w-full px-4 button-like"
 										style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150" }}
 									>
 										<div className=" flex items-center flex-1 w-full gap-3">

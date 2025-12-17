@@ -75,8 +75,8 @@ initLogCapture();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<Provider store={store}>
 		<ThemeProvider defaultTheme="dark">
-			<Decorations />
 			<ErrorBoundary>
+				<Decorations />
 				<App />
 			</ErrorBoundary>
 		</ThemeProvider>

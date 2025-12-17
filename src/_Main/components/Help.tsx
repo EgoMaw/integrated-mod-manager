@@ -22,8 +22,9 @@ function Help() {
 	return (
 		<Dialog open={helpOpen} onOpenChange={setHelpOpen}>
 			<DialogTrigger asChild>
-				<Button className="aspect-square text-ellipsis bg-sidebar flex flex-col h-full p-0 overflow-hidden text-xs border">
-					<HelpCircle className="scale-120 mb-0.5" />
+				<Button className="bg-sidebar flex gap-0.5 h-5 pointer-events-auto p-0 px-1 text-[10px] border">
+					<HelpCircle className="py-[1px]" />
+					Help
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="game-font min-h-200 min-w-280 flex flex-col gap-8">

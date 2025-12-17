@@ -24,7 +24,7 @@ function LeftSidebar() {
 	// const decor = useAtomValue(SETTINGS).global.winType
 	useInstalledItemsManager();
 	return (
-		<Sidebar collapsible="icon" className="pointer-events-auto pt-6"
+		<Sidebar collapsible="icon" className="pointer-events-auto pt-8"
 		>
 			<SidebarContent className="bg-sidebar polka h-full gap-0 overflow-hidden border border-t-0">
 				<div className="flex flex-col w-full max-h-full min-h-full">

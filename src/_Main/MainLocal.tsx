@@ -2,6 +2,7 @@ import {
 	CATEGORY,
 	FILTER,
 	INIT_DONE,
+	INSTALLED_ITEMS,
 	LAST_UPDATED,
 	MOD_LIST,
 	SEARCH,
@@ -35,6 +36,14 @@ function MainLocal() {
 	const [initial, setInitial] = useState(true);
 	const lastUpdated = useAtomValue(LAST_UPDATED);
 	const [modList, setModList] = useAtom(MOD_LIST);
+	const installedItems = useAtomValue(INSTALLED_ITEMS);
+	const updateObj = useMemo(() => {
+		const obj: { [key: string]: boolean } = {};
+		installedItems.forEach((item) => {
+			obj[item.name] = item.modStatus==2;
+		});
+		return obj;
+	}, [installedItems]);
 	const category = useAtomValue(CATEGORY);
 	const filter = useAtomValue(FILTER);
 	const search = useAtomValue(SEARCH);
@@ -192,23 +201,6 @@ function MainLocal() {
 				<label className="text-muted z-200 flex flex-col items-center gap-1">
 					<label className="flex items-center">
 						{filteredList.length} {textData.Items}{" "}
-						{/* <Tooltip>
-							<TooltipTrigger
-								onClick={() => {
-									addToast({
-										type: "info",
-										message: textData._Toasts.RefreshMods,
-									});
-									// setModList([]);
-									refreshModList().then((data) => {
-										setModList(data);
-									});
-								}}
-							>
-								<RefreshCwIcon className="text-link hover:opacity-100 h-4 duration-200 opacity-50"></RefreshCwIcon>
-							</TooltipTrigger>
-							<TooltipContent>{textData.Refresh}</TooltipContent>
-						</Tooltip> */}
 					</label>
 					<label className="text-xs">
 						in{" "}
@@ -251,7 +243,7 @@ function MainLocal() {
 									{isVisible ? (
 										<div className="card-generic"></div>
 									) : (
-										<CardLocal item={mod} selected={selected === mod.path} lastUpdated={lastUpdated} />
+										<CardLocal item={mod} selected={selected === mod.path} lastUpdated={lastUpdated} hasUpdate={updateObj[mod.path]} />
 									)}
 								</motion.div>
 							);

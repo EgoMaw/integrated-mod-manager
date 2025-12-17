@@ -127,7 +127,7 @@ function LeftLocal() {
 					<div
 						className="min-w-14 thin justify-evenly flex flex-col items-center w-full gap-2 pl-2 overflow-hidden overflow-y-scroll duration-200"
 						style={{
-							maxHeight: leftSidebarOpen ? "calc(100vh - 31.5rem)" : "calc(100vh - 35.5rem)",
+							maxHeight: leftSidebarOpen ? "calc(100vh - 33.5rem)" : "calc(100vh - 37.5rem)",
 						}}
 					>
 						<AnimatePresence initial={false}>

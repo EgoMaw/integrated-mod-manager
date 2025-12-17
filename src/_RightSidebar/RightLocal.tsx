@@ -29,7 +29,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { GAME_GB_IDS, managedSRC } from "@/utils/consts";
-import { getImageUrl, handleImageError, join, modRouteFromURL } from "@/utils/utils";
+import { getImageUrl, handleImageError, handleInAppLink, join, modRouteFromURL } from "@/utils/utils";
 import { Sidebar, SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 // @ts-ignore: no type declarations available for this optional Tauri plugin
 import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
@@ -56,34 +56,12 @@ let curUrlIndex = 0;
 function RightLocal() {
 	const [tab, setTab] = useState<"notes" | "hotkeys">("hotkeys");
 	const setOnline = useSetAtom(ONLINE);
-	const setOnlineSelected = useSetAtom(ONLINE_SELECTED);
-	const setRightSlideOverOpen = useSetAtom(RIGHT_SLIDEOVER_OPEN);
-	const setFileToDl = useSetAtom(FILE_TO_DL);
 	const game = useAtomValue(GAME);
 	const lang = useAtomValue(SETTINGS).global.lang
 	const initDone = useAtomValue(INIT_DONE);
 	const setSettings = useSetAtom(SETTINGS);
 
-	function handleInAppLink(url: string) {
-		if (url.startsWith("imm://")) {
-			url = url.replace("imm://", "");
-			if (!url.startsWith("http")) {
-				url = "https://" + url;
-			}
-			const temp = url.split("/dl/");
-			url = temp[0];
-			if (temp[1]) {
-				setFileToDl(temp[1]);
-			}
-		}
-		if (!url.startsWith("http")) return;
-		let mod = modRouteFromURL(url);
-		if (mod) {
-			setOnline(true);
-			setOnlineSelected(mod);
-			setRightSlideOverOpen(true);
-		}
-	}
+	
 	const [urls, setUrls] = useState<string[]>([]);
 	const handleURLGame = useCallback(async (urls: string[]) => {
 		const final = urls[urls.length - 1];

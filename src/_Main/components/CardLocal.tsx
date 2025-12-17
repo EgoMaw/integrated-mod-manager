@@ -1,7 +1,8 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { getImageUrl, handleImageError } from "@/utils/utils";
-import { Link2Icon, Link2OffIcon } from "lucide-react";
+import { getImageUrl, handleImageError, handleInAppLink } from "@/utils/utils";
+import { Link2Icon, Link2OffIcon, UploadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CardLocalProps {
 	item: {
@@ -13,9 +14,10 @@ interface CardLocalProps {
 	};
 	selected: boolean;
 	lastUpdated: number;
+	hasUpdate: boolean;
 }
 
-const CardLocal = React.memo(({ item, selected, lastUpdated }: CardLocalProps) => {
+const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate }: CardLocalProps) => {
 	const previewUrl = `${getImageUrl(item.path)}?${lastUpdated}`;
 	return (
 		<div
@@ -32,13 +34,18 @@ const CardLocal = React.memo(({ item, selected, lastUpdated }: CardLocalProps) =
 			/>
 			<img
 				style={{ filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }}
-				className="w-full fadein h-[calc(100%-3.5rem)] -mt-71.5 data-gxi:-mt-57.5  duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover"
+				className="w-full fadein h-[calc(100%-3.5rem)] -mt-[calc(var(--card-height)-2px)]   duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover"
 				src={previewUrl}
 				onError={(e) => handleImageError(e)}
 			/>
-			<div className="bg-background/50 fadein backdrop-blur data-gxi:-mt-71.5 flex items-center w-full min-h-14 gap-2 px-4 py-1 header-img">
+			<div className="bg-background/50 fadein backdrop-blur
+			 flex items-center w-full min-h-14 gap-2 px-4 py-1 header-img">
 				{item?.source ? (
-					<Link2Icon className="text-accent"/>
+					hasUpdate?<Button onClick={()=>{
+						handleInAppLink(item.source||"")
+					}} className="pointer-events-auto" variant="ghost">
+						<UploadIcon  className="text-accent"/>
+					</Button>:<Link2Icon className="text-accent"/>
 				) : (
 					<Link2OffIcon className="text-muted"/>
 				)}
@@ -49,6 +56,7 @@ const CardLocal = React.memo(({ item, selected, lastUpdated }: CardLocalProps) =
 					{item.name}
 				</Label>
 			</div>
+			
 		</div>
 	);
 });

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { IMAGE_SERVER, managedSRC } from "./consts";
-import { DATA, GAME, INSTALLED_ITEMS, LANG, ONLINE_DATA, SOURCE, store } from "./vars";
+import { DATA, FILE_TO_DL, GAME, INSTALLED_ITEMS, LANG, ONLINE, ONLINE_DATA, ONLINE_SELECTED, RIGHT_SLIDEOVER_OPEN, SOURCE, store } from "./vars";
 import { useAtom, useAtomValue } from "jotai";
 import { apiClient } from "./api";
 import { join } from "./hotreload";
@@ -80,7 +80,8 @@ let src = "";
 store.sub(SOURCE, () => {
 	src = store.get(SOURCE);
 });
-export function getImageUrl(path: string): string {
+export function 
+getImageUrl(path: string): string {
 	return `${IMAGE_SERVER_URL}/${src}/${managedSRC}/${path}`;
 }
 const PRIORITY_KEYS = ["Alt", "Ctrl", "Shift", "Capslock", "Tab", "Up", "Down", "Left", "Right"];
@@ -197,6 +198,26 @@ function saveCheckedCache(cache: Record<string, { updated: number; status: numbe
 
 const checked: Record<string, { updated: number; status: number }> = loadCheckedCache();
 let now = Date.now();
+export function handleInAppLink(url: string) {
+		if (url.startsWith("imm://")) {
+			url = url.replace("imm://", "");
+			if (!url.startsWith("http")) {
+				url = "https://" + url;
+			}
+			const temp = url.split("/dl/");
+			url = temp[0];
+			if (temp[1]) {
+				store.set(FILE_TO_DL, temp[1]);
+			}
+		}
+		if (!url.startsWith("http")) return;
+		let mod = modRouteFromURL(url);
+		if (mod) {
+			store.set(ONLINE,true);
+			store.set(ONLINE_SELECTED, mod);
+			store.set(RIGHT_SLIDEOVER_OPEN, true);
+		}
+	}
 export function useInstalledItemsManager() {
 	const [installedItems, setInstalledItems] = useAtom(INSTALLED_ITEMS);
 	const localData = useAtomValue(DATA);

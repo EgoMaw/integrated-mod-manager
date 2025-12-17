@@ -21,7 +21,7 @@ function Main() {
 		};
 	}, [online]);
 	return (
-		<div className="border border-t-0 flex flex-col w-full h-full overflow-hidden duration-200 mt-6 pb-6"
+		<div className="border border-t-0 flex flex-col w-full h-full overflow-hidden duration-200 mt-8 pb-8"
 		>
 			<TopBar />
 			<div className="flex w-full h-full px-2 overflow-hidden">

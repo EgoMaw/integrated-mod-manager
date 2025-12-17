@@ -21,6 +21,7 @@ import {
 	DownloadIcon,
 	EllipsisVerticalIcon,
 	EyeIcon,
+	InfoIcon,
 	LinkIcon,
 	LoaderIcon,
 	MessageSquareIcon,
@@ -39,6 +40,7 @@ import { UNCATEGORIZED } from "@/utils/consts";
 import { addToast } from "@/_Toaster/ToastProvider";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { invoke } from "@tauri-apps/api/core";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 // import { OnlineMod } from "@/utils/types";
 let now = Date.now() / 1000;
 
@@ -68,7 +70,7 @@ function RightOnline({ open }: { open: boolean }) {
 			setDownloadList((prev: any) => {
 				//300ms promise await
 				// await new Promise(resolve => setTimeout(resolve, 300));
-				
+
 				let dlitem = {
 					status: "pending",
 					addon: altPopoverOpen,
@@ -138,18 +140,17 @@ function RightOnline({ open }: { open: boolean }) {
 			saveConfigs();
 		}
 	}, [selected]);
-	useEffect(()=>{
-		console.log(item?._aFiles)
-		if(item?._aFiles){
-			const file = item._aFiles.find((f:any)=>f._idRow==fileToDl)
-			if(file){
+	useEffect(() => {
+		console.log(item?._aFiles);
+		if (item?._aFiles) {
+			const file = item._aFiles.find((f: any) => f._idRow == fileToDl);
+			if (file) {
 				addToDownloadQueue(file);
 				setFileToDl("");
-				addToast({type:"success",message:"File added to download queue."} );
+				addToast({ type: "success", message: "File added to download queue." });
 			}
 		}
-
-	},[item?._aFiles])
+	}, [item?._aFiles]);
 	const popoverContent = item?._aFiles?.map((file: any) => (
 		<Button
 			className="min-h-fit data-wuwa:p-2 flex items-center justify-center min-w-full gap-1 p-4 overflow-hidden"
@@ -187,9 +188,21 @@ function RightOnline({ open }: { open: boolean }) {
 						<div className=" bg-warn w-12 px-1 text-center rounded-lg">pending</div>
 					)}
 				</div>
-				<p className="w-52 text-ellipsis brightness-75 wrap-break-word overflow-hidden text-xs resize-none">
-					{file._sDescription}
-				</p>
+				<div className="flex items-center gap-1">
+					{file._sDescription && file._sDescription.length > 0 && (
+						<Tooltip>
+							<TooltipTrigger>
+								<InfoIcon />
+							</TooltipTrigger>
+							<TooltipContent className="max-w-64 w-fit text-center">
+								<p className="max-w-64 break-words text-center">{file._sDescription}</p>
+							</TooltipContent>
+						</Tooltip>
+					)}
+					<p className="w-52 text-ellipsis brightness-75 wrap-break-word overflow-hidden text-xs resize-none">
+						{file._sDescription}
+					</p>
+				</div>
 			</div>
 			<div className="min-w-24 flex flex-col items-center">
 				<div className="flex gap-1">

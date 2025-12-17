@@ -283,7 +283,7 @@ function MainOnline() {
 
 			<AnimatePresence mode="popLayout">
 				<motion.div
-					className="min-h-fit card-grid grid justify-center w-full py-4"
+					className="min-h-fit card-grid card-grid-online grid justify-center w-full py-4"
 					layout
 					key={"content" + onlinePath}
 					initial={{ opacity: 0 }}
