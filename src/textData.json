@@ -4,6 +4,7 @@
 		"Browse": "Browse",
 		"All": "All",
 		"Update": "Update",
+		"UpdateAvl":"Update Available!",
 		"Install": "Install",
 		"Loading": "Loading",
 		"Skip": "Skip",
@@ -36,6 +37,12 @@
 			"ru": "Russian",
 			"jp": "Japanese",
 			"kr": "Korean"
+		},
+		"_Tags":{
+			"Tags":"Tags",
+			"AddTag":"Add Tag",
+			"Favorite":"Favorite",
+			"NSFW":"NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Mods Loaded Successfully",
@@ -493,6 +500,7 @@
 		"Browse": "浏览",
 		"All": "全部",
 		"Update": "更新",
+		"UpdateAvl": "有可用更新！",
 		"Install": "安装",
 		"Loading": "加载中",
 		"Skip": "跳过",
@@ -525,6 +533,12 @@
 			"ru": "俄语",
 			"jp": "日语",
 			"kr": "韩语"
+		},
+		"_Tags":{
+			"Tags":"标签",
+			"AddTag":"添加标签",
+			"Favorite":"收藏",
+			"NSFW":"NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "模组加载成功",
@@ -969,6 +983,7 @@
 		"Browse": "Обзор",
 		"All": "Все",
 		"Update": "Обновить",
+		"UpdateAvl": "Доступно обновление!",
 		"Install": "Установить",
 		"Loading": "Загрузка",
 		"Skip": "Пропустить",
@@ -1001,6 +1016,12 @@
 			"ru": "Русский",
 			"jp": "Японский",
 			"kr": "Корейский"
+		},
+		"_Tags":{
+			"Tags": "Теги",
+			"AddTag": "Добавить тег",
+			"Favorite": "Избранное",
+			"NSFW": "NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Моды успешно загружены",
@@ -1468,6 +1489,7 @@
 		"Browse": "参照",
 		"All": "すべて",
 		"Update": "更新",
+		"UpdateAvl": "アップデートが利用可能です！",
 		"Install": "インストール",
 		"Loading": "読み込み中",
 		"Skip": "スキップ",
@@ -1500,6 +1522,12 @@
 			"ru": "ロシア語",
 			"jp": "日本語",
 			"kr": "韓国語"
+		},
+		"_Tags":{
+			"Tags": "タグ",
+			"AddTag": "タグを追加",
+			"Favorite": "お気に入り",
+			"NSFW": "NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Modが正常に読み込まれました",
@@ -1958,6 +1986,7 @@
 		"Browse": "찾아보기",
 		"All": "모두",
 		"Update": "업데이트",
+		"UpdateAvl": "업데이트 사용 가능!",
 		"Install": "설치",
 		"Loading": "로딩 중",
 		"Skip": "건너뛰기",
@@ -1990,6 +2019,12 @@
 			"ru": "러시아어",
 			"jp": "일본어",
 			"kr": "한국어"
+		},
+		"_Tags":{
+			"Tags": "태그",
+			"AddTag": "태그 추가",
+			"Favorite": "즐겨찾기",
+			"NSFW": "NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "모드가 성공적으로 로드되었습니다",

@@ -207,7 +207,7 @@ function RightLocal() {
 		}
 	}, [item, modList]);
 	return (
-		<Sidebar side="right" className="duration-300 pt-6"
+		<Sidebar side="right" className="duration-300 pt-8"
 		>
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<ManageCategories />
@@ -257,16 +257,16 @@ function RightLocal() {
 			</AlertDialog>
 			<SidebarContent className="polka bg-sidebar flex flex-row w-full h-full gap-0 p-0 overflow-hidden duration-300 border border-t-0">
 				<div className=" flex flex-col items-center h-full min-w-full overflow-y-hidden" key={item?.path || "no-item"}>
-					<div className="text-accent min-h-16 flex items-center justify-center h-16 min-w-full gap-3 px-3 border-b">
+					<div className="text-accent min-h-10 flex items-center justify-center h-10 min-w-full gap-3 px-3 border-b">
 						{item ? (
 							<>
 								<Button
-									className="aspect-square"
+									className="aspect-square  max-h-8"
 									onClick={() => {
 										openPath(join(source, managedSRC, item.path));
 									}}
 								>
-									<ArrowUpRightFromSquareIcon className="w-4 h-4" />
+									<ArrowUpRightFromSquareIcon className="max-h-3" />
 								</Button>
 								<Input
 									onFocus={(e) => {
@@ -283,7 +283,7 @@ function RightLocal() {
 									defaultValue={item?.name || ""}
 								/>
 								<Button
-									className="aspect-square"
+									className="aspect-square max-h-8"
 									variant="destructive"
 									onClick={() => {
 										setDeleteItemData((prev) => {
@@ -293,14 +293,14 @@ function RightLocal() {
 										});
 									}}
 								>
-									<TrashIcon className="w-4 h-4" />
+									<TrashIcon className="max-h-3" />
 								</Button>
 							</>
 						) : (
 							"---"
 						)}
 					</div>
-					<SidebarGroup className="min-h-82 px-1 mt-1 select-none">
+					<SidebarGroup className="min-h-76 px-1 mt-1 select-none">
 						<EditIcon
 							onClick={() => {
 								item && savePreviewImage(item.path);
@@ -309,12 +309,12 @@ function RightLocal() {
 						/>
 						<img
 							id="preview"
-							className="w-82 h-82 data-zzz:rounded-[1px] data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl bg-background/50 object-cover duration-150 border rounded-lg"
+							className="w-82 h-76 data-zzz:rounded-[1px] data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl bg-background/50 object-cover duration-150 border rounded-lg"
 							onError={(e) => handleImageError(e)}
 							src={`${getImageUrl(item?.path || "")}?${lastUpdated}`}
 						></img>
 					</SidebarGroup>
-					<SidebarGroup className="px-1 min-h-27.5 my-1">
+					<SidebarGroup className="px-1 min-h-41.5 my-1">
 						<div className="flex flex-col w-full border rounded-lg">
 							<div className="bg-pat2 flex items-center justify-between w-full p-1 rounded-lg">
 								<Label className=" h-12  flex items-center justify-center  min-w-28.5 w-28.5 text-accent ">
@@ -481,6 +481,93 @@ function RightLocal() {
 									{}
 								</div>
 							</div>
+							<div className="bg-pat1 flex justify-between w-full p-1 rounded-lg">
+								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
+									{textData._Tags.Tags}
+								</Label>
+								<div className="w-48.5 flex items-center px-1">
+									<Input
+										onBlur={(e) => {
+											if (item && e.currentTarget.value !== item?.source) {
+												setData((prev) => {
+													prev[item.path] = {
+														...prev[item.path],
+														source: e.currentTarget.value,
+														updatedAt: Date.now(),
+														viewedAt: 0,
+													};
+													return { ...prev };
+												});
+												setModList((prev) => {
+													return prev.map((m) => {
+														if (m.path == item.path) {
+															return { ...m, source: e.currentTarget.value };
+														}
+														return m;
+													});
+												});
+												saveConfigs();
+											}
+										}}
+										type="text"
+										placeholder={textData._RightSideBar._RightLocal.NoSource}
+										className="w-full select-none focus-within:select-auto overflow-hidden h-12 focus-visible:ring-[0px] border-0  text-ellipsis"
+										style={{ backgroundColor: "#fff0" }}
+										key={item?.source}
+										defaultValue={item?.source}
+									/>
+									{item?.source ? (
+										<Button
+											className="bg-pat2"
+											onClick={() => {
+												if (item?.source && item?.source != "") {
+													handleInAppLink(item.source || "");
+												}
+											}}
+										>
+											<Tooltip>
+												<TooltipTrigger>
+													<LinkIcon className=" w-4 h-4" />
+												</TooltipTrigger>
+												<TooltipContent className="w-20 flex items-center justify-center">
+													<p className="w-full max-w-20 text-center">
+														{textData._RightSideBar._RightLocal.ViewModOnline}
+													</p>
+												</TooltipContent>
+											</Tooltip>
+										</Button>
+									) : (
+										item && (
+											<Button
+												onClick={() => {
+													setOnline(true);
+													const search = document.getElementById("search-input") as HTMLInputElement;
+													setTimeout(() => {
+														search.focus();
+														search.value = item?.name.replaceAll("_", " ");
+														search.blur();
+													}, 100);
+													// setRightSlideOverOpen(true);
+													setSelected("");
+												}}
+												className="bg-pat2"
+											>
+												<Tooltip>
+													<TooltipTrigger>
+														<SearchIcon className=" pointer-events-none w-4 h-4" />
+													</TooltipTrigger>
+													<TooltipContent className="w-15 flex items-center justify-center">
+														<p className="w-full max-w-15 text-center">
+															{textData._RightSideBar._RightLocal.SearchOnline}
+														</p>
+													</TooltipContent>
+												</Tooltip>
+											</Button>
+										)
+									)}
+									{}
+								</div>
+							</div>
 						</div>
 					</SidebarGroup>
 					<SidebarGroup
@@ -527,7 +614,7 @@ function RightLocal() {
 										className="flex w-full h-full gap-2 border rounded-md"
 									>
 										{tab == "hotkeys" ? (
-											<div className="text-gray-300 h-full max-h-[calc(100vh-36.75rem)] flex flex-col w-full overflow-y-scroll overflow-x-hidden">
+											<div className="text-gray-300 h-full max-h-[calc(100vh-38.75rem)] flex flex-col w-full overflow-y-scroll overflow-x-hidden">
 												{item?.keys?.map((hotkey, index) => (
 													<div
 														key={index + item.path}

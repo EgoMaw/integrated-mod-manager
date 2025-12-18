@@ -60,8 +60,10 @@ function Decorations() {
 					/>
 				</Button>
 				<div className="w-full h-full items-center justify-between flex overflow-hidden">
-					<div className=""></div>
-					<div className="flex h-full items-center justify-center gap-1">
+					<div className="min-w-16 h-1"></div>
+					<div style={{
+						marginLeft: rightSidebarOpen?"":"6.5rem"
+					}} className="flex h-full items-center justify-center gap-1">
 						<Updater/>
 					</div>
 

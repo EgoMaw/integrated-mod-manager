@@ -26,7 +26,7 @@ function ToastProvider() {
 	const toasts = useAtomValue(TOASTS);
 	return createPortal(
 		<>
-			<div className="fixed z-[99999] top-1 left-1/2 -translate-x-1/2 w-82 h-2 flex flex-col-reverse items-center justify-center pointer-events-none">
+			<div className="fixed z-[99999] top-5 left-1/2 -translate-x-1/2 w-82 h-2 flex flex-col-reverse items-center justify-center pointer-events-none">
 				<AnimatePresence>
 					{toasts.map((toast: any, index: number) => (
 						<motion.div

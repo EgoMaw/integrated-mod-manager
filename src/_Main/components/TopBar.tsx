@@ -138,8 +138,8 @@ function TopBar() {
 					}}
 				/>
 			</div>
-			<div className="data-wuwa:bg-sidebar data-wuwa:min-w-32 min-w-28 data-wuwa:border h-full bg-transparent border-0 rounded-lg">
-				{online ? (
+			{online && <div className="data-wuwa:bg-sidebar data-wuwa:min-w-32 min-w-28 data-wuwa:border h-full bg-transparent border-0 rounded-lg">
+				
 					<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 						<PopoverTrigger asChild>
 							<div className="min-w-fit trs button-like zzz-border hover:brightness-150 bg-sidebar cursor-pointerx flex items-center justify-center h-full gap-1 p-2 text-xs duration-300 rounded-md select-none">
@@ -238,14 +238,10 @@ function TopBar() {
 							</div>
 						</PopoverContent>
 					</Popover>
-				) : (
-					<>
-						<Updater />
-					</>
-				)}
-			</div>
+				
+			</div>}
 			<Notice />
-			<Help />
+			{/* <Help /> */}
 			<Button
 				onClick={() => {
 					if(online){

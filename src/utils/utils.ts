@@ -82,7 +82,7 @@ store.sub(SOURCE, () => {
 });
 export function 
 getImageUrl(path: string): string {
-	return `${IMAGE_SERVER_URL}/${src}/${managedSRC}/${path}`;
+	return `${IMAGE_SERVER_URL}x/${src}/${managedSRC}/${path}`;
 }
 const PRIORITY_KEYS = ["Alt", "Ctrl", "Shift", "Capslock", "Tab", "Up", "Down", "Left", "Right"];
 const PRIORITY_SET = new Set(PRIORITY_KEYS);

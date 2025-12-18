@@ -231,7 +231,7 @@ function RightOnline({ open }: { open: boolean }) {
 					animate={{ translateX: "0%", opacity: 1 }}
 					exit={{ translateX: "100%", opacity: 0 }}
 					transition={{ duration: 0.3, ease: "linear" }}
-					className="bg-sidebar polka fixed right-0 pt-6 z-10 flex flex-col items-center justify-center h-full overflow-hidden border-l"
+					className="bg-sidebar polka fixed right-0 pt-8 z-10 flex flex-col items-center justify-center h-full overflow-hidden border-l"
 					style={{
 						maxWidth: "42vw",
 						width: "50rem",

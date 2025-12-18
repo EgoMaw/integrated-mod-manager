@@ -51,28 +51,31 @@ function Updater() {
 	return (
 		<Dialog open={updaterOpen} onOpenChange={setUpdaterOpen}>
 			<DialogTrigger asChild>
-				<Button className="max-w-32 text-ellipsis bg-sidebar flex flex-col w-full h-full p-0 overflow-hidden text-xs">
+				<Button className="text-ellipsis bg-sidebar pointer-events-auto flex h-6 p-0 overflow-hidden text-xs">
+					<img src="IMMDecor.png" className="h-6.5 min-w-fit p-2 pr-0" />
 					{update && update.status !== "ignored"
 						? {
 								available: (
-									<div className="min-w-24 min-h-12 text-accent flex items-center justify-center w-full gap-1 pointer-events-none">
-										<UploadIcon className="min-h-4 min-w-4" />
-										<Label className=" w-fit max-w-24 text-xs pointer-events-none">{textData.Update}</Label>
-									</div>
+									<>
+										<div className=" min-w-fit px-2 h-5 rounded-sm text-background button-like bg-accent flex items-center justify-center w-full gap-1 pointer-events-none">
+											<UploadIcon className="max-h-3.5" />
+											<Label className=" w-fit text-xs pointer-events-none">{textData.Update}</Label>
+										</div>
+									</>
 								),
 								downloading: (
-									<>
+									<div className=" flex flex-col  max-w-24 min-w-24 rounded-md overflow-hidden border">
 										<div
 											key={"down1"}
-											className="fade-in max-w-24 min-w-24 -mb-14 min-h-12 z-10 w-full pointer-events-none"
+											className="fade-in max-w-24 min-w-24 -mb-5 min-h-5 h-5 z-10 w-full pointer-events-none"
 										>
 											<div
 												ref={ref1}
-												className="min-h-12 height-in bg-accent text-background hover:brightness-125 flex flex-col self-start justify-center overflow-hidden rounded-lg"
+												className="min-h-5 h-5 height-in bg-accent text-background hover:brightness-125 flex flex-col self-start justify-center overflow-hidden rounded-r-md"
 												style={{ width: prev + "%" }}
 											>
 												<div className="min-w-24 fade-in flex items-center justify-center gap-1 pointer-events-none">
-													<Loader2Icon className="min-h-4 min-w-4 animate-spin" />
+													<Loader2Icon className="h-3 max-h-3 w-3 max-w-3 -ml-0.5 -mt-0.5 animate-spin" />
 
 													<Label className=" w-fit max-w-24 text-[0.6rem] pointer-events-none">
 														{textData._Main._components._Updater.Downloading}
@@ -83,26 +86,26 @@ function Updater() {
 
 										<div
 											key={"down2"}
-											className="fade-in min-w-24 min-h-12 text-accent flex items-center justify-center w-full gap-1 pointer-events-none"
+											className="fade-in min-w-24 max-w-24 min-h-5 h-5 text-accent flex items-center justify-center w-full gap-1 pointer-events-none"
 										>
-											<Loader2Icon className="min-h-4 min-w-4 animate-spin" />
+											<Loader2Icon className="h-3 max-h-3 w-3 max-w-3 -ml-0.5 -mt-0.5 animate-spin" />
 
 											<Label className=" w-fit max-w-24 text-[0.6rem] pointer-events-none">
 												{textData._Main._components._Updater.Downloading}
 											</Label>
 										</div>
-									</>
+									</div>
 								),
 								ready: (
-									<div className="min-w-24 min-h-12 text-background bg-accent flex items-center justify-center w-full gap-1 pointer-events-none">
-										<DownloadIcon className="min-h-4 min-w-4" />
+									<div className=" min-w-fit px-2 h-5 rounded-sm text-background button-like bg-accent flex items-center justify-center w-full gap-1 pointer-events-none">
+										<DownloadIcon className="max-h-3.5" />
 										<Label className=" w-fit max-w-24 text-xs pointer-events-none">{textData.Install}</Label>
 									</div>
 								),
 								error: (
-									<div className="min-w-24 min-h-12 text-background bg-accent flex items-center justify-center w-full gap-1 pointer-events-none">
-										<CircleAlert className="min-h-4 min-w-4 text-destructive" />
-										<Label className=" w-fit max-w-24 text-destructive text-xs pointer-events-none">
+									<div className=" min-w-fit px-2 h-5 rounded-sm text-background button-like bg-destructive flex items-center justify-center w-full gap-1 pointer-events-none">
+										<CircleAlert className="max-h-3.5" />
+										<Label className=" w-fit max-w-24 text-xs pointer-events-none">
 											{textData._Main._components._Updater.Error}
 										</Label>
 									</div>
@@ -195,8 +198,7 @@ function Updater() {
 									className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 								>
 									{" "}
-									<img className="h-4" src="/GBLogo.png" />{" "}
-									<img className="h-3" src="/GBTitle.png" />
+									<img className="h-4" src="/GBLogo.png" /> <img className="h-3" src="/GBTitle.png" />
 								</a>
 								|
 								<a
@@ -205,10 +207,7 @@ function Updater() {
 									className="hover:opacity-100 flex items-center gap-1 text-xs duration-200 opacity-50"
 								>
 									{" "}
-									<img
-										className="h-6"
-										src="/DCLogoTitle.svg"
-									/>
+									<img className="h-6" src="/DCLogoTitle.svg" />
 								</a>
 							</div>
 						</div>

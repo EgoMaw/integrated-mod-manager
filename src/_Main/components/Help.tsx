@@ -27,7 +27,7 @@ function Help() {
 					Help
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="game-font min-h-200 min-w-280 flex flex-col gap-8">
+			<DialogContent className="game-font h-200 max-h-[calc(100vh-4rem)] min-w-260 flex flex-col gap-8">
 				<div className="min-h-fit text-accent mt-6 text-3xl">
 					{textData.Tutorials}
 					<Tooltip>
@@ -35,7 +35,7 @@ function Help() {
 						<TooltipContent className="opacity-0"></TooltipContent>
 					</Tooltip>
 				</div>
-				<div className="w-255 h-161 flex gap-12 overflow-hidden">
+				<div className="w-250  h-161 flex gap-12 overflow-hidden">
 					<div className="min-w-82 flex flex-col h-full gap-2 overflow-hidden">
 						{/* <Input placeholder="Search..." /> */}
 						<div className="w-82 data-wuwa:border data-wuwa:gap-0 data-wuwa:pr-0 flex flex-col h-full gap-1 pr-1 overflow-x-hidden overflow-y-auto border-0 rounded-sm">
@@ -84,7 +84,7 @@ function Help() {
 							) : (
 								<>
 									<motion.div
-										className="text-muted-foreground pointer-events-none gap-4 fixed flex flex-col items-center justify-center w-[680px] h-full"
+										className="text-muted-foreground pointer-events-none gap-4 fixed flex flex-col items-center justify-center w-[640px] h-full"
 										key="empty"
 										initial={{ opacity: 0, scale: 0.95 }}
 										animate={{ opacity: 1, scale: 1 }}
