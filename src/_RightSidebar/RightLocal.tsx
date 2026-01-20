@@ -21,7 +21,11 @@ import {
 	CheckIcon,
 	ChevronDownIcon,
 	EditIcon,
+	EyeIcon,
+	EyeOffIcon,
+	HeartIcon,
 	LinkIcon,
+	MinusIcon,
 	SearchIcon,
 	Settings2Icon,
 	TrashIcon,
@@ -57,34 +61,36 @@ function RightLocal() {
 	const [tab, setTab] = useState<"notes" | "hotkeys">("hotkeys");
 	const setOnline = useSetAtom(ONLINE);
 	const game = useAtomValue(GAME);
-	const lang = useAtomValue(SETTINGS).global.lang
+	const lang = useAtomValue(SETTINGS).global.lang;
 	const initDone = useAtomValue(INIT_DONE);
 	const setSettings = useSetAtom(SETTINGS);
 
-	
 	const [urls, setUrls] = useState<string[]>([]);
-	const handleURLGame = useCallback(async (urls: string[]) => {
-		const final = urls[urls.length - 1];
-		if (final) getCurrentWebviewWindow()?.setFocus();
-		if (final.includes("/game/")) {
-			const url: any = final.split("/game/");
-			url[1] = url[1].split("/");
-			const urlGame = GAME_GB_IDS[url[1].shift()];
-			console.log("urlGame:", urlGame, "game: ",game);
-			url[1] = url[1].join("/");
-			urls[urls.length - 1] = url.join("/");
-			if (urlGame && urlGame != game) {
-				addToast({
-					message: `Switching to game: ${urlGame}`,
-				});
-				setSettings((prev) => ({ ...prev, global: { ...prev.global, game: urlGame } }));
-				await saveConfigs(true);
-				setTimeout(() => {
-					main();
-				}, 0);
+	const handleURLGame = useCallback(
+		async (urls: string[]) => {
+			const final = urls[urls.length - 1];
+			if (final) getCurrentWebviewWindow()?.setFocus();
+			if (final.includes("/game/")) {
+				const url: any = final.split("/game/");
+				url[1] = url[1].split("/");
+				const urlGame = GAME_GB_IDS[url[1].shift()];
+				console.log("urlGame:", urlGame, "game: ", game);
+				url[1] = url[1].join("/");
+				urls[urls.length - 1] = url.join("/");
+				if (urlGame && urlGame != game) {
+					addToast({
+						message: `Switching to game: ${urlGame}`,
+					});
+					setSettings((prev) => ({ ...prev, global: { ...prev.global, game: urlGame } }));
+					await saveConfigs(true);
+					setTimeout(() => {
+						main();
+					}, 0);
+				}
 			}
-		}
-	}, [game,lang]);
+		},
+		[game, lang]
+	);
 	useEffect(() => {
 		let unlisten: (() => void) | undefined;
 
@@ -206,9 +212,9 @@ function RightLocal() {
 			setCategory({ name: "-1", icon: "" });
 		}
 	}, [item, modList]);
+	const tags = new Set(item?.tags || []);
 	return (
-		<Sidebar side="right" className="duration-300 pt-8"
-		>
+		<Sidebar side="right" className="duration-300 pt-8">
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 				<ManageCategories />
 			</Dialog>
@@ -485,87 +491,93 @@ function RightLocal() {
 								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
 									{textData._Tags.Tags}
 								</Label>
-								<div className="w-48.5 flex items-center px-1">
-									<Input
-										onBlur={(e) => {
-											if (item && e.currentTarget.value !== item?.source) {
-												setData((prev) => {
-													prev[item.path] = {
-														...prev[item.path],
-														source: e.currentTarget.value,
-														updatedAt: Date.now(),
-														viewedAt: 0,
-													};
-													return { ...prev };
-												});
-												setModList((prev) => {
-													return prev.map((m) => {
-														if (m.path == item.path) {
-															return { ...m, source: e.currentTarget.value };
-														}
-														return m;
-													});
-												});
-												saveConfigs();
-											}
-										}}
-										type="text"
-										placeholder={textData._RightSideBar._RightLocal.NoSource}
-										className="w-full select-none focus-within:select-auto overflow-hidden h-12 focus-visible:ring-[0px] border-0  text-ellipsis"
-										style={{ backgroundColor: "#fff0" }}
-										key={item?.source}
-										defaultValue={item?.source}
-									/>
-									{item?.source ? (
-										<Button
-											className="bg-pat2"
-											onClick={() => {
-												if (item?.source && item?.source != "") {
-													handleInAppLink(item.source || "");
-												}
-											}}
-										>
-											<Tooltip>
-												<TooltipTrigger>
-													<LinkIcon className=" w-4 h-4" />
-												</TooltipTrigger>
-												<TooltipContent className="w-20 flex items-center justify-center">
-													<p className="w-full max-w-20 text-center">
-														{textData._RightSideBar._RightLocal.ViewModOnline}
-													</p>
-												</TooltipContent>
-											</Tooltip>
-										</Button>
-									) : (
-										item && (
+								<div className="w-48.5 flex gap-1 items-center px-1">
+									<Tooltip>
+										<TooltipTrigger>
 											<Button
 												onClick={() => {
-													setOnline(true);
-													const search = document.getElementById("search-input") as HTMLInputElement;
-													setTimeout(() => {
-														search.focus();
-														search.value = item?.name.replaceAll("_", " ");
-														search.blur();
-													}, 100);
-													// setRightSlideOverOpen(true);
-													setSelected("");
+													if (!item) return;
+													const newTags = new Set(item.tags || []);
+													if (newTags.has("fav")) {
+														newTags.delete("fav");
+													} else {
+														newTags.add("fav");
+													}
+													setData((prev) => {
+														prev[item.path] = {
+															...prev[item.path],
+															tags: Array.from(newTags),
+														};
+														return { ...prev };
+													});
+													setModList((prev) => {
+														return prev.map((m) => {
+															if (m.path == item.path) {
+																return { ...m, tags: Array.from(newTags) };
+															}
+															return m;
+														});
+													});
+													saveConfigs();
 												}}
-												className="bg-pat2"
+												className="aspect-square h-8"
 											>
-												<Tooltip>
-													<TooltipTrigger>
-														<SearchIcon className=" pointer-events-none w-4 h-4" />
-													</TooltipTrigger>
-													<TooltipContent className="w-15 flex items-center justify-center">
-														<p className="w-full max-w-15 text-center">
-															{textData._RightSideBar._RightLocal.SearchOnline}
-														</p>
-													</TooltipContent>
-												</Tooltip>
+												<HeartIcon
+													className="w-3.5 h-3.5 "
+													style={{
+														color: tags.has("fav") ? "var(--color-red-400)" : "",
+														fill: tags.has("fav") ? "currentColor" : "none",
+													}}
+												/>
 											</Button>
-										)
-									)}
-									{}
+										</TooltipTrigger>
+										<TooltipContent>Favourite</TooltipContent>
+									</Tooltip><Tooltip>
+										<TooltipTrigger>
+											<Button
+												onClick={() => {
+													if (!item) return;
+													const newTags = new Set(item.tags || []);
+													if (newTags.has("nsfw")) {
+														newTags.delete("nsfw");
+													} else {
+														newTags.add("nsfw");
+													}
+													setData((prev) => {
+														prev[item.path] = {
+															...prev[item.path],
+															tags: Array.from(newTags),
+														};
+														return { ...prev };
+													});
+													setModList((prev) => {
+														return prev.map((m) => {
+															if (m.path == item.path) {
+																return { ...m, tags: Array.from(newTags) };
+															}
+															return m;
+														});
+													});
+													saveConfigs();
+												}}
+												className="aspect-square h-8 flex flex-col"
+												style={{
+														color: tags.has("nsfw") ? "var(--color-yellow-200)" : "",
+													}}
+											>
+												<EyeIcon
+													className="w-3.5 h-3.5 "
+												/>
+												<MinusIcon className="-mt-6 rotate-45 duration-300 scale-x-170"
+												style={{
+													scale: tags.has("nsfw")?"1.7 1":"0 1"
+												}}
+												/>
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>NSFW</TooltipContent>
+									</Tooltip>
+									
 								</div>
 							</div>
 						</div>

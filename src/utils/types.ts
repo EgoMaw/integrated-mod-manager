@@ -54,6 +54,7 @@ export interface ModData {
 	source?: string;
 	updatedAt?: number;
 	viewedAt?: number;
+	tags?: string[];
 	note?: string;
 	state?: { [key: string]: any };
 }
@@ -113,6 +114,7 @@ export interface Mod {
 	updatedAt?: number;
 	viewedAt?: number;
 	note?: string;
+	tags?: string[];
 }
 export interface ProgressData {
 	title: string;

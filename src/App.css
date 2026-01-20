@@ -277,7 +277,7 @@
 	outline-offset: 0.375rem; /* outline-offset-7 */
 	outline: 1px solid transparent;
 	transition-duration: 200ms; /* duration-200 */
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 /* ========================================
    ZZZ Theme Specific Styles
@@ -516,6 +516,30 @@ a {
 }
 .logo-in {
 	animation: logo-in 1.2s;
+}
+.bgx-flash{
+	animation: bgx-flash 2s infinite alternate linear;
+	opacity:0.5;	
+}
+.textx-flash{
+	animation: textx-flash 2s infinite alternate linear;
+}
+@keyframes textx-flash {
+	0%,33% {
+		color:var(--background)
+	}
+	66%,100% {
+		color: var(--accent);
+	}
+}
+@keyframes bgx-flash {
+	0%,33% {
+		background-color: var(--accent);
+	}
+	66%,100% {
+		
+		background-color:transparent;
+	}
 }
 @keyframes logo-in {
 	0% {

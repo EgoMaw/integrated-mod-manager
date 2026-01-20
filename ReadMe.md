@@ -13,6 +13,7 @@ Integrated Mod Manager is a desktop application that streamlines mod management 
 - **Mod Organization**: Categorized mod display with folder-based organization
 ---
 #### Mod Management
+[![local](./preview/ZZLocal.png)]()  
 - **Mod Status Control**: Toggle mods on/off with one click
 - **Batch Operations**: Toggle multiple mods simultaneously using presets
 - **Preview Mod**: Set preview images for mods to easily identify them
@@ -21,11 +22,13 @@ Integrated Mod Manager is a desktop application that streamlines mod management 
 - **Delete Mod**: Remove unwanted mods with a couple of clicks
 ---
 #### Restore Points
+[![restore](./public/tutorials/Restore/0.png)]()
 - **Backup & Restore**: Create restore points to backup mods
 ---
 
 ### 2. Online Mode & Installation System
 #### Online Mod Browsing
+[![online_home](./preview/ZZOnline.png)]()  
 - **Mod Discovery**: Browse Gamebanana's extensive online mod library with search and filtering
 - **Category Filtering**: Filter mods by type (Characters, Skins, UI, etc.)
 - **Mod Details**: Detailed mod information including descriptions & images
@@ -40,11 +43,12 @@ Integrated Mod Manager is a desktop application that streamlines mod management 
 - **Auto-Installation**: Automatic mod extraction and installation post-download
 ---
 #### File Operations
+[![download](./public/tutorials/DLMods/2.png)]() 
 - **Smart Extraction**: Intelligent ZIP/archive extraction with conflict resolution
 - **Path Management**: Automatic directory structure creation and management
 ---
 ### 3. Multi-Game Support
-#### Choose Between WuWa, ZZZ and GI
+#### Choose Between WuWa, ZZZ & GI
 [![game_select](./public/tutorials/SwitchGames/0.png)]()
 
 ---

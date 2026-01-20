@@ -111,9 +111,7 @@ function MainLocal() {
 		const click = e.button;
 		let tag = (e.target as HTMLElement).tagName.toLowerCase();
 		if (tag == "button") {
-			if (!mod) return;
-
-			return setSelected(mod.path);
+			return
 		}
 		if (click == toggleOn) {
 			toggleMod(mod.path, !mod.enabled);
@@ -243,7 +241,7 @@ function MainLocal() {
 									{isVisible ? (
 										<div className="card-generic"></div>
 									) : (
-										<CardLocal item={mod} selected={selected === mod.path} lastUpdated={lastUpdated} hasUpdate={updateObj[mod.path]} />
+										<CardLocal item={mod} selected={selected === mod.path} lastUpdated={lastUpdated} hasUpdate={updateObj[mod.path]} updateAvl={textData.UpdateAvl}/>
 									)}
 								</motion.div>
 							);
