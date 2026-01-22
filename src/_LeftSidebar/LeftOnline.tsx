@@ -119,7 +119,7 @@ function LeftOnline() {
 			>
 				<SidebarGroupLabel className="flex items-center gap-1">
 					{textData.Installed}{" "}
-					<Label className="text-accent flex text-xs scale-75 opacity-50">
+					<Label className="text-accent min-w-fit flex text-xs scale-75 opacity-50">
 						<UploadIcon className="min-h-2 min-w-2 w-4 h-4" />{" "}
 						{installedItems.filter((item) => item.modStatus === 2).length} <span> | </span>
 						<EyeIcon className="min-h-2 min-w-2 w-4 h-4" />
@@ -128,6 +128,7 @@ function LeftOnline() {
 						<FolderCheckIcon className="min-h-2 min-w-2 w-4 h-4" />
 						{installedItems.filter((item) => item.modStatus === 0).length}
 					</Label>
+					
 				</SidebarGroupLabel>
 				<SidebarContent className="min-w-14 flex flex-col items-center w-full h-full gap-2 pl-2 pr-1 mb-2 overflow-hidden overflow-y-auto duration-200">
 					<AnimatePresence initial={false}>

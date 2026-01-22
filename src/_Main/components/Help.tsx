@@ -22,7 +22,7 @@ function Help() {
 	return (
 		<Dialog open={helpOpen} onOpenChange={setHelpOpen}>
 			<DialogTrigger asChild>
-				<Button className="bg-sidebar flex gap-0.5 h-5 pointer-events-auto p-0 px-1 text-[10px] border">
+				<Button disabled={helpOpen} className="bg-sidebar flex gap-0.5 h-5 pointer-events-auto p-0 px-1 text-[10px] border">
 					<HelpCircle className="py-[1px]" />
 					Help
 				</Button>

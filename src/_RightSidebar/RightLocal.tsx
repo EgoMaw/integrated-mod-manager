@@ -2,14 +2,11 @@ import { Input } from "@/components/ui/input";
 import {
 	CATEGORIES,
 	DATA,
-	FILE_TO_DL,
 	GAME,
 	INIT_DONE,
 	LAST_UPDATED,
 	MOD_LIST,
 	ONLINE,
-	ONLINE_SELECTED,
-	RIGHT_SLIDEOVER_OPEN,
 	SELECTED,
 	SETTINGS,
 	SOURCE,
@@ -22,7 +19,6 @@ import {
 	ChevronDownIcon,
 	EditIcon,
 	EyeIcon,
-	EyeOffIcon,
 	HeartIcon,
 	LinkIcon,
 	MinusIcon,
@@ -33,7 +29,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { GAME_GB_IDS, managedSRC } from "@/utils/consts";
-import { getImageUrl, handleImageError, handleInAppLink, join, modRouteFromURL } from "@/utils/utils";
+import { getImageUrl, handleImageError, handleInAppLink, join } from "@/utils/utils";
 import { Sidebar, SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 // @ts-ignore: no type declarations available for this optional Tauri plugin
 import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
@@ -267,7 +263,7 @@ function RightLocal() {
 						{item ? (
 							<>
 								<Button
-									className="aspect-square  max-h-8"
+									className="aspect-square  max-h-6"
 									onClick={() => {
 										openPath(join(source, managedSRC, item.path));
 									}}
@@ -285,11 +281,11 @@ function RightLocal() {
 									}}
 									type="text"
 									key={item?.name || "no-item"}
-									className="label text-muted-foreground"
+									className="label text-muted-foreground  text-ellipsis"
 									defaultValue={item?.name || ""}
 								/>
 								<Button
-									className="aspect-square max-h-8"
+									className="aspect-square max-h-6"
 									variant="destructive"
 									onClick={() => {
 										setDeleteItemData((prev) => {
@@ -311,7 +307,7 @@ function RightLocal() {
 							onClick={() => {
 								item && savePreviewImage(item.path);
 							}}
-							className="min-h-12 min-w-12 bg-background/50 z-25 text-accent data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl rounded-tr-md rounded-bl-md self-end w-12 p-3 -mb-12 border"
+							className="min-h-8 min-w-8 bg-background/50 z-25 text-accent data-zzz:rounded-tr-2xl data-zzz:rounded-bl-2xl rounded-tr-md rounded-bl-md self-end w-12 p-2 -mb-8 border"
 						/>
 						<img
 							id="preview"
@@ -491,7 +487,7 @@ function RightLocal() {
 								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
 									{textData._Tags.Tags}
 								</Label>
-								<div className="w-48.5 flex gap-1 items-center px-1">
+								<div className="w-48.5 flex gap-1 justify-evenly items-center px-1">
 									<Tooltip>
 										<TooltipTrigger>
 											<Button
@@ -531,7 +527,7 @@ function RightLocal() {
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>Favourite</TooltipContent>
+										<TooltipContent>{(new Set(item?.tags || [])).has("fav")? textData._Tags.RemFav : textData._Tags.AddFav}</TooltipContent>
 									</Tooltip><Tooltip>
 										<TooltipTrigger>
 											<Button
@@ -575,7 +571,7 @@ function RightLocal() {
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>NSFW</TooltipContent>
+										<TooltipContent>{(new Set(item?.tags || [])).has("nsfw")? textData._Tags.UnmarkNSFW : textData._Tags.MarkNSFW}</TooltipContent>
 									</Tooltip>
 									
 								</div>

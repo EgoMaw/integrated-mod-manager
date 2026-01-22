@@ -12,6 +12,7 @@ import {
 	// RIGHT_SIDEBAR_OPEN,
 	// RIGHT_SLIDEOVER_OPEN,
 	SEARCH,
+	SORT,
 	TEXT_DATA,
 } from "@/utils/vars";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -27,12 +28,11 @@ import {
 	ThumbsUpIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import Updater from "./Updater";
 import Notice from "./Notice";
-import Help from "./Help";
 // import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { addToast } from "@/_Toaster/ToastProvider";
 import { refreshModList } from "@/utils/filesys";
+import { SORT_OPTIONS } from "@/utils/consts";
 const searched = {
 	online: "",
 	offline: "",
@@ -43,14 +43,15 @@ function TopBar() {
 	// const [rightSlideOverOpen, setRightSlideOverOpen] = useAtom(RIGHT_SLIDEOVER_OPEN);
 	const [onlineType, setOnlineType] = useAtom(ONLINE_TYPE);
 	const [onlineSort, setOnlineSort] = useAtom(ONLINE_SORT);
-	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [onlinePath, setOnlinePath] = useAtom(ONLINE_PATH);
+	const [sort, setSort] = useAtom(SORT);
+	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [search, setSearch] = useAtom(SEARCH);
 	const [term, setTerm] = useState("");
 	const textData = useAtomValue(TEXT_DATA);
 	const online = useAtomValue(ONLINE);
 	const setModList = useSetAtom(MOD_LIST);
-	const setOnlineData = useSetAtom(ONLINE_DATA)
+	const setOnlineData = useSetAtom(ONLINE_DATA);
 	useEffect(() => {
 		const handler = setTimeout(
 			() => {
@@ -74,8 +75,8 @@ function TopBar() {
 			searched[online ? "offline" : "online"] = online
 				? search
 				: onlinePath.startsWith("search/")
-				? onlinePath.split("search/")[1].split("&_type=")[0]
-				: "";
+					? onlinePath.split("search/")[1].split("&_type=")[0]
+					: "";
 			searchInput.value = online ? searched.online : searched.offline;
 		}
 	}, [online]);
@@ -138,18 +139,22 @@ function TopBar() {
 					}}
 				/>
 			</div>
-			{online && <div className="data-wuwa:bg-sidebar data-wuwa:min-w-32 min-w-28 data-wuwa:border h-full bg-transparent border-0 rounded-lg">
-				
+			<div className="data-wuwa:bg-sidebar data-wuwa:min-w-32 min-w-28 data-wuwa:border h-full bg-transparent border-0 rounded-lg">
+				{
 					<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 						<PopoverTrigger asChild>
 							<div className="min-w-fit trs button-like zzz-border hover:brightness-150 bg-sidebar cursor-pointerx flex items-center justify-center h-full gap-1 p-2 text-xs duration-300 rounded-md select-none">
-								{onlinePath.startsWith("home") || onlinePath.startsWith("search")
-									? onlineType == "Mod"
-										? textData._Main._components._TopBar.ModsOnly
-										: textData.All
-									: onlineSort == ""
-									? textData._Main._components._TopBar.Default
-									: {
+								{online ? (
+									onlinePath.startsWith("home") || onlinePath.startsWith("search") ? (
+										onlineType == "Mod" ? (
+											textData._Main._components._TopBar.ModsOnly
+										) : (
+											textData.All
+										)
+									) : onlineSort == "" ? (
+										textData._Main._components._TopBar.Default
+									) : (
+										{
 											Generic_MostLiked: (
 												<>
 													{textData._Main._components._TopBar.Most} <ThumbsUpIcon className="h-4" />
@@ -165,111 +170,128 @@ function TopBar() {
 													{textData._Main._components._TopBar.Most} <DownloadIcon className="h-4" />
 												</>
 											),
-									  }[onlineSort]}
+										}[onlineSort]
+									)
+								) : (
+									<>{SORT_OPTIONS[sort]}</>
+								)}
 							</div>
 						</PopoverTrigger>
 						<PopoverContent className="data-wuwa:bg-sidebar game-font z-100 data-wuwa:w-32 w-28 data-gi:-ml-14 data-wuwa:border absolute p-0 my-2 mr-2 -ml-16 bg-transparent border-0 rounded-lg">
 							<div className="data-wuwa:gap-0 flex flex-col gap-2" onClick={() => setPopoverOpen(false)}>
-								{onlinePath.startsWith("home") || onlinePath.startsWith("search") ? (
-									<>
-										<div
-											className="hover:brightness-150 button-like trs data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-b rounded-md select-none"
-											onClick={() => {
-												setOnlineType("");
-												setOnlinePath((prev) => `${prev.split("&_type=")[0]}&_type=`);
-												// setSettings((prev) => ({ ...prev, onlineType: "" }));
-												// saveConfig();
-											}}
-										>
-											{textData.All}
-										</div>
-										<div
-											className="hover:brightness-150 bg-sidebar button-like trs data-zzz:bg-button zzz-border min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-t rounded-md select-none"
-											onClick={() => {
-												setOnlineType("Mod");
-												setOnlinePath((prev) => `${prev.split("&_type=")[0]}&_type=Mod`);
-												// setSettings((prev) => ({ ...prev, onlineType: "Mod" }));
-												// saveConfig();
-											}}
-										>
-											{textData._Main._components._TopBar.ModsOnly}
-										</div>
-									</>
+								{online ? (
+									onlinePath.startsWith("home") || onlinePath.startsWith("search") ? (
+										<>
+											<div
+												className="hover:brightness-150 button-like trs data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-b rounded-md select-none"
+												onClick={() => {
+													setOnlineType("");
+													setOnlinePath((prev) => `${prev.split("&_type=")[0]}&_type=`);
+													// setSettings((prev) => ({ ...prev, onlineType: "" }));
+													// saveConfig();
+												}}
+											>
+												{textData.All}
+											</div>
+											<div
+												className="hover:brightness-150 bg-sidebar button-like trs data-zzz:bg-button zzz-border min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-t rounded-md select-none"
+												onClick={() => {
+													setOnlineType("Mod");
+													setOnlinePath((prev) => `${prev.split("&_type=")[0]}&_type=Mod`);
+													// setSettings((prev) => ({ ...prev, onlineType: "Mod" }));
+													// saveConfig();
+												}}
+											>
+												{textData._Main._components._TopBar.ModsOnly}
+											</div>
+										</>
+									) : (
+										<>
+											<div
+												className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-b rounded-md select-none"
+												onClick={() => {
+													setOnlineSort("");
+													setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=`);
+												}}
+											>
+												{textData._Main._components._TopBar.Default}
+											</div>
+											<div
+												className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border border-y bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 rounded-md select-none"
+												onClick={() => {
+													setOnlineSort("Generic_MostLiked");
+													setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_liked`);
+												}}
+											>
+												{textData._Main._components._TopBar.Most} <ThumbsUpIcon className="h-4" />
+											</div>
+											<div
+												className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border border-y bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 rounded-md select-none"
+												onClick={() => {
+													setOnlineSort("Generic_MostViewed");
+													setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_viewed`);
+												}}
+											>
+												{textData._Main._components._TopBar.Most} <EyeIcon className="h-4" />
+											</div>
+											<div
+												className="hover:brightness-150 trs data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-t rounded-md select-none"
+												onClick={() => {
+													setOnlineSort("Generic_MostDownloaded");
+													setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_downloaded`);
+												}}
+											>
+												{textData._Main._components._TopBar.Most} <DownloadIcon className="h-4" />
+											</div>
+										</>
+									)
 								) : (
-									<>
+									Object.entries(SORT_OPTIONS).map(([value, label]) => (
 										<div
-											className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-b rounded-md select-none"
+											key={value}
+											className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 rounded-md select-none"
 											onClick={() => {
-												setOnlineSort("");
-												setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=`);
+												setSort(value);
 											}}
 										>
-											{textData._Main._components._TopBar.Default}
+											{label}
 										</div>
-										<div
-											className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border border-y bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 rounded-md select-none"
-											onClick={() => {
-												setOnlineSort("Generic_MostLiked");
-												setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_liked`);
-											}}
-										>
-											{textData._Main._components._TopBar.Most} <ThumbsUpIcon className="h-4" />
-										</div>
-										<div
-											className="hover:brightness-150 trs button-like data-zzz:bg-button zzz-border border-y bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 rounded-md select-none"
-											onClick={() => {
-												setOnlineSort("Generic_MostViewed");
-												setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_viewed`);
-											}}
-										>
-											{textData._Main._components._TopBar.Most} <EyeIcon className="h-4" />
-										</div>
-										<div
-											className="hover:brightness-150 trs data-zzz:bg-button zzz-border bg-sidebar min-h-12 cursor-pointerx flex items-center justify-center w-full gap-1 p-2 text-sm duration-300 border-t rounded-md select-none"
-											onClick={() => {
-												setOnlineSort("Generic_MostDownloaded");
-												setOnlinePath((prev) => `${prev.split("&_sort=")[0]}&_sort=most_downloaded`);
-											}}
-										>
-											{textData._Main._components._TopBar.Most} <DownloadIcon className="h-4" />
-										</div>
-									</>
+									))
 								)}
 							</div>
 						</PopoverContent>
 					</Popover>
-				
-			</div>}
+				}
+			</div>
 			<Notice />
 			{/* <Help /> */}
 			<Button
 				onClick={() => {
-					if(online){
+					if (online) {
 						const curPath = onlinePath;
 						setOnlinePath("");
-						setOnlineData(prev=>{
+						setOnlineData((prev) => {
 							delete prev[curPath];
-							if(curPath.startsWith("home"))
-								delete prev.banner;
-							return {...prev};
-						})
-						setTimeout(()=>{
+							if (curPath.startsWith("home")) delete prev.banner;
+							return { ...prev };
+						});
+						setTimeout(() => {
 							setOnlinePath(curPath);
-						},50);
-					}else{
+						}, 50);
+					} else {
 						addToast({
-						type: "info",
-						message: textData._Toasts.RefreshMods,
-					});
-					refreshModList().then((data) => {
-						setModList(data);
-					});
+							type: "info",
+							message: textData._Toasts.RefreshMods,
+						});
+						refreshModList().then((data) => {
+							setModList(data);
+						});
 					}
 				}}
 				className="bg-sidebar flex items-center justify-center w-12 h-12 gap-0 duration-200 border rounded-lg"
 			>
 				{/* <Tooltip> */}
-					<RefreshCwIcon></RefreshCwIcon>
+				<RefreshCwIcon></RefreshCwIcon>
 				{/* </Tooltip> */}
 			</Button>
 			{/* <Button

@@ -250,6 +250,9 @@
 	border-style: var(--tw-border-style);
 	border-width: 0px;
 	border-radius: calc(infinity * 1px);
+	font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
+
 }
 [data-theme="gi"] .bg-bgg {
 	background-image: url("/GImm.png");
@@ -310,6 +313,8 @@
 	border-style: solid;
 	border-width: 2px;
 	border-radius: calc(infinity * 1px);
+	font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
 }
 
 [data-theme="zzz"] .polka {

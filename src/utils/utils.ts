@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { IMAGE_SERVER, managedSRC } from "./consts";
-import { DATA, FILE_TO_DL, GAME, INSTALLED_ITEMS, LANG, ONLINE, ONLINE_DATA, ONLINE_SELECTED, RIGHT_SLIDEOVER_OPEN, SOURCE, store } from "./vars";
+import { DATA, FILE_TO_DL, GAME, INSTALLED_ITEMS, LANG, ONLINE, ONLINE_DATA, ONLINE_SELECTED, RIGHT_SLIDEOVER_OPEN, SETTINGS, SOURCE, store } from "./vars";
 import { useAtom, useAtomValue } from "jotai";
 import { apiClient } from "./api";
 import { join } from "./hotreload";
@@ -73,12 +73,16 @@ export function preventContextMenu(event: React.MouseEvent): void {
 	// event.currentTarget.dispatchEvent(new MouseEvent("mouseup", { button: 2, bubbles: true }));
 }
 let src = "";
+let check = true;
 // let lastUpdated = 0;
 // store.sub(LAST_UPDATED, () => {
 // 	lastUpdated = Date.now();
 // });
 store.sub(SOURCE, () => {
 	src = store.get(SOURCE);
+});
+store.sub(SETTINGS,()=>{
+	check = store.get(SETTINGS).global.chkModUpdates;
 });
 export function 
 getImageUrl(path: string): string {
@@ -224,6 +228,9 @@ export function useInstalledItemsManager() {
 	async function checkModStatus(item: any) {
 		console.log("[IMM] Checking mod status for", item.name);
 		let modStatus = 0;
+		if (!check){
+			return 0;
+		}
 		if (checked.hasOwnProperty(item.name) && now - (checked[item.name]?.updated || 0) < oneHour) {
 			console.log("[IMM] Mod status found in cache for", item.name);
 			modStatus =  item.updated < checked[item.name].status ? (item.viewed < checked[item.name].status ? 2 : 1) : 0;
@@ -273,6 +280,8 @@ export function useInstalledItemsManager() {
 			modsTotalLabel.innerText = totalItems.toString();
 			modsProgressContainer.style.bottom = "0px";
 		}
+		if (!check)
+			console.log("[IMM] Mod update checking is disabled.");
 		for (let i = 0; i < itemsToProcess.length; i += batchSize) {
 			const batch = itemsToProcess.slice(i, i + batchSize);
 			const newInBatch = batch.filter((item) => !checked.hasOwnProperty(item.name));

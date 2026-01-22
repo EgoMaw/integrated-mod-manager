@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { SidebarContent, SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { applyPreset, refreshModList, saveConfigs } from "@/utils/filesys";
 import { CURRENT_PRESET, FILTER, LEFT_SIDEBAR_OPEN, MOD_LIST, PRESETS, TEXT_DATA } from "@/utils/vars";
 import { Separator } from "@radix-ui/react-separator";
 import { useAtom, useAtomValue } from "jotai";
 import { CheckIcon, CircleIcon, EditIcon, PlusIcon, SaveIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useCallback } from "react";
 let focusedPreset = -1;
 function LeftLocal() {
 	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
@@ -58,10 +61,198 @@ function LeftLocal() {
 
 		saveConfigs();
 	};
+	const filterFunction = useCallback(
+		(val: string, arr: any[]) => {
+			let newFilter = new Set(filter);
+			arr.forEach((f:any) => {
+				newFilter.delete(f.name);
+			});
+			newFilter.add(val);
+			setFilter(newFilter);
+		},
+		[filter, setFilter]
+	);
 	return (
 		<>
 			<SidebarGroup className=" p-0">
-				<SidebarGroupLabel>{textData._LeftSideBar._LeftLocal.Filter}</SidebarGroupLabel>
+				<SidebarGroupLabel className="justify-between">
+					{textData._LeftSideBar._LeftLocal.Filter}
+					<Dialog>
+						<DialogTrigger>
+							<div
+								onClickCapture={async () => {
+									// setCurrentPreset(-1);
+									// applyPreset([]);
+									// setModList(await refreshModList());
+								}}
+								className="min-w-fit hover:text-accent cursor-pointerx active:scale-95 text-accent/50 text-xs duration-200 select-none"
+							>
+								{textData._LeftSideBar._LeftLocal._Filter.Advanced}
+							</div>
+						</DialogTrigger>
+						<DialogContent className="max-h-110 min-h-110">
+							<div className="min-h-fit text-accent my-6 text-3xl">
+								{textData._LeftSideBar._LeftLocal._Filter.AdvFilOpt}
+								<Tooltip>
+									<TooltipTrigger></TooltipTrigger>
+									<TooltipContent className="opacity-0"></TooltipContent>
+								</Tooltip>
+							</div>
+
+							<div className="flex flex-row mb-8 gap-4 items-center">
+								{
+									[
+										{
+											icon: <CircleIcon className="aspect-square h-4 text-accent" />,
+											text: textData._LeftSideBar._LeftLocal._Filter.All,
+										},
+										{
+											icon: <CheckIcon className="aspect-square h-4 text-success" />,
+											text: textData._LeftSideBar._LeftLocal._Filter.Yes,
+										},
+										{
+											icon: <XIcon className="aspect-square h-4 text-destructive" />,
+											text: textData._LeftSideBar._LeftLocal._Filter.No,
+										},
+									].map((fil) => (
+										<div key={fil.text} className="flex flex-row gap-1 items-center">
+											{fil.icon}
+											<label>{fil.text}</label>
+										</div>
+									))
+								}
+							</div>
+							<div className="flex flex-row gap-4 items-center">
+								<label className="min-w-24 text-center">{textData._LeftSideBar._LeftLocal._Filter.Enabled}</label>
+								<div className="flex flex-row gap-1 w-full">
+									{[
+										{
+											name: "st:all",
+											icon: <CircleIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "st:enabled",
+											icon: <CheckIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "st:disabled",
+											icon: <XIcon className="aspect-square h-4" />,
+										},
+									].map((fil, _, arr) => (
+										<Button
+											key={"filter " + fil.name}
+											onClick={() => {
+												filterFunction(fil.name, arr);
+											}}
+											className={
+												"w-25 data-zzz:text-xs " + (filter.has(fil.name) ? "bg-accent bgaccent text-background " : "")
+											}
+											style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
+										>
+											{fil.icon}
+										</Button>
+									))}
+								</div>
+							</div>
+							<div className="flex flex-row gap-4 items-center">
+								<label className="min-w-24 text-center">{textData._RightSideBar._RightLocal.Source}</label>
+								<div className="flex flex-row gap-1 w-full">
+									{[
+										{
+											name: "src:any",
+											icon: <CircleIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "src:has",
+											icon: <CheckIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "src:none",
+											icon: <XIcon className="aspect-square h-4" />,
+										},
+									].map((fil, _, arr) => (
+										<Button
+											key={"filter " + fil.name}
+											onClick={() => {
+												filterFunction(fil.name, arr);
+											}}
+											className={
+												"w-25 data-zzz:text-xs " + (filter.has(fil.name) ? "bg-accent bgaccent text-background " : "")
+											}
+											style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
+										>
+											{fil.icon}
+										</Button>
+									))}
+								</div>
+							</div>
+							<div className="flex flex-row gap-4 items-center">
+								<label className="min-w-24 text-center">{textData._Tags.Favorite}</label>
+								<div className="flex flex-row gap-1 w-full">
+									{[
+										{
+											name: "tag:fav=any",
+											icon: <CircleIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "tag:fav=has",
+											icon: <CheckIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "tag:fav=lacks",
+											icon: <XIcon className="aspect-square h-4" />,
+										},
+									].map((fil, _, arr) => (
+										<Button
+											key={"filter " + fil.name}
+											onClick={() => {
+												filterFunction(fil.name, arr);
+											}}
+											className={
+												"w-25 data-zzz:text-xs " + (filter.has(fil.name) ? "bg-accent bgaccent text-background " : "")
+											}
+											style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
+										>
+											{fil.icon}
+										</Button>
+									))}
+								</div>
+							</div>
+							<div className="flex flex-row gap-4 items-center">
+								<label className="min-w-24 text-center">{textData._Tags.NSFW}</label>
+								<div className="flex flex-row gap-1 w-full">
+									{[
+										{
+											name: "tag:nsfw=any",
+											icon: <CircleIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "tag:nsfw=has",
+											icon: <CheckIcon className="aspect-square h-4" />,
+										},
+										{
+											name: "tag:nsfw=lacks",
+											icon: <XIcon className="aspect-square h-4" />,
+										},
+									].map((fil, _, arr) => (
+										<Button
+											key={"filter " + fil.name}
+											onClick={() => {
+												filterFunction(fil.name, arr);
+											}}
+											className={
+												"w-25 data-zzz:text-xs " + (filter.has(fil.name) ? "bg-accent bgaccent text-background " : "")
+											}
+											style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
+										>
+											{fil.icon}
+										</Button>
+									))}
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
+				</SidebarGroupLabel>
 				<SidebarContent
 					className="flex flex-row items-center justify-between w-full gap-2 px-2 overflow-hidden"
 					style={{
@@ -70,27 +261,27 @@ function LeftLocal() {
 				>
 					{[
 						{
-							name: "All",
+							name: "st:all",
 							icon: <CircleIcon className="aspect-square h-4" />,
 							text: textData.All,
 						},
 						{
-							name: "Enabled",
+							name: "st:enabled",
 							icon: <CheckIcon className="aspect-square h-4" />,
 							text: textData._LeftSideBar._LeftLocal._Filter.Enabled,
 						},
 						{
-							name: "Disabled",
+							name: "st:disabled",
 							icon: <XIcon className="aspect-square h-4" />,
 							text: textData._LeftSideBar._LeftLocal._Filter.Disabled,
 						},
-					].map((fil) => (
+					].map((fil, _, arr) => (
 						<Button
 							key={"filter " + fil.name}
 							onClick={() => {
-								setFilter(fil.name);
+								filterFunction(fil.name, arr);
 							}}
-							className={"w-25 data-zzz:text-xs " + (filter == fil.name ? "bg-accent bgaccent text-background " : "")}
+							className={"w-25 data-zzz:text-xs " + (filter.has(fil.name) ? "bg-accent bgaccent text-background " : "")}
 							style={{ width: leftSidebarOpen ? "" : "2.5rem" }}
 						>
 							{fil.icon}
@@ -118,7 +309,6 @@ function LeftLocal() {
 							setModList(await refreshModList());
 						}}
 						className="min-w-fit hover:text-accent cursor-pointerx active:scale-95 text-accent/50 text-xs duration-200 select-none"
-						onClick={() => {}}
 					>
 						{textData._LeftSideBar._LeftLocal._Presets.DisableAll}
 					</div>

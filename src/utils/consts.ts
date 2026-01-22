@@ -112,7 +112,8 @@ export const DEFAULTS = {
 	CURRENT_PRESET: -1,
 	MOD_LIST: [] as Mod[],
 	SELECTED: "",
-	FILTER: "All",
+	FILTER: new Set(["st:all", "src:any", "tag:fav=any", "tag:nsfw=any"]),
+	SORT: "default",
 	CATEGORY: "All",
 	SEARCH: "",
 	INSTALLED_ITEMS: [] as InstalledItem[],
@@ -122,3 +123,53 @@ export const DEFAULTS = {
 	ONLINE_PATH: "home&type=Mod",
 	ONLINE_SELECTED: "",
 };
+export const SORT_OPTIONS = Object.fromEntries(
+	[
+		{
+			label: "Default",
+			value: "default",
+		},
+		// {
+		// 	label: "A-Z",
+		// 	value: "alpha-asc",
+		// },
+		// {
+		// 	label: "Z-A",
+		// 	value: "alpha-desc",
+		// },
+		{
+			label: "Favourite ↑",
+			value: "fav-asc",
+		},
+		{
+			label: "Favourite ↓",
+			value: "fav-desc",
+		},
+		// {
+		// 	label: "Source ↑",
+		// 	value: "src-asc",
+		// },
+		// {
+		// 	label: "Source ↓",
+		// 	value: "src-desc",
+		// },
+		// {
+		// 	label: "NSFW ↑",
+		// 	value: "nsfw-asc",
+		// },
+		// {
+		// 	label: "NSFW ↓",
+		// 	value: "nsfw-desc",
+		// },
+		// {
+		// 	label: "Enabled ↑",
+		// 	value: "en-asc",
+		// },
+		// {
+		// 	label: "Enabled ↓",
+		// 	value: "en-desc",
+		// },
+	].map((opt) => [opt.value, opt.label])
+);
+console.log(SORT_OPTIONS)
+

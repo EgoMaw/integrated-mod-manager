@@ -3,7 +3,6 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useAtom, useAtomValue } from "jotai";
 import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, RectangleHorizontalIcon, XIcon } from "lucide-react";
 import { LEFT_SIDEBAR_OPEN, ONLINE, RIGHT_SIDEBAR_OPEN, RIGHT_SLIDEOVER_OPEN } from "./vars";
-import { AnimatePresence, motion } from "motion/react";
 import Help from "@/_Main/components/Help";
 import Updater from "@/_Main/components/Updater";
 const appWindow = getCurrentWindow();

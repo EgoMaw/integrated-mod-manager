@@ -85,12 +85,15 @@ export function getPrevGame() {
 export const window = getCurrentWebviewWindow();
 export async function setWindowType(type: number) {
 	if (type == 0) {
+		// if (await window.isMaximized())
+		window.unmaximize();
 		// window.setFullscreen(false);
-		// // window.setDecorations(true);
+		// window.setDecorations(true);
 		// currentMonitor().then((x) => {
 		// 	if (x?.size) window.setSize(new PhysicalSize(x.size.width * 0.8, x.size.height * 0.8));
 		// });
 	} else if (type == 1) {
+		window.unmaximize();
 		// window.setFullscreen(false);
 		// window.setDecorations(false);
 		// currentMonitor().then((x) => {
@@ -404,6 +407,10 @@ export async function main() {
 	}
 	await maintainBackups();
 	config = safeLoadJson(defConfig, JSON.parse(await readTextFile("config.json")));
+	if (config.version < "2.2.0") {
+		config.chkModUpdates = true;
+		config.bgType = 1;
+	}
 	console.log("[IMM] Loaded config:", config);
 	if (!config.XXMI && !config.game && !config.lang) {
 		console.log("[IMM] First time setup detected, checking for WWMM...");

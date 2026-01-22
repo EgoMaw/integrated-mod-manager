@@ -8,6 +8,7 @@ import {
 	SEARCH,
 	SELECTED,
 	SETTINGS,
+	SORT,
 	SOURCE,
 	TEXT_DATA,
 } from "@/utils/vars";
@@ -40,7 +41,7 @@ function MainLocal() {
 	const updateObj = useMemo(() => {
 		const obj: { [key: string]: boolean } = {};
 		installedItems.forEach((item) => {
-			obj[item.name] = item.modStatus==2;
+			obj[item.name] = item.modStatus == 2;
 		});
 		return obj;
 	}, [installedItems]);
@@ -53,6 +54,7 @@ function MainLocal() {
 	const [selected, setSelected] = useAtom(SELECTED);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const toggleOn = useAtomValue(SETTINGS).global.toggleClick;
+	const sort = useAtomValue(SORT);
 	const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	// const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 	const keyRef = useRef<string | null>(null);
@@ -86,9 +88,9 @@ function MainLocal() {
 	}, [modList]);
 	useEffect(() => {
 		filterChangeCount += 1;
-	}, [filter, category, search]);
+	}, [filter, category, search,sort]);
 	useEffect(() => {
-		keyRef.current = `${filter}-${category}-${search}-${modList.length}-${filterChangeCount}`;
+		keyRef.current = `${filter}-${category}-${search}-${modList.length}-${filterChangeCount}-${sort}`;
 		if (prev !== keyRef.current) {
 			if (containerRef.current) {
 				containerRef.current.scrollTo({ top: 0 });
@@ -98,20 +100,68 @@ function MainLocal() {
 		}
 		prev = keyRef.current;
 		let newList: Mod[] = searchDB && search ? searchDB.search(search) : [...modList];
-		if (filter != "All") {
-			newList = newList.filter((mod) => mod.enabled == (filter == "Enabled"));
-		}
+		
+		// let enb = filters.shift() || "All";
+		// if (enb != "All") {
+		// 	newList = newList.filter((mod) => mod.enabled == (enb == "Enabled"));
+		// }
+		
+			filter.forEach((f) => {
+				const [key, value] = f.split(":");
+				let modifier = (mod:Mod)=>!!mod;
+				switch (key) {
+					case "src":
+						modifier=(mod)=>(value == "any" || (value == "has" ? !!mod.source : !mod.source));
+						break;
+					case "st":
+						modifier=(mod)=>(value == "all" || (value == "enabled" ? mod.enabled : !mod.enabled));
+						break;
+					case "tag":
+						const [tag,val] = value.split("=");
+						switch(val){
+							case "has":
+								modifier=(mod)=>((mod.tags||[]).includes(tag));
+								break; 
+							case "lacks":
+								modifier=(mod)=>!((mod.tags||[]).includes(tag));
+								break;
+						}
+						break;
+					default:
+						return;
+				}
+				newList = newList.filter((mod) => modifier(mod));
+			});
+		
 		if (category != "All") {
 			newList = newList.filter((mod) => mod.parent == category);
 		}
+
+		switch (sort) {
+			case "fav-asc":
+				newList.sort((a, b) => {
+					const aFav = a.tags?.includes("fav") ? 1 : 0;
+					const bFav = b.tags?.includes("fav") ? 1 : 0;
+					return bFav - aFav || a.name.localeCompare(b.name);
+				});
+				break;
+			case "fav-desc":
+				newList.sort((a, b) => {
+					const aFav = a.tags?.includes("fav") ? 1 : 0;
+					const bFav = b.tags?.includes("fav") ? 1 : 0;
+					return aFav - bFav || a.name.localeCompare(b.name);
+				});
+				break;
+		}
+
 		setFilteredList(newList);
-	}, [modList, filter, category, search, filterChangeCount]);
+	}, [modList, filter, category, search, filterChangeCount,sort]);
 
 	const handleClick = (e: MouseEvent, mod: Mod) => {
 		const click = e.button;
 		let tag = (e.target as HTMLElement).tagName.toLowerCase();
 		if (tag == "button") {
-			return
+			return;
 		}
 		if (click == toggleOn) {
 			toggleMod(mod.path, !mod.enabled);
@@ -241,7 +291,13 @@ function MainLocal() {
 									{isVisible ? (
 										<div className="card-generic"></div>
 									) : (
-										<CardLocal item={mod} selected={selected === mod.path} lastUpdated={lastUpdated} hasUpdate={updateObj[mod.path]} updateAvl={textData.UpdateAvl}/>
+										<CardLocal
+											item={mod}
+											selected={selected === mod.path}
+											lastUpdated={lastUpdated}
+											hasUpdate={updateObj[mod.path]}
+											updateAvl={textData.UpdateAvl}
+										/>
 									)}
 								</motion.div>
 							);

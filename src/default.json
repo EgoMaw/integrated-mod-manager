@@ -4,7 +4,7 @@
 	"bgOpacity": 1,
 	"winOpacity": 1,
 	"winType": 0,
-	"bgType": 2,
+	"bgType": 1,
 	"listType": 0,
 	"nsfw": 1,
 	"toggleClick": 2,
@@ -14,5 +14,6 @@
 	"XXMI": "",
 	"lang": "",
 	"game": "",
+	"chkModUpd":true,
 	"preReleases": false
 }

@@ -23,6 +23,7 @@ export interface GlobalSettings {
 	updatedAt?: string;
 	notice?: number;	
 	preReleases: boolean;
+	chkModUpdates: boolean;
 }
 export interface GameSettings {
 	launch: 0 | 1;

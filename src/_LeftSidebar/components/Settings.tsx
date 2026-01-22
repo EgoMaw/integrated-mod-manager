@@ -31,7 +31,6 @@ import {
 	Globe2,
 	InfoIcon,
 	Maximize2Icon,
-	MaximizeIcon,
 	MouseIcon,
 	MousePointerClickIcon,
 	PauseIcon,
@@ -72,7 +71,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 				],
 			};
 
-				dialogOptions.defaultPath = join(getCwd(), "backups");
+			dialogOptions.defaultPath = join(getCwd(), "backups");
 
 			const filePath = await open(dialogOptions);
 
@@ -139,11 +138,21 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 									<span>
 										{TEXT[langAlertData.prev].Warning1 + " "}
 										{TEXT[langAlertData.prev].Warning2}
-									</span>
+										</span>
+										{langAlertData.new === "cn"
+											? TEXT[langAlertData.prev].CredCN
+											: langAlertData.new === "ru"
+												? TEXT[langAlertData.prev].CredRU
+												: ""}
 									<span>
 										{TEXT[langAlertData.new].Warning1 + " "}
 										{TEXT[langAlertData.new].Warning2}
-									</span>
+										</span>
+										{langAlertData.new === "cn"
+											? TEXT[langAlertData.new].CredCN
+											: langAlertData.new === "ru"
+												? TEXT[langAlertData.new].CredRU
+												: ""}
 								</div>
 							)}
 						</div>
@@ -248,15 +257,15 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 												className="w-full"
 											>
 												<TabsList className="bg-background/50 w-full">
-													<TabsTrigger value="0" className="w-1/3 h-10">
+													<TabsTrigger value="0" className="w-1/2 h-10">
 														<AppWindowIcon className="aspect-square h-full pointer-events-none" />{" "}
 														{textData._LeftSideBar._components._Settings._WindowType.Windowed}
 													</TabsTrigger>
-													<TabsTrigger value="1" className="w-1/3 h-10">
+													{/* <TabsTrigger value="1" className="w-1/3 h-10">
 														<MaximizeIcon className="aspect-square h-full pointer-events-none" />{" "}
 														{textData._LeftSideBar._components._Settings._WindowType.Borderless}
-													</TabsTrigger>
-													<TabsTrigger value="2" className="w-1/3 h-10">
+													</TabsTrigger> */}
+													<TabsTrigger value="2" className="w-1/2 h-10">
 														<Maximize2Icon className="aspect-square h-full pointer-events-none" />{" "}
 														{textData._LeftSideBar._components._Settings._WindowType.Fullscreen}
 													</TabsTrigger>
@@ -480,7 +489,7 @@ function Settings({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 														? {
 																pointerEvents: "none",
 																filter: "brightness(0.5)",
-														  }
+															}
 														: {}
 												}
 												onValueChange={(e) => {

@@ -4,7 +4,7 @@
 		"Browse": "Browse",
 		"All": "All",
 		"Update": "Update",
-		"UpdateAvl":"Update Available!",
+		"UpdateAvl": "Update Available!",
 		"Install": "Install",
 		"Loading": "Loading",
 		"Skip": "Skip",
@@ -30,7 +30,9 @@
 		"GetPre": "Get pre-releases",
 		"Start": "Start Game",
 		"Refresh": "Refresh mod list",
-		"v2.1.2Warning":"If you are upgrading from v2.1.2 or lower, please close all file explorer windows and refresh IMM.",
+		"CredCN":"Thanks to 118ununoctium for verifying CN translations!",
+		"CredRU":"Thanks to Antonzlo for verifying RU translations!",
+		"v2.1.2Warning": "If you are upgrading from v2.1.2 or lower, please close all file explorer windows and refresh IMM.",
 		"Languages": {
 			"cn": "Chinese (Simplified)",
 			"en": "English",
@@ -38,11 +40,15 @@
 			"jp": "Japanese",
 			"kr": "Korean"
 		},
-		"_Tags":{
-			"Tags":"Tags",
-			"AddTag":"Add Tag",
-			"Favorite":"Favorite",
-			"NSFW":"NSFW"
+		"_Tags": {
+			"Tags": "Tags",
+			"AddTag": "Add Tag",
+			"Favorite": "Favorite",
+			"NSFW": "NSFW",
+			"RemFav": "Remove from Favourites",
+			"AddFav": "Add to Favourites",
+			"MarkNSFW": "Mark as NSFW",
+			"UnmarkNSFW": "Unmark as NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Mods Loaded Successfully",
@@ -70,8 +76,8 @@
 			"SameName": "ERR: Item with the same name already exists in the destination.",
 			"CannotExpandSelected": "Cannot expand a selected item.",
 			"RefreshMods": "Refreshing Mod List",
-			"SrcOrTgt":"Source or Target directory does not exist",
-			"XXMIConfErr":"Could Not Verify XXMI Config"
+			"SrcOrTgt": "Source or Target directory does not exist",
+			"XXMIConfErr": "Could Not Verify XXMI Config"
 		},
 		"_Help": {
 			"SwitchGames": {
@@ -138,11 +144,14 @@
 				"title": "Updating Mods",
 				"content": ["Get notified when an installed mod has updates available!"]
 			},
-			"ManageCats":{
+			"ManageCats": {
 				"title": "Managing Categories",
-				"content": ["Create custom categories to organize your mods as you wish.","Add custom icons to default categories."]
+				"content": [
+					"Create custom categories to organize your mods as you wish.",
+					"Add custom icons to default categories."
+				]
 			},
-			"BatchOps":{
+			"BatchOps": {
 				"title": "Batch Operations",
 				"content": ["Select multiple mods to perform various actions (like toggle, switch categories) on them in bulk."]
 			},
@@ -193,13 +202,13 @@
 			"Confirm": "Confirm",
 			"XXMILDir": "XXMI Launcher Directory",
 			"CustomDir": "Custom Directories",
-			"ClickHelp":"Click to open help menu.",
-			"SelectingXXMIDir":"Selecting the XXMI Launcher Directory",
-			"Correct":"Correct",
-			"SelectXXMIFolder":"Select the XXMI Launcher folder.",
-			"ContainConfig":"It should contain the \"XXMI Launcher Config.json\" file.",
-			"Incorrect":"Incorrect",
-			"DoNotSelectFolders":"Do not select the GIMI/WWMI/ZZMI folders.",
+			"ClickHelp": "Click to open help menu.",
+			"SelectingXXMIDir": "Selecting the XXMI Launcher Directory",
+			"Correct": "Correct",
+			"SelectXXMIFolder": "Select the XXMI Launcher folder.",
+			"ContainConfig": "It should contain the \"XXMI Launcher Config.json\" file.",
+			"Incorrect": "Incorrect",
+			"DoNotSelectFolders": "Do not select the GIMI/WWMI/ZZMI folders.",
 			"UsingXXMILauncher": "I'm using XXMI Launcher",
 			"ThisDirTarget": "This directory is where the program you are using to inject mods expects the mod files to be in.",
 			"TargetDir": "Target Dir :",
@@ -209,22 +218,21 @@
 			"_Help": {
 				"Help": "Help",
 				"QuickChecks": "Work through these quick checks before reaching out for support.",
-				"WrongGame":"Accidentally selected the wrong game?",
-				"SwitchGames":"No worries, you can re-select your game.",
+				"WrongGame": "Accidentally selected the wrong game?",
+				"SwitchGames": "No worries, you can re-select your game.",
 				"Select": "Select",
-				"CorrectPath":"Are you sure you selected the correct path?",
-				"VerifyPath":"Verify that the <game/>MI and mod directories are pointing to the right location.",
-				"Change":"Change",
-				"UpToDate":" Is IMM up to date?",
-				"UpdatesFix":"Updates often contain fixes for issues you might be experiencing.",
-				"Check":"Check",
-				"Backup":"Backup current config & reset IMM",
-				"CreateBKUP":"Create a backup and restore defaults to clear out conflicting settings.",
-				"ImportConfigs":"You can import the backed-up configs from the settings menu.",
-				"Reset":"Reset",
-				"StillStuck":"Still stuck?",
-				"ContactDev":"Contact developer :"
-
+				"CorrectPath": "Are you sure you selected the correct path?",
+				"VerifyPath": "Verify that the <game/>MI and mod directories are pointing to the right location.",
+				"Change": "Change",
+				"UpToDate": " Is IMM up to date?",
+				"UpdatesFix": "Updates often contain fixes for issues you might be experiencing.",
+				"Check": "Check",
+				"Backup": "Backup current config & reset IMM",
+				"CreateBKUP": "Create a backup and restore defaults to clear out conflicting settings.",
+				"ImportConfigs": "You can import the backed-up configs from the settings menu.",
+				"Reset": "Reset",
+				"StillStuck": "Still stuck?",
+				"ContactDev": "Contact developer :"
 			}
 		},
 		"_LeftSideBar": {
@@ -331,7 +339,12 @@
 				"Filter": "Filter",
 				"_Filter": {
 					"Enabled": "Enabled",
-					"Disabled": "Disabled"
+					"Disabled": "Disabled",
+					"Advanced": "Advanced",
+					"AdvFilOpt":"Advanced Filter Options",
+					"All":"All / Any",
+					"Yes":"Yes / Positive",
+					"No":"No / Negative"	
 				},
 				"Presets": "Presets",
 				"_Presets": {
@@ -342,7 +355,8 @@
 				}
 			},
 			"_LeftOnline": {
-				"Type": "Type"
+				"Type": "Type",
+				"Chk":"Check for Updates"
 			}
 		},
 		"_Main": {
@@ -515,7 +529,7 @@
 		"Category": "分类",
 		"Downloads": "下载",
 		"Installed": "已安装",
-		"Warning1": "中文界面基于AI翻译，由118ununoctium后期校对。可能存在一些错误。",
+		"Warning1": "此语言的翻译使用了人工智能技术，可能存在一些错误。部分用户界面元素可能未正确对齐",
 		"Warning2": "某些UI元素在中文界面可能无法正确对齐。",
 		"Language": "语言",
 		"Current": "中文",
@@ -526,6 +540,8 @@
 		"GetPre": "获取预发布版本",
 		"Start": "启动游戏",
 		"Refresh": "刷新模组列表",
+		"CredCN":"感谢 118ununoctium 验证中文翻译！",
+		"CredRU":"感谢 Antonzlo 验证俄语翻译！",
 		"v2.1.2Warning": "如果您从v2.1.2或更低版本升级，请关闭所有文件资源管理器窗口并刷新IMM。",
 		"Languages": {
 			"cn": "中文（简体）",
@@ -534,11 +550,15 @@
 			"jp": "日语",
 			"kr": "韩语"
 		},
-		"_Tags":{
-			"Tags":"标签",
-			"AddTag":"添加标签",
-			"Favorite":"收藏",
-			"NSFW":"NSFW"
+		"_Tags": {
+			"Tags": "标签",
+			"AddTag": "添加标签",
+			"Favorite": "收藏",
+			"NSFW": "NSFW",
+			"RemFav": "从收藏中移除",
+			"AddFav": "添加到收藏",
+			"MarkNSFW": "标记为NSFW",
+			"UnmarkNSFW": "取消NSFW标记"
 		},
 		"_Toasts": {
 			"ModsLoaded": "模组加载成功",
@@ -814,7 +834,12 @@
 				"Filter": "筛选",
 				"_Filter": {
 					"Enabled": "已启用",
-					"Disabled": "已禁用"
+					"Disabled": "已禁用",
+					"Advanced": "高级",
+					"AdvFilOpt":"高级筛选选项",
+					"All":"全部 / 任意",
+					"Yes":"是 / 肯定",
+					"No":"否 / 否定"
 				},
 				"Presets": "预设",
 				"_Presets": {
@@ -825,7 +850,8 @@
 				}
 			},
 			"_LeftOnline": {
-				"Type": "类型"
+				"Type": "类型",
+				"Chk":"检查更新"
 			}
 		},
 		"_Main": {
@@ -1009,6 +1035,8 @@
 		"GetPre": "Скачивать пререлизы",
 		"Start": "Запустить игру",
 		"Refresh": "Обновить список модов",
+		"CredCN":"Спасибо 118ununoctium за проверку перевода на китайский!",
+		"CredRU":"Спасибо Antonzlo за проверку перевода на русский!",
 		"v2.1.2Warning": "Если вы обновляетесь с версии v2.1.2 или ниже, пожалуйста, закройте все окна проводника и обновите IMM.",
 		"Languages": {
 			"cn": "Китайский (упрощенный)",
@@ -1017,11 +1045,15 @@
 			"jp": "Японский",
 			"kr": "Корейский"
 		},
-		"_Tags":{
+		"_Tags": {
 			"Tags": "Теги",
 			"AddTag": "Добавить тег",
 			"Favorite": "Избранное",
-			"NSFW": "NSFW"
+			"NSFW": "NSFW",
+			"RemFav": "Удалить из избранного",
+			"AddFav": "Добавить в избранное",
+			"MarkNSFW": "Отметить как NSFW",
+			"UnmarkNSFW": "Снять отметку NSFW"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Моды успешно загружены",
@@ -1095,9 +1127,7 @@
 			},
 			"OnlineMode": {
 				"title": "Переключение в онлайн режим",
-				"content": [
-					"Переключайтесь между онлайн и локальным режимом с помощью переключателя на левой боковой панели."
-				]
+				"content": ["Переключайтесь между онлайн и локальным режимом с помощью переключателя на левой боковой панели."]
 			},
 			"UsingPresets": {
 				"title": "Использование пресетов",
@@ -1109,9 +1139,7 @@
 			},
 			"SearchMods": {
 				"title": "Поиск модов",
-				"content": [
-					"Начните вводить в любом месте для поиска модов. Работает как в онлайн, так и в локальном режиме."
-				]
+				"content": ["Начните вводить в любом месте для поиска модов. Работает как в онлайн, так и в локальном режиме."]
 			},
 			"DLMods": {
 				"title": "Загрузка и установка модов",
@@ -1142,11 +1170,16 @@
 			},
 			"ManageCats": {
 				"title": "Управление категориями",
-				"content": ["Создавайте пользовательские категории для организации модов по своему усмотрению.", "Добавляйте пользовательские значки к категориям по умолчанию."]
+				"content": [
+					"Создавайте пользовательские категории для организации модов по своему усмотрению.",
+					"Добавляйте пользовательские значки к категориям по умолчанию."
+				]
 			},
 			"BatchOps": {
 				"title": "Массовые операции",
-				"content": ["Выбирайте несколько модов для выполнения различных действий (таких как переключение, смена категорий) над ними массово."]
+				"content": [
+					"Выбирайте несколько модов для выполнения различных действий (таких как переключение, смена категорий) над ними массово."
+				]
 			},
 			"Updater": {
 				"title": "Обновлятор IMM",
@@ -1320,7 +1353,12 @@
 				"Filter": "Фильтр",
 				"_Filter": {
 					"Enabled": "Включено",
-					"Disabled": "Отключено"
+					"Disabled": "Отключено",
+					"Advanced": "Расширенный",
+					"AdvFilOpt":"Расширенные параметры фильтра",
+					"All":"Все / Любой",
+					"Yes":"Да / Положительный",
+					"No":"Нет / Отрицательный"
 				},
 				"Presets": "Пресеты",
 				"_Presets": {
@@ -1331,7 +1369,8 @@
 				}
 			},
 			"_LeftOnline": {
-				"Type": "Тип"
+				"Type": "Тип",
+				"Chk":"Проверить обновления"
 			}
 		},
 		"_Main": {
@@ -1515,6 +1554,8 @@
 		"GetPre": "プレリリースを取得",
 		"Start": "ゲームを起動",
 		"Refresh": "Modリストを更新",
+		"CredCN":"118ununoctiumさんに中国語翻訳の検証をいただきありがとうございます！",
+		"CredRU":"Antonzloさんにロシア語翻訳の検証をいただきありがとうございます！",
 		"v2.1.2Warning": "v2.1.2以前からアップグレードする場合は、すべてのファイルエクスプローラーウィンドウを閉じてIMMを更新してください。",
 		"Languages": {
 			"cn": "中国語（簡体字）",
@@ -1523,11 +1564,15 @@
 			"jp": "日本語",
 			"kr": "韓国語"
 		},
-		"_Tags":{
+		"_Tags": {
 			"Tags": "タグ",
 			"AddTag": "タグを追加",
 			"Favorite": "お気に入り",
-			"NSFW": "NSFW"
+			"NSFW": "NSFW",
+			"RemFav": "お気に入りから削除",
+			"AddFav": "お気に入りに追加",
+			"MarkNSFW": "NSFWとしてマーク",
+			"UnmarkNSFW": "NSFWマークを解除"
 		},
 		"_Toasts": {
 			"ModsLoaded": "Modが正常に読み込まれました",
@@ -1639,7 +1684,10 @@
 			},
 			"ManageCats": {
 				"title": "カテゴリの管理",
-				"content": ["カスタムカテゴリを作成して、お好みでModを整理します。", "デフォルトカテゴリにカスタムアイコンを追加します。"]
+				"content": [
+					"カスタムカテゴリを作成して、お好みでModを整理します。",
+					"デフォルトカテゴリにカスタムアイコンを追加します。"
+				]
 			},
 			"BatchOps": {
 				"title": "バッチ操作",
@@ -1817,7 +1865,12 @@
 				"Filter": "フィルター",
 				"_Filter": {
 					"Enabled": "有効",
-					"Disabled": "無効"
+					"Disabled": "無効",
+					"Advanced": "詳細",
+					"AdvFilOpt":"詳細フィルターオプション",
+					"All":"すべて / いずれか",
+					"Yes":"はい / 肯定",
+					"No":"いいえ / 否定"
 				},
 				"Presets": "プリセット",
 				"_Presets": {
@@ -1828,7 +1881,8 @@
 				}
 			},
 			"_LeftOnline": {
-				"Type": "タイプ"
+				"Type": "タイプ",
+				"Chk":"更新を確認"
 			}
 		},
 		"_Main": {
@@ -2012,6 +2066,8 @@
 		"GetPre": "프리릴리스 받기",
 		"Start": "게임 시작",
 		"Refresh": "모드 목록 새로 고침",
+		"CredCN":"118ununoctium님께 중국어 번역 검증을 감사드립니다!",
+		"CredRU":"Antonzlo님께 러시아어 번역 검증을 감사드립니다!",
 		"v2.1.2Warning": "v2.1.2 이하 버전에서 업그레이드하는 경우 모든 파일 탐색기 창을 닫고 IMM을 새로 고침하세요.",
 		"Languages": {
 			"cn": "중국어 (간체)",
@@ -2020,11 +2076,15 @@
 			"jp": "일본어",
 			"kr": "한국어"
 		},
-		"_Tags":{
+		"_Tags": {
 			"Tags": "태그",
 			"AddTag": "태그 추가",
 			"Favorite": "즐겨찾기",
-			"NSFW": "NSFW"
+			"NSFW": "NSFW",
+			"RemFav": "즐겨찾기에서 제거",
+			"AddFav": "즐겨찾기에 추가",
+			"MarkNSFW": "NSFW로 표시",
+			"UnmarkNSFW": "NSFW 표시 해제"
 		},
 		"_Toasts": {
 			"ModsLoaded": "모드가 성공적으로 로드되었습니다",
@@ -2134,7 +2194,10 @@
 			},
 			"ManageCats": {
 				"title": "카테고리 관리",
-				"content": ["원하는 대로 모드를 정리할 수 있는 사용자 정의 카테고리를 만듭니다.", "기본 카테고리에 사용자 정의 아이콘을 추가합니다."]
+				"content": [
+					"원하는 대로 모드를 정리할 수 있는 사용자 정의 카테고리를 만듭니다.",
+					"기본 카테고리에 사용자 정의 아이콘을 추가합니다."
+				]
 			},
 			"BatchOps": {
 				"title": "일괄 작업",
@@ -2312,7 +2375,12 @@
 				"Filter": "필터",
 				"_Filter": {
 					"Enabled": "활성화됨",
-					"Disabled": "비활성화됨"
+					"Disabled": "비활성화됨",
+					"Advanced": "고급",
+					"AdvFilOpt":"고급 필터 옵션",
+					"All":"모두 / 임의",
+					"Yes":"예 / 긍정",
+					"No":"아니오 / 부정"
 				},
 				"Presets": "프리셋",
 				"_Presets": {
@@ -2323,7 +2391,8 @@
 				}
 			},
 			"_LeftOnline": {
-				"Type": "타입"
+				"Type": "타입",
+				"Chk":"업데이트 확인"
 			}
 		},
 		"_Main": {
