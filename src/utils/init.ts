@@ -435,6 +435,7 @@ export async function main() {
 	console.log("[IMM] Initializing game...");
 	if (config.game) configXX = await initGame(config.game);
 	console.log("[IMM] Setting window type...");
+	if (config.winType > 1)
 	setWindowType(config.winType);
 	const bg = document.querySelector("body");
 	if (bg)
