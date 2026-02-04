@@ -1,7 +1,7 @@
 import { atom, createStore } from "jotai";
 export const store = createStore();
 // import { initGame } from "./init";
-import  TEXT  from "@/textData.json";
+import TEXT from "@/textData.json";
 import { DEFAULTS, VERSION } from "./consts";
 import {
 	Category,
@@ -17,13 +17,18 @@ import {
 	ProgressData,
 	Settings,
 } from "./types";
-
-// const init = { settings: true };
+interface UpdateInfo {
+	version: string;
+	status: "available" | "downloading" | "ready" | "error" | "installed" | "ignored";
+	date: string;
+	body: string;
+	raw: any | null;
+}
 const INIT_DONE = atom(false);
+const MAIN_FUNC_STATUS = atom("" as String);
 const FIRST_LOAD = atom(false);
 const GAME = atom<Games>("");
 const LANG = atom<Language>("en");
-//saved
 const LAST_UPDATED = atom(Date.now());
 const SETTINGS = atom<Settings>({
 	global: {
@@ -55,15 +60,13 @@ const DATA = atom<ModDataObj>({});
 const PRESETS = atom<Preset[]>([]);
 const CATEGORIES = atom<Category[]>([]);
 const TYPES = atom<Category[]>([]);
-const XXMI_MODE = atom<0|1>(0);
+const XXMI_MODE = atom<0 | 1>(0);
 const XXMI_DIR = atom<string>("");
-//not-saved
 const LEFT_SIDEBAR_OPEN = atom(true);
 const RIGHT_SIDEBAR_OPEN = atom(true);
 const RIGHT_SLIDEOVER_OPEN = atom(false);
 const ONLINE = atom(false);
 const DOWNLOAD_LIST = atom<DownloadList>(DEFAULTS.DOWNLOAD_LIST);
-
 const CURRENT_PRESET = atom(DEFAULTS.CURRENT_PRESET);
 const MOD_LIST = atom<Mod[]>(DEFAULTS.MOD_LIST);
 const SELECTED = atom(DEFAULTS.SELECTED);
@@ -86,14 +89,7 @@ const CHANGES = atom<ChangeInfo>({
 	title: "",
 });
 const TEXT_DATA = atom(TEXT["en"]);
-const PROGRESS_OVERLAY = atom<ProgressData>({ title: "", open: false, finished: false, button: "", name:"" });
-export interface UpdateInfo {
-	version: string;
-	status: "available" | "downloading" | "ready" | "error" | "installed" | "ignored";
-	date: string;
-	body: string;
-	raw: any | null;
-}
+const PROGRESS_OVERLAY = atom<ProgressData>({ title: "", open: false, finished: false, button: "", name: "" });
 const IMM_UPDATE = atom(null as UpdateInfo | null);
 const UPDATER_OPEN = atom(false);
 const NOTICE = atom({
@@ -107,6 +103,20 @@ const NOTICE = atom({
 const HELP_OPEN = atom(false);
 const TUTORIAL_OPEN = atom(false);
 const NOTICE_OPEN = atom(false);
+const CONFLICTS_OPEN = atom(false);
+const CONFLICTS = atom({
+	conflicts: [] as string[][],
+	mods: {} as Record<string, number>,
+});
+const CONFLICT_INDEX = atom(0);
+export function openConflict(index=-1) {
+	store.set(CONFLICTS_OPEN, (prev) => {
+		if (!prev && index>=0) {
+			store.set(CONFLICT_INDEX, index);
+		}
+		return true;
+	});
+}
 const FILE_TO_DL = atom("");
 export function resetAtoms() {
 	const atoms = {
@@ -136,7 +146,7 @@ export function resetAtoms() {
 		ONLINE_PATH,
 		ONLINE_SORT,
 		ONLINE_SELECTED,
-		XXMI_MODE
+		XXMI_MODE,
 	};
 	store.set(FILE_TO_DL, "");
 	Object.keys(atoms).forEach((atom) =>
@@ -145,6 +155,7 @@ export function resetAtoms() {
 }
 const ERR = atom("");
 export {
+	CONFLICTS,
 	FILE_TO_DL,
 	ERR,
 	XXMI_DIR,
@@ -155,6 +166,8 @@ export {
 	NOTICE,
 	NOTICE_OPEN,
 	UPDATER_OPEN,
+	CONFLICTS_OPEN,
+	CONFLICT_INDEX,
 	IMM_UPDATE,
 	PROGRESS_OVERLAY,
 	TOASTS,
@@ -173,6 +186,7 @@ export {
 	FILTER,
 	GAME,
 	INIT_DONE,
+	MAIN_FUNC_STATUS,
 	LANG,
 	SETTINGS,
 	TEXT_DATA,
@@ -188,5 +202,5 @@ export {
 	RIGHT_SIDEBAR_OPEN,
 	LAST_UPDATED,
 	SELECTED,
-	SORT
+	SORT,
 };

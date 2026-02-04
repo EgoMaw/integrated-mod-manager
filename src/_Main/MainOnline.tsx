@@ -273,7 +273,8 @@ function MainOnline() {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: 0 }}
 							transition={transitionConfig(0)}
-							className="aspect-video w-full max-w-3xl mb-4"
+							className="aspect-video w-full max-w-175 duration-300 transition-[max-width] xl:max-w-3xl mb-4"
+							
 						>
 							<Carousel data={filteredBannerData || []} blur={nsfw == 1} onModClick={onModClick} />
 						</motion.div>

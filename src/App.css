@@ -630,7 +630,24 @@ a {
 	background-attachment: fixed;
 	background-position: 0 0;
 }
+.star-wars{
+	/* animation: star-wars 60s linear; */
 
+	transform: rotateX(50deg);
+	
+}
+.sw{
+	transform: rotateX(45deg);
+
+}
+@keyframes star-wars {
+	0% {
+		margin-top: 100vh;
+	}
+	100% {
+		margin-top: -100vh;
+	}
+}
 .card-grid {
 	grid-template-columns: repeat(auto-fill, minmax(256px, 256px));
 	grid-auto-rows: var(--card-height);

@@ -1,8 +1,9 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { getImageUrl, handleImageError, handleInAppLink } from "@/utils/utils";
-import { Link2Icon, Link2OffIcon, UploadIcon } from "lucide-react";
+import { Link2Icon, Link2OffIcon, SwordsIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { openConflict } from "@/utils/vars";
 
 interface CardLocalProps {
 	item: {
@@ -16,9 +17,10 @@ interface CardLocalProps {
 	lastUpdated: number;
 	hasUpdate: boolean;
 	updateAvl: string;
+	inConflict: number;
 }
 
-const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAvl }: CardLocalProps) => {
+const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAvl, inConflict }: CardLocalProps) => {
 	const previewUrl = `${getImageUrl(item.path)}?${lastUpdated}`;
 	return (
 		<div
@@ -41,38 +43,37 @@ const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAv
 			/>
 
 			<div
-				className="bg-background/50 fadein backdrop-blur
-			 flex items-center w-full min-h-14 gap-2 px-4 py-1 header-img"
+				className="bg-background/50 rounded-b-xl data-zzz:rounded-bl-3xl fadein backdrop-blur
+			 flex items-center w-full min-h-14 gap-2 px-2 py-1 header-img"
 			>
-				{item?.source ? (
-					hasUpdate&&false ? (
-						<Button
-							onClick={() => {
-								handleInAppLink(item.source || "");
-							}}
-							className="pointer-events-auto"
-							variant="ghost"
-						>
-							<UploadIcon className="text-accent" />
-						</Button>
-					) : (
-						<Link2Icon className="text-accent" />
-					)
+				{inConflict >= 0 ? (
+					<Button
+						onMouseDown={() => {
+							openConflict(inConflict);
+						}}
+						variant="ghost"
+					>
+						<SwordsIcon className="text-destructive h-4" />
+					</Button>
+				) : item?.source ? (
+					<Link2Icon className="text-accent h-4" />
 				) : (
-					<Link2OffIcon className="text-muted" />
+					<Link2OffIcon className="text-muted h-4" />
 				)}
 				<Label
-					className="text-ellipsis w-56 overflow-hidden border-0 pointer-events-none select-none"
+					className="text-ellipsis w-56 overflow-hidden border-0 text-xs pointer-events-none select-none"
 					style={{ backgroundColor: "#fff0", filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }}
 				>
 					{item.name}
 				</Label>
 			</div>
-			{item?.source && hasUpdate && <div
-				className="fadein backdrop-blur -mt-[calc(var(--card-height)-2px)]
+			{item?.source && hasUpdate && (
+				<div
+					className="fadein backdrop-blur -mt-[calc(var(--card-height)-2px)]
 			 flex items-center w-full h-8 bg-background/50 pointer-events-none duration-200 justify-center border-y header-img"
-			>	<div className="absolute h-full w-full bgx-flash pointer-events-none"/>
-				
+				>
+					{" "}
+					<div className="absolute h-full w-full bgx-flash pointer-events-none" />
 					<div
 						onMouseDown={() => {
 							handleInAppLink(item.source || "");
@@ -81,8 +82,8 @@ const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAv
 					>
 						<UploadIcon className="h-4" /> {updateAvl}
 					</div>
-				
-			</div>}
+				</div>
+			)}
 		</div>
 	);
 });

@@ -25,9 +25,10 @@ import LeftSidebar from "./_LeftSidebar/Left";
 import Main from "./_Main/Main";
 import RightLocal from "./_RightSidebar/RightLocal";
 import RightOnline from "./_RightSidebar/RightOnline";
-import { main } from "./utils/init";
+import { changeWindowTitle, main } from "./utils/init";
 import ToastProvider from "./_Toaster/ToastProvider";
 import Progress from "./_Progress/Progress";
+import { Button } from "./components/ui/button";
 
 initializeThemes();
 main();

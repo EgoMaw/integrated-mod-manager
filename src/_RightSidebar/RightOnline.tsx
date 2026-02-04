@@ -102,8 +102,10 @@ function RightOnline({ open }: { open: boolean }) {
 					downloading: prev?.downloading || null,
 					completed: prev?.completed || [],
 					queue: [...(prev?.queue || []), dlitem],
+					extracting: prev?.extracting || [],
 				};
 			});
+			addToast({ type: "success", message: "File added to download queue." });
 		},
 		[altPopoverOpen, item, setDownloadList]
 	);
@@ -124,7 +126,6 @@ function RightOnline({ open }: { open: boolean }) {
 			controller.abort();
 		};
 	}, [selected]);
-	//console.log(item)
 	useEffect(() => {
 		if (type != "Install" && item?._sProfileUrl) {
 			installedItem &&
@@ -141,13 +142,12 @@ function RightOnline({ open }: { open: boolean }) {
 		}
 	}, [selected]);
 	useEffect(() => {
-		console.log(item?._aFiles);
 		if (item?._aFiles) {
 			const file = item._aFiles.find((f: any) => f._idRow == fileToDl);
 			if (file) {
 				addToDownloadQueue(file);
 				setFileToDl("");
-				addToast({ type: "success", message: "File added to download queue." });
+				
 			}
 		}
 	}, [item?._aFiles]);
@@ -195,7 +195,7 @@ function RightOnline({ open }: { open: boolean }) {
 								<InfoIcon />
 							</TooltipTrigger>
 							<TooltipContent className="max-w-64 w-fit text-center">
-								<p className="max-w-64 break-words text-center">{file._sDescription}</p>
+								<p className="max-w-64 text-center break-words">{file._sDescription}</p>
 							</TooltipContent>
 						</Tooltip>
 					)}
@@ -231,9 +231,9 @@ function RightOnline({ open }: { open: boolean }) {
 					animate={{ translateX: "0%", opacity: 1 }}
 					exit={{ translateX: "100%", opacity: 0 }}
 					transition={{ duration: 0.3, ease: "linear" }}
-					className="bg-sidebar polka fixed right-0 pt-8 z-10 flex flex-col items-center justify-center h-full overflow-hidden border-l"
+					className="bg-sidebar polka fixed right-0 z-10 flex flex-col items-center justify-center h-full pt-8 overflow-hidden border-l"
 					style={{
-						maxWidth: "42vw",
+						maxWidth: "47vw",
 						width: "50rem",
 						backdropFilter: "blur(8px)",
 						backgroundColor: "color-mix(in oklab, var(--sidebar) 75%, transparent)",
@@ -262,6 +262,18 @@ function RightOnline({ open }: { open: boolean }) {
 							>
 								<LoaderIcon className="animate-spin" />
 							</motion.div>
+						) : item && (item._bIsPrivate || item._bIsTrashed || item._bIsWithheld) ? (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.2 }}
+								key="loading"
+								className="text-accent flex flex-col items-center justify-center h-full gap-4 p-4"
+							>
+								This mod has been {item._bIsPrivate ? "set to private" : item._bIsTrashed ? "deleted" : "withheld"}
+								{selected.startsWith("Mod") && <a href={`https://gamebanana.com/${selected.replace("Mod","mods")}`} target="_blank" className="text-xs">View in browser</a>}
+							</motion.div>
 						) : (
 							<motion.div
 								key={"loaded" + selected}
@@ -278,10 +290,10 @@ function RightOnline({ open }: { open: boolean }) {
 											onError={(e) => {
 												e.currentTarget.src = "/who.jpg";
 											}}
-											src={item._aCategory._sIconUrl || "err"}
+											src={item._aCategory?._sIconUrl || "err"}
 										/>
 
-										<span className="ctrs">{item._aCategory._sName.split(" ")[0]}</span>
+										<span className="ctrs">{item._aCategory?._sName.split(" ")[0]}</span>
 									</div>
 
 									<Label key={item._sName} className="w-full text-xl text-center">
@@ -294,7 +306,7 @@ function RightOnline({ open }: { open: boolean }) {
 												<LinkIcon />
 											</Button>
 										</PopoverTrigger>
-										<PopoverContent className="w-fit bg-sidebar p-2 flex flex-col">
+										<PopoverContent className="w-fit bg-sidebar flex flex-col p-2">
 											<Button
 												onClick={() => {
 													navigator.clipboard.writeText(item._sProfileUrl || "");
@@ -329,7 +341,7 @@ function RightOnline({ open }: { open: boolean }) {
 												}}
 											>
 												<PopoverTrigger>
-													<Button className="w-full min-w-fit mt-2">
+													<Button className="min-w-fit w-full mt-2">
 														{textData._RightSideBar._RightOnline.LinkToMod}
 													</Button>
 												</PopoverTrigger>
@@ -362,6 +374,7 @@ function RightOnline({ open }: { open: boolean }) {
 																						"/" +
 																						item._aPreviewMedia._aImages[0]._sFile,
 																					savePath: await createModDownloadDir(mod.parent, mod.name),
+																					key:"link_preview_" + mod.name,
 																					emit: false,
 																				});
 																			}
@@ -393,7 +406,7 @@ function RightOnline({ open }: { open: boolean }) {
 																		className="button-like zzz-fg-text data-zzz:mt-1"
 																	>
 																		<img
-																			className="aspect-square object-cover outline bg-accent/10 flex items-center justify-center h-12 text-white rounded-full pointer-events-none"
+																			className="aspect-square outline bg-accent/10 flex items-center justify-center object-cover h-12 text-white rounded-full pointer-events-none"
 																			onError={(e) => {
 																				e.currentTarget.src = "/who.jpg";
 																			}}
@@ -401,7 +414,7 @@ function RightOnline({ open }: { open: boolean }) {
 																			style={{}}
 																		/>
 
-																		<div className="w-full text-ellipsis overflow-hidden whitespace-nowrap max-w-56 break-words">
+																		<div className="text-ellipsis whitespace-nowrap max-w-56 w-full overflow-hidden break-words">
 																			{mod.name}
 																		</div>
 																		{/* <CheckIcon
@@ -424,7 +437,7 @@ function RightOnline({ open }: { open: boolean }) {
 											onError={(e) => {
 												e.currentTarget.src = "/who.jpg";
 											}}
-											src={item._aSubmitter._sAvatarUrl || "err"}
+											src={item._aSubmitter?._sAvatarUrl || "err"}
 										/>
 
 										<span className="ctrs">{item._aSubmitter?._sName}</span>

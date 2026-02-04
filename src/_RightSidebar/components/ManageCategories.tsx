@@ -205,7 +205,7 @@ function ManageCategories() {
 			<div className="min-h-fit text-accent my-6 text-3xl">
 				{textData._RightSideBar._components._ManageCategories.ManageCat}
 			</div>
-			<div className="max-h-120 min-h-120 flex flex-wrap w-full h-full gap-2 p-2 overflow-x-hidden overflow-y-scroll text-gray-300 rounded-sm">
+			<div className="max-h-110 min-h-110 flex flex-wrap w-full h-full gap-2 p-2 overflow-x-hidden overflow-y-scroll text-gray-300 rounded-sm">
 				{categories.map((cat) => (
 					<div
 						key={cat._sName}

@@ -7,6 +7,7 @@ import {
 	LAST_UPDATED,
 	MOD_LIST,
 	ONLINE,
+	openConflict,
 	SELECTED,
 	SETTINGS,
 	SOURCE,
@@ -17,6 +18,7 @@ import {
 	ArrowUpRightFromSquareIcon,
 	CheckIcon,
 	ChevronDownIcon,
+	DownloadIcon,
 	EditIcon,
 	EyeIcon,
 	HeartIcon,
@@ -24,6 +26,7 @@ import {
 	MinusIcon,
 	SearchIcon,
 	Settings2Icon,
+	SwordsIcon,
 	TrashIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -37,7 +40,15 @@ import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { changeModName, deleteMod, saveConfigs, savePreviewImage } from "@/utils/filesys";
+import {
+	changeModName,
+	deleteMod,
+	installFromArchives,
+	refreshModList,
+	saveConfigs,
+	savePreviewImage,
+	selectPath,
+} from "@/utils/filesys";
 import { Label } from "@/components/ui/label";
 import { Mod } from "@/utils/types";
 import ManageCategories from "./components/ManageCategories";
@@ -51,6 +62,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { main } from "@/utils/init";
 import { addToast } from "@/_Toaster/ToastProvider";
+import ModPreferences from "./components/ModPreferences";
 let text = "";
 let curUrlIndex = 0;
 function RightLocal() {
@@ -148,9 +160,10 @@ function RightLocal() {
 	const [modList, setModList] = useAtom(MOD_LIST);
 	const [selected, setSelected] = useAtom(SELECTED);
 	const textData = useAtomValue(TEXT_DATA);
-	const setData = useSetAtom(DATA);
+	const [data, setData] = useAtom(DATA);
 	const [item, setItem] = useState<Mod | undefined>();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [dialogType, setDialogType] = useState("");
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	useEffect(() => {
@@ -163,6 +176,7 @@ function RightLocal() {
 			<Button
 				onClick={() => {
 					setPopoverOpen(false);
+					setDialogType("categories");
 					setDialogOpen(true);
 				}}
 				className="w-full mx-2 my-1"
@@ -195,11 +209,29 @@ function RightLocal() {
 	useEffect(() => {
 		text = "";
 		if (selected) {
-			const mod = modList.find((m) => m.path == selected);
+			const mod = { ...modList.find((m) => m.path == selected) } as Mod;
 			text = mod?.note || "";
-			setItem(mod);
-		} else setItem(undefined);
-	}, [selected, modList]);
+			if (mod) {
+				const modData = data[mod.path]?.vars;
+				if (modData) {
+					console.log("Mod data found for selected mod:", modData);
+					mod.keys = mod.keys.map((key) => {
+						if (modData[key.file] && modData[key.file][key.target]) {
+							key.pref = modData[key.file][key.target].pref;
+							key.reset = modData[key.file][key.target].reset;
+							key.name = modData[key.file][key.target].name || key.target;
+						}
+
+						return key;
+					});
+				}
+
+				setItem(mod);
+				return;
+			}
+		}
+		setItem(undefined);
+	}, [selected, modList, data]);
 	useEffect(() => {
 		if (item) {
 			const cat = categories.find((c) => c._sName == item.parent) || { _sName: "-1", _sIconUrl: "" };
@@ -209,10 +241,11 @@ function RightLocal() {
 		}
 	}, [item, modList]);
 	const tags = new Set(item?.tags || []);
+	//console.log(item?.keys);
 	return (
-		<Sidebar side="right" className="duration-300 pt-8">
+		<Sidebar side="right" className="pt-8 duration-300">
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<ManageCategories />
+				{dialogType == "edit-mod-config" && item?.keys ? <ModPreferences item={item} /> : <ManageCategories />}
 			</Dialog>
 			<AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
 				<AlertDialogContent>
@@ -263,7 +296,7 @@ function RightLocal() {
 						{item ? (
 							<>
 								<Button
-									className="aspect-square  max-h-6"
+									className="aspect-square max-h-6"
 									onClick={() => {
 										openPath(join(source, managedSRC, item.path));
 									}}
@@ -281,7 +314,7 @@ function RightLocal() {
 									}}
 									type="text"
 									key={item?.name || "no-item"}
-									className="label text-muted-foreground  text-ellipsis"
+									className="label text-muted-foreground text-ellipsis"
 									defaultValue={item?.name || ""}
 								/>
 								<Button
@@ -316,10 +349,10 @@ function RightLocal() {
 							src={`${getImageUrl(item?.path || "")}?${lastUpdated}`}
 						></img>
 					</SidebarGroup>
-					<SidebarGroup className="px-1 min-h-41.5 my-1">
-						<div className="flex flex-col w-full border rounded-lg">
-							<div className="bg-pat2 flex items-center justify-between w-full p-1 rounded-lg">
-								<Label className=" h-12  flex items-center justify-center  min-w-28.5 w-28.5 text-accent ">
+					<SidebarGroup className="px-1 min-h-33.5 my-1">
+						<div className="flex flex-col w-full gap-1 py-1 border rounded-lg">
+							<div className="bg-pat2 flex items-center justify-between w-full px-1 rounded-lg">
+								<Label className=" h-10  flex items-center justify-center  min-w-28.5 w-28.5 text-accent ">
 									{textData.Category}
 								</Label>
 								{item?.depth == 1 ? (
@@ -327,7 +360,7 @@ function RightLocal() {
 										<PopoverTrigger asChild>
 											<div
 												role="combobox"
-												className="overflow-hidden text-ellipsis active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all p-2 gap-2 bg-sidebar text-accent shadow-xs hover:brightness-120  duration-300 h-12 flex items-center justify-between w-48.5"
+												className="overflow-hidden text-ellipsis active:scale-90 whitespace-nowrap rounded-md text-sm font-medium transition-all p-2 gap-2 bg-sidebar text-accent shadow-xs hover:brightness-120  duration-300 h-10 flex items-center justify-between w-48.5"
 											>
 												{category.name != "-1" ? (
 													<>
@@ -396,8 +429,8 @@ function RightLocal() {
 									</div>
 								)}
 							</div>
-							<div className="bg-pat1 flex justify-between w-full p-1 rounded-lg">
-								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
+							<div className="bg-pat1 flex justify-between w-full px-1 rounded-lg">
+								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-10 w-28.5 text-accent ">
 									{textData._RightSideBar._RightLocal.Source}
 								</Label>
 								<div className="w-48.5 flex items-center px-1">
@@ -426,7 +459,7 @@ function RightLocal() {
 										}}
 										type="text"
 										placeholder={textData._RightSideBar._RightLocal.NoSource}
-										className="w-full select-none focus-within:select-auto overflow-hidden h-12 focus-visible:ring-[0px] border-0  text-ellipsis"
+										className="w-full select-none focus-within:select-auto overflow-hidden h-10 focus-visible:ring-[0px] border-0  text-ellipsis"
 										style={{ backgroundColor: "#fff0" }}
 										key={item?.source}
 										defaultValue={item?.source}
@@ -444,8 +477,8 @@ function RightLocal() {
 												<TooltipTrigger>
 													<LinkIcon className=" w-4 h-4" />
 												</TooltipTrigger>
-												<TooltipContent className="w-20 flex items-center justify-center">
-													<p className="w-full max-w-20 text-center">
+												<TooltipContent className="flex items-center justify-center w-20">
+													<p className="max-w-20 w-full text-center">
 														{textData._RightSideBar._RightLocal.ViewModOnline}
 													</p>
 												</TooltipContent>
@@ -469,10 +502,10 @@ function RightLocal() {
 											>
 												<Tooltip>
 													<TooltipTrigger>
-														<SearchIcon className=" pointer-events-none w-4 h-4" />
+														<SearchIcon className=" w-4 h-4 pointer-events-none" />
 													</TooltipTrigger>
 													<TooltipContent className="w-15 flex items-center justify-center">
-														<p className="w-full max-w-15 text-center">
+														<p className="max-w-15 w-full text-center">
 															{textData._RightSideBar._RightLocal.SearchOnline}
 														</p>
 													</TooltipContent>
@@ -483,8 +516,8 @@ function RightLocal() {
 									{}
 								</div>
 							</div>
-							<div className="bg-pat1 flex justify-between w-full p-1 rounded-lg">
-								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-12 w-28.5 text-accent ">
+							<div className="bg-pat1 flex justify-between w-full px-1 rounded-lg">
+								<Label className="bg-input/0 flex items-center justify-center hover:bg-input/0 h-10 w-28.5 text-accent ">
 									{textData._Tags.Tags}
 								</Label>
 								<div className="w-48.5 flex gap-1 justify-evenly items-center px-1">
@@ -527,8 +560,11 @@ function RightLocal() {
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>{(new Set(item?.tags || [])).has("fav")? textData._Tags.RemFav : textData._Tags.AddFav}</TooltipContent>
-									</Tooltip><Tooltip>
+										<TooltipContent>
+											{new Set(item?.tags || []).has("fav") ? textData._Tags.RemFav : textData._Tags.AddFav}
+										</TooltipContent>
+									</Tooltip>
+									<Tooltip>
 										<TooltipTrigger>
 											<Button
 												onClick={() => {
@@ -556,24 +592,24 @@ function RightLocal() {
 													});
 													saveConfigs();
 												}}
-												className="aspect-square h-8 flex flex-col"
+												className="aspect-square flex flex-col h-8"
 												style={{
-														color: tags.has("nsfw") ? "var(--color-yellow-200)" : "",
-													}}
-											>
-												<EyeIcon
-													className="w-3.5 h-3.5 "
-												/>
-												<MinusIcon className="-mt-6 rotate-45 duration-300 scale-x-170"
-												style={{
-													scale: tags.has("nsfw")?"1.7 1":"0 1"
+													color: tags.has("nsfw") ? "var(--color-yellow-200)" : "",
 												}}
+											>
+												<EyeIcon className="w-3.5 h-3.5 " />
+												<MinusIcon
+													className="scale-x-170 -mt-6 duration-300 rotate-45"
+													style={{
+														scale: tags.has("nsfw") ? "1.7 1" : "0 1",
+													}}
 												/>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>{(new Set(item?.tags || [])).has("nsfw")? textData._Tags.UnmarkNSFW : textData._Tags.MarkNSFW}</TooltipContent>
+										<TooltipContent>
+											{new Set(item?.tags || []).has("nsfw") ? textData._Tags.UnmarkNSFW : textData._Tags.MarkNSFW}
+										</TooltipContent>
 									</Tooltip>
-									
 								</div>
 							</div>
 						</div>
@@ -582,15 +618,16 @@ function RightLocal() {
 						className="h-full duration-200 opacity-0"
 						style={{
 							opacity: item ? 1 : 0,
+							marginBottom: item ? "0rem" : "-33rem",
 						}}
 					>
 						<div className=" flex flex-col w-full h-full p-2 overflow-hidden">
-							<Tabs defaultValue={tab} onValueChange={(val: any) => setTab(val)} className="w-full min-h-full">
-								<TabsList className="bg-background/0 w-full gap-2">
+							<Tabs defaultValue={tab} onValueChange={(val: any) => setTab(val)} className=" w-full min-h-full">
+								<TabsList className="bg-background/0 w-full h-8 gap-2">
 									<TabsTrigger
 										value="hotkeys"
 										nbg2
-										className="transparent-bg w-1/2 h-10"
+										className="transparent-bg w-1/2 h-8"
 										style={{
 											color: tab == "hotkeys" ? "var(--accent)" : "var(--muted-foreground)",
 											border: "1px solid var(--border)",
@@ -602,7 +639,7 @@ function RightLocal() {
 									<TabsTrigger
 										nbg2
 										value="notes"
-										className="transparent-bg w-1/2 h-10"
+										className="transparent-bg w-1/2 h-8"
 										style={{
 											color: tab !== "hotkeys" ? "var(--accent)" : "var(--muted-foreground)",
 											border: "1px solid var(--border)",
@@ -622,12 +659,12 @@ function RightLocal() {
 										className="flex w-full h-full gap-2 border rounded-md"
 									>
 										{tab == "hotkeys" ? (
-											<div className="text-gray-300 h-full max-h-[calc(100vh-38.75rem)] flex flex-col w-full overflow-y-scroll overflow-x-hidden">
+											<div className="text-gray-300 h-full max-h-[calc(100vh-39.75rem)] flex flex-col w-full overflow-y-scroll overflow-x-hidden">
 												{item?.keys?.map((hotkey, index) => (
 													<div
 														key={index + item.path}
 														className={
-															"flex border-b justify-center text-border items-center gap-2 w-full min-h-12 px-4 py-2 bg-pat" +
+															"flex border-b justify-center text-border items-center gap-2 w-full min-h-10 px-4 py-2 bg-pat" +
 															(1 + (index % 2))
 														}
 													>
@@ -687,6 +724,54 @@ function RightLocal() {
 									</motion.div>
 								</AnimatePresence>
 							</Tabs>
+						</div>
+					</SidebarGroup>
+					<SidebarGroup
+						className="min-h-10 p-2 pt-0 mb-2 overflow-hidden"
+						style={{
+							maxHeight: item ? "2.5rem" : "",
+						}}
+					>
+						{item && (
+							<Button
+								className="w-full h-10"
+								onClick={() => {
+									setDialogType("edit-mod-config");
+									setDialogOpen(true);
+								}}
+							>
+								<Settings2Icon className="w-4 h-4" />
+								Edit Mod Config(s)
+							</Button>
+						)}
+
+						<div className="w-full -mb-2 pointer-events-auto justify-between flex">
+							<Button
+								className="w-38.75 h-12"
+								onClick={async () => {
+									const files = (await selectPath({
+										multiple: true,
+										title: "Select .7z/.zip/.rar Archive(s) to Install Mod(s) From",
+									})) as string[] | null;
+									if (!files || files.length === 0) return;
+									installFromArchives(files || ([] as string[])).then(async () => {
+										setModList(await refreshModList());
+									});
+								}}
+							>
+								<DownloadIcon className="w-4 h-4" />
+								Manual Install
+							</Button>
+							<Button
+								className="w-38.75 h-12"
+								variant="destructive"
+								onClick={() => {
+									openConflict();
+								}}
+							>
+								<SwordsIcon className="w-4 h-4" />
+								Conflicts
+							</Button>
 						</div>
 					</SidebarGroup>
 				</div>

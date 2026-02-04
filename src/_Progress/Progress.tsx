@@ -8,14 +8,14 @@ function Progress() {
 	const textData = useAtomValue(TEXT_DATA);
 	const [restoreInfo, setRestoreInfo] = useAtom(PROGRESS_OVERLAY);
 	const setChanges = useSetAtom(CHANGES);
-	useEffect(() => {
-		if (restoreInfo.open && restoreInfo.finished && restoreInfo.title == "Restore Point Created") {
-			// updateInfo("Optimizing dir structure...");
-			applyChanges(true).then(() => {
-				setChanges((prev) => ({ ...prev, skip: true }));
-			});
-		}
-	}, [restoreInfo]);
+	// useEffect(() => {
+	// 	if (restoreInfo.open && restoreInfo.finished && restoreInfo.title == "Restore Point Created") {
+	// 		// updateInfo("Optimizing dir structure...");
+	// 		applyChanges(true).then(() => {
+	// 			setChanges((prev) => ({ ...prev, skip: true }));
+	// 		});
+	// 	}
+	// }, [restoreInfo]);
 	//console.log(restoreInfo);
 	return (
 		<motion.div

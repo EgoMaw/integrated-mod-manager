@@ -46,7 +46,7 @@ function Carousel({
 				setApi={setApi}
 				opts={{ loop: true }}
 				plugins={[Autoplay({ delay: 5000 })]}
-				className="aspect-video max-w-3xl overflow-hidden rounded-lg"
+				className="aspect-video max-w-175 xl:max-w-3xl duration-300 transition-[max-width] overflow-hidden rounded-lg"
 			>
 				<CarouselContent>
 					{data?.map((item, index) => (

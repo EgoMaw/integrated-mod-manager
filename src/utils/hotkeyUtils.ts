@@ -60,7 +60,8 @@ export function formatHotkeyDisplay(hotkey: string): string {
 		.replaceAll("down", "🠋")
 		.replaceAll("left", "🠈")
 		.replaceAll("right", "🠊")
-		.replaceAll("lbutton", "Left Click")
+		.replaceAll("lbutton", "LMB")
+		.replaceAll("rbutton", "RMB")
 
 		.replaceAll("xx+xx", " ﹢ ");
 }

@@ -189,7 +189,7 @@ function Changes({ afterInit }: { afterInit: () => Promise<void> }) {
 								// updateInfo("Optimizing dir structure...");
 								// setConsentOverlayData((prev) => ({ ...prev, next: true }));
 								addToast({ type: "info", message: textData._Toasts.ApplyingChanges });
-								await applyChanges(true);
+								await applyChanges();
 								setChanges((prev) => ({ ...prev, skip: true }));
 							}
 						}}

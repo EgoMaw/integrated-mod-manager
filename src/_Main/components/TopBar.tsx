@@ -104,26 +104,6 @@ function TopBar() {
 	}, [online]);
 	return (
 		<div className="text-accent min-h-16 flex items-center justify-center w-full h-16 gap-2 p-2">
-			{/* <Button
-				onClick={(e) => {
-					e.stopPropagation();
-					setLeftSidebarOpen((prev: boolean) => !prev);
-				}}
-				className="bg-sidebar flex items-center justify-center w-12 h-12 gap-0 duration-200 border rounded-lg"
-			>
-				<PanelLeftCloseIcon
-					className=" min-h-5 w-6 duration-200 stroke-1"
-					style={{
-						width: leftSidebarOpen ? "1.5rem" : "0rem",
-					}}
-				/>
-				<PanelLeftOpenIcon
-					className=" min-h-5 w-6 duration-200 stroke-1"
-					style={{
-						width: leftSidebarOpen ? "0rem" : "1.5rem",
-					}}
-				/>
-			</Button> */}
 			<div className="bg-sidebar button-like flex items-center justify-between w-full h-full px-3 py-1 overflow-hidden border rounded-lg">
 				<SearchIcon className="text-muted-foreground flex-shrink-0 w-4 h-4 mr-2" />
 				<Input
@@ -264,7 +244,6 @@ function TopBar() {
 				}
 			</div>
 			<Notice />
-			{/* <Help /> */}
 			<Button
 				onClick={() => {
 					if (online) {
@@ -294,27 +273,6 @@ function TopBar() {
 				<RefreshCwIcon></RefreshCwIcon>
 				{/* </Tooltip> */}
 			</Button>
-			{/* <Button
-				onClick={(e) => {
-					e.stopPropagation();
-
-					online ? setRightSlideOverOpen((prev: boolean) => !prev) : setRightSidebarOpen((prev: boolean) => !prev);
-				}}
-				className="bg-sidebar flex items-center justify-center w-12 h-12 gap-0 duration-200 border rounded-lg"
-			>
-				<PanelRightOpenIcon
-					className="min-h-5 w-6 duration-200 stroke-1"
-					style={{
-						width: (online ? rightSlideOverOpen : rightSidebarOpen) ? "0rem" : "1.5rem",
-					}}
-				/>
-				<PanelRightCloseIcon
-					className="min-h-5 w-6 duration-200 stroke-1"
-					style={{
-						width: (online ? rightSlideOverOpen : rightSidebarOpen) ? "1.5rem" : "0rem",
-					}}
-				/>
-			</Button> */}
 		</div>
 	);
 }

@@ -57,7 +57,8 @@ export interface ModData {
 	viewedAt?: number;
 	tags?: string[];
 	note?: string;
-	state?: { [key: string]: any };
+	// state?: { [key: string]: any };
+	vars?: { [key: string]: any };
 }
 export interface ModDataObj {
 	[key: string]: ModData;
@@ -89,17 +90,24 @@ export interface DownloadItem {
 	updated:  number;
 	name: string;
 	fname: string;
+	key?: string;
 }
 export interface DownloadList {
 	queue: DownloadItem[];
 	downloading: DownloadItem | null ;
 	completed: DownloadItem[];
+	extracting: DownloadItem[];
 }
 export interface ModHotKeys {
 	key: string;
 	type: string;
 	target: string;
 	name: string;
+	values: string[];
+	default: string;
+	file:string;
+	pref: string | null;
+	reset: string | null;
 }
 export interface Mod {
 	isDir: boolean;
@@ -116,6 +124,7 @@ export interface Mod {
 	viewedAt?: number;
 	note?: string;
 	tags?: string[];
+	hashes?: string[];
 }
 export interface ProgressData {
 	title: string;

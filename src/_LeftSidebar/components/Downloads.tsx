@@ -1,17 +1,25 @@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Check, Clock, DownloadIcon, FileQuestionIcon, Loader2, X } from "lucide-react";
+import { Check, Clock, DownloadIcon, FileQuestionIcon, FolderArchiveIcon, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { DATA, DOWNLOAD_LIST, GAME, LEFT_SIDEBAR_OPEN, MOD_LIST, TEXT_DATA } from "@/utils/vars";
+import { CATEGORIES, DATA, DOWNLOAD_LIST, GAME, LEFT_SIDEBAR_OPEN, MOD_LIST, TEXT_DATA } from "@/utils/vars";
 import { formatBytes, sanitizeFileName } from "@/utils/utils";
-import { createModDownloadDir, refreshModList, saveConfigs, validateModDownload } from "@/utils/filesys";
+import {
+	cleanCancelledDownload,
+	createModDownloadDir,
+	refreshModList,
+	saveConfigs,
+	validateModDownload,
+} from "@/utils/filesys";
 import { DownloadItem } from "@/utils/types";
+import { UNCATEGORIZED } from "@/utils/consts";
 let path = "";
 let downloadElement: any = null;
+let extracts = {} as any;
 let prev = 0;
 let prevText = " • ";
 const Icons = {
@@ -19,10 +27,12 @@ const Icons = {
 	downloading: <Loader2 className="min-h-4 min-w-4 max-w-4 animate-spin" />,
 	completed: <Check className="min-h-4 min-w-4 max-w-4" />,
 	failed: <X className="min-h-4 min-w-4 max-w-4 text-destructive" />,
+	extracting: <FolderArchiveIcon className="min-h-4 min-w-4 max-w-4 animate-pulse" />,
 };
 function Downloads() {
 	const textData = useAtomValue(TEXT_DATA);
 	const [downloads, setDownloads] = useAtom(DOWNLOAD_LIST);
+	const categories = useAtomValue(CATEGORIES);
 	const [data, setData] = useAtom(DATA);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const leftSidebarOpen = useAtomValue(LEFT_SIDEBAR_OPEN);
@@ -35,20 +45,25 @@ function Downloads() {
 	const lastSpeedUpdate = useRef<number>(0);
 	const downloadFile = async (item: DownloadItem) => {
 		if (item.category == "Other/Misc") item.category = "Other";
+		else if (!categories.find((cat) => cat._sName == item.category)) item.category = UNCATEGORIZED;
 		item.name = sanitizeFileName(item.name);
 		path = (await createModDownloadDir(item.category, item.name)) as string;
 		downloadElement = {
 			name: item.name,
 			path: item.category + "\\" + item.name,
 			source: item.source,
+			fname: item.fname,
 			category: item.category,
 			updatedAt: item.updated * 1000,
+			dlPath: path,
+			key: `${item.name}_${item.file}_${item.fname}_${item.updated}`,
 		};
 		setData((prevData) => {
 			if (downloadElement.path)
 				prevData[downloadElement.path] = {
 					source: downloadElement.source,
 					updatedAt: prevData[downloadElement.path]?.updatedAt || -1,
+					...prevData[downloadElement.path],
 				};
 			return { ...prevData };
 		});
@@ -57,12 +72,14 @@ function Downloads() {
 			fileName: item.name,
 			downloadUrl: item.file,
 			savePath: path,
+			key: downloadElement.key,
 			emit: true,
 		});
 		invoke("download_and_unzip", {
 			fileName: "preview",
 			downloadUrl: item.preview,
 			savePath: path,
+			key: "link_preview_" + item.name,
 			emit: false,
 		});
 	};
@@ -72,6 +89,7 @@ function Downloads() {
 			const total = payload.total as number;
 			const downloaded = payload.downloaded as number;
 			prev = ((downloaded / total) * 100).toFixed(2) as unknown as number;
+			if (!downloadElement || payload.key !== downloadElement.key) return;
 			prevText = ` • ${prev}% (${formatBytes(downloaded)}/${formatBytes(total)}) • ${payload.speed} • ${
 				payload.eta
 			} • `;
@@ -89,9 +107,9 @@ function Downloads() {
 					"conic-gradient( var(--accent) 0% " + prev + "%, var(--button) 0% 100%)";
 			}
 		});
-		listen("fin", async () => {
-			if (!path || !downloadElement) return;
-			validateModDownload(path);
+		listen("ext", (event) => {
+			const payload = event.payload as any;
+			if (!downloadElement || payload.key !== downloadElement.key) return;
 			path = "";
 			prev = 0;
 			prevText = " • ";
@@ -101,24 +119,47 @@ function Downloads() {
 			if (downloadRef3.current) {
 				downloadRef3.current.style.background = "conic-gradient( var(--accent) 0% 0%, var(--button) 0% 100%)";
 			}
-			setData((prevData) => {
-				if (downloadElement.path)
-					prevData[downloadElement.path] = {
-						source: downloadElement.source,
-						updatedAt: downloadElement.updatedAt || Date.now(),
-						viewedAt: Date.now(),
-					};
-				return { ...prevData };
-			});
 			setDownloads((prev) => {
 				return {
 					...prev,
-					completed: [...(prev.completed || []), downloadElement],
 					downloading: null,
+					extracting: [...(prev.extracting || []), downloadElement],
 				};
 			});
-			modList(await refreshModList());
-			saveConfigs();
+			extracts[payload.key] = {
+				...downloadElement,
+			};
+			downloadElement = null;
+		});
+		listen("fin", async (event) => {
+			const payload = event.payload as any;
+			const key = payload.key as string;
+			console.log("[IMM] Extraction finished for key:", key);
+			if (extracts[key]) {
+				const finishedElement = extracts[key];
+				delete extracts[key];
+				await validateModDownload(finishedElement.dlPath);
+				setData((prev) => {
+					if (finishedElement.path)
+						prev[finishedElement.path] = {
+							source: finishedElement.source,
+							updatedAt: finishedElement.updatedAt || Date.now(),
+							viewedAt: Date.now(),
+						};
+					return { ...prev };
+				});
+				setDownloads((prev) => {
+					return {
+						...prev,
+						completed: [...(prev.completed || []), finishedElement],
+						extracting: prev.extracting?.filter((item: any) => item.key !== key) || [],
+					};
+				});
+				modList(await refreshModList());
+				saveConfigs();
+				return;
+			}
+			return;
 		});
 	}, []);
 	useEffect(() => {
@@ -160,20 +201,50 @@ function Downloads() {
 	const clearCompleted = () => {
 		setDownloads((prev) => ({ ...prev, completed: [] }));
 	};
-	const cancelDownload = (index: number) => {
-		setDownloads((prev) => {
-			return {
-				...prev,
-				queue: prev.queue.filter(
-					(_, i: number) => i !== index - (prev.downloading && Object.keys(prev.downloading).length > 0 ? 1 : 0)
-				),
-			};
+	const cancelExtract = (key: string) => {
+		invoke("cancel_extract", { key }).then(() => {
+			setDownloads((prev) => {
+				return {
+					...prev,
+					extracting: prev.extracting?.filter((item) => item.key !== key) || [],
+				};
+			});
 		});
+	};
+	const cancelDownload = (index: number) => {
+		if (index == 0 && downloads?.downloading && Object.keys(downloads.downloading).length > 0) {
+			invoke("get_username").then((_) => {
+				cleanCancelledDownload(path);
+				path = "";
+				downloadElement = null;
+				prev = 0;
+				prevText = " • ";
+				setDownloads((prev) => {
+					return {
+						...prev,
+						downloading: null,
+					};
+				});
+			});
+			return;
+		}
+		index =
+			index -
+			(downloads?.downloading && Object.keys(downloads.downloading).length > 0 ? 1 : 0) -
+			downloads.extracting.length;
+		const type = index < downloads?.queue.length ? "queue" : "completed";
+		index = type == "queue" ? index : index - downloads.queue.length;
+		setDownloads((prev) => ({
+			...prev,
+			[type]: prev[type].filter((_: any, i: number) => i !== index),
+		}));
 	};
 	const done = downloads?.completed?.length || 0;
 	let downloadList = [];
 	if (downloads?.downloading && Object.keys(downloads.downloading).length > 0)
 		downloadList.push({ ...downloads.downloading, status: "downloading" });
+	if (downloads?.extracting)
+		downloadList = [...downloadList, ...downloads.extracting.map((item) => ({ ...item, status: "extracting" }))];
 	if (downloads?.queue)
 		downloadList = [...downloadList, ...downloads.queue.map((item) => ({ ...item, status: "pending" }))];
 	if (downloads?.completed)
@@ -204,7 +275,7 @@ function Downloads() {
 													{downloadList[0].status == "downloading"
 														? `${textData._LeftSideBar._components._Downloads.Downloading} ${done + 1}/${
 																downloadList.length
-														  }`
+															}`
 														: `${textData._LeftSideBar._components._Downloads.Downloaded} ${done}/${downloadList.length}`}
 												</Label>
 											</div>
@@ -220,7 +291,7 @@ function Downloads() {
 												{downloadList[0].status == "downloading"
 													? `${textData._LeftSideBar._components._Downloads.Downloading} ${done + 1}/${
 															downloadList.length
-													  }`
+														}`
 													: `${textData._LeftSideBar._components._Downloads.Downloaded} ${done}/${downloadList.length}`}
 											</Label>
 										</div>
@@ -274,11 +345,16 @@ function Downloads() {
 						{downloadList.length > 0 ? (
 							<>
 								{
-									<div className="button-like zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 data-wuwa:-mb-16 h-16 -mb-18 data-wuwa:border-b flex items-center w-full min-w-0 overflow-hidden">
+									<div
+										className="button-like zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 data-wuwa:-mb-16 -mb-18 data-wuwa:border-b flex items-center w-full h-16 min-w-0 overflow-hidden"
+										style={{
+											opacity: downloadList[0].status === "downloading" ? 1 : 0,
+										}}
+									>
 										<div
 											key={"cur" + JSON.stringify(downloadList[0])}
 											ref={downloadRef2}
-											className="bg-accent bgaccent data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 h-16 flex items-center w-0 min-w-0 opacity-50"
+											className="bg-accent bgaccent data-zzz:zzz-rounded zzz-fg-text data-gi:rounded-sm duration-0 min-h-16 flex items-center w-0 h-16 min-w-0 opacity-50"
 											style={{ width: prev + "%" }}
 										></div>
 									</div>
@@ -286,7 +362,7 @@ function Downloads() {
 								{downloadList.map((item, index) => (
 									<div
 										key={item.name.replaceAll("DISABLED_", "") + index}
-										className="hover:bg-background/20 zzz-fg-text  data-gi:border-1 data-gi:rounded-sm min-h-16 data-wuwa:border-b flex items-center justify-between w-full px-4 button-like"
+										className="hover:bg-background/20 zzz-fg-text data-gi:border-1 data-gi:rounded-sm min-h-16 data-wuwa:border-b button-like flex items-center justify-between w-full px-4"
 										style={{ backgroundColor: index % 2 == 0 ? "#1b1b1b50" : "#31313150" }}
 									>
 										<div className=" flex items-center flex-1 w-full gap-3">
@@ -299,14 +375,14 @@ function Downloads() {
 													{item.name.replaceAll("DISABLED_", "")}
 												</Label>
 												<div className="flex gap-1 text-xs text-gray-400 capitalize">
-													{item.status}
+													{`${item.status + (item.status === "extracting" ? ` ${item.fname}` : "")}`}
 													<div ref={index == 0 ? speedRef : null}>{index == 0 ? prevText : " • "}</div>
 													{item.category}
 												</div>
 											</div>
 										</div>
-										<div className="flex items-center gap-2">
-											{item.status === "pending" && (
+										<div className="flex items-center gap-2 z-20">
+											{item.status === "pending" ? (
 												<Button
 													variant="ghost"
 													size="sm"
@@ -315,8 +391,7 @@ function Downloads() {
 												>
 													<X className="w-4 h-4" />
 												</Button>
-											)}
-											{(item.status === "completed" || item.status === "failed") && (
+											) : item.status === "completed" || item.status === "failed" ? (
 												<Button
 													variant="ghost"
 													size="sm"
@@ -325,6 +400,26 @@ function Downloads() {
 												>
 													<X className="w-4 h-4" />
 												</Button>
+											) : item.status === "downloading" ? (
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => cancelDownload(index)}
+													className="hover:text-destructive"
+												>
+													<X className="w-4 h-4" />
+												</Button>
+											) : item.status === "extracting" ? (
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => cancelExtract(item.key || "")}
+													className="hover:text-destructive"
+												>
+													<X className="w-4 h-4" />
+												</Button>
+											) : (
+												<></>
 											)}
 										</div>
 									</div>

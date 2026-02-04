@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { IMAGE_SERVER, managedSRC } from "./consts";
-import { DATA, FILE_TO_DL, GAME, INSTALLED_ITEMS, LANG, ONLINE, ONLINE_DATA, ONLINE_SELECTED, RIGHT_SLIDEOVER_OPEN, SETTINGS, SOURCE, store } from "./vars";
+import { DATA, FILE_TO_DL, GAME, INSTALLED_ITEMS, LANG, MOD_LIST, ONLINE, ONLINE_DATA, ONLINE_SELECTED, RIGHT_SLIDEOVER_OPEN, SETTINGS, SOURCE, store } from "./vars";
 import { useAtom, useAtomValue } from "jotai";
 import { apiClient } from "./api";
 import { join } from "./hotreload";
@@ -86,7 +86,7 @@ store.sub(SETTINGS,()=>{
 });
 export function 
 getImageUrl(path: string): string {
-	return `${IMAGE_SERVER_URL}/${src}/${managedSRC}/${path}`;
+	return `${IMAGE_SERVER_URL}/${src}x/${managedSRC}/${path}`;
 }
 const PRIORITY_KEYS = ["Alt", "Ctrl", "Shift", "Capslock", "Tab", "Up", "Down", "Left", "Right"];
 const PRIORITY_SET = new Set(PRIORITY_KEYS);
@@ -225,6 +225,9 @@ export function handleInAppLink(url: string) {
 export function useInstalledItemsManager() {
 	const [installedItems, setInstalledItems] = useAtom(INSTALLED_ITEMS);
 	const localData = useAtomValue(DATA);
+	const modList = useAtomValue(MOD_LIST)
+	const validPaths = new Set(modList.map((mod) => mod.path));
+	console.log("[IMM] Valid mod paths:", validPaths);
 	async function checkModStatus(item: any) {
 		console.log("[IMM] Checking mod status for", item.name);
 		let modStatus = 0;
@@ -257,7 +260,7 @@ export function useInstalledItemsManager() {
 	}
 	async function updateInstalledItems(localDataSnapshot: any) {
 		const itemsToProcess = Object.keys(localDataSnapshot)
-			.filter((key) => localDataSnapshot[key].source)
+			.filter((key) => localDataSnapshot[key].source && validPaths.has(key))
 			.map((key) => ({
 				name: key,
 				source: localDataSnapshot[key].source,
@@ -351,5 +354,5 @@ export function useInstalledItemsManager() {
 		} else {
 			setInstalledItems([]);
 		}
-	}, [localData]);
+	}, [localData, modList]);
 }

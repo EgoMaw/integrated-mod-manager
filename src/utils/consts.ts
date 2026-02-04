@@ -23,7 +23,7 @@ export const OLD_managedSRC = "DISABLED (Managed by IMM)";
 export const OLD_managedTGT = "Mods (Managed by IMM)";
 export const managedSRC = "DISABLED - ALL MODS ARE STORED HERE (Managed by IMM)";
 export const managedTGT = "DO NOT MODIFY (Managed by IMM)";
-export const VERSION = "2.2.0";
+export const VERSION = "2.2.1";
 export const GAMES: Games[] = ["WW", "ZZ", "GI"];
 export const GAME_GB_IDS: { [key: number]: Games } = {
 	20357: "WW",
@@ -106,7 +106,7 @@ export const DEFAULTS = {
 	TYPES: [] as Category[],
 	CHANGES: { before: [], after: [], map: {}, skip: false, title: "" } as ChangeInfo,
 	DOWNLOAD_LIST: {
-		...{ queue: [] as DownloadItem[], downloading: null as DownloadItem | null, completed: [] as DownloadItem[] },
+		...{ queue: [] as DownloadItem[], downloading: null as DownloadItem | null, completed: [] as DownloadItem[], extracting: [] as DownloadItem[]},
 	},
 	ONLINE: false,
 	CURRENT_PRESET: -1,

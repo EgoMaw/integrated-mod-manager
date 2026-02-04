@@ -1,5 +1,6 @@
 import {
 	CATEGORY,
+	CONFLICTS,
 	FILTER,
 	INIT_DONE,
 	INSTALLED_ITEMS,
@@ -23,6 +24,7 @@ import { join, setChange } from "@/utils/hotreload";
 import { managedSRC } from "@/utils/consts";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { Mod } from "@/utils/types";
+import { addToast } from "@/_Toaster/ToastProvider";
 // import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 // import { RefreshCwIcon } from "lucide-react";
 // import { addToast } from "@/_Toaster/ToastProvider";
@@ -34,6 +36,7 @@ let filterChangeCount = 0;
 function MainLocal() {
 	const initDone = useAtomValue(INIT_DONE);
 	const textData = useAtomValue(TEXT_DATA);
+	const [conflicts, setConflicts] = useAtom(CONFLICTS);
 	const [initial, setInitial] = useState(true);
 	const lastUpdated = useAtomValue(LAST_UPDATED);
 	const [modList, setModList] = useAtom(MOD_LIST);
@@ -85,10 +88,66 @@ function MainLocal() {
 
 			prevEnabled = enabled;
 		}
+		function checkForHashCollisions() {
+			const allHashes: { [key: string]: Set<string> } = {};
+			const hashes: { [key: string]: string[] } = {};
+			[...modList]
+				.sort((a, b) => a.path.localeCompare(b.path))
+				.forEach((mod) => {
+					if (mod.hashes) {
+						mod.hashes.forEach((hash) => {
+							if (mod.enabled) {
+								if (!hashes[hash]) {
+									hashes[hash] = [];
+								}
+								hashes[hash].push(mod.path);
+							}
+							if (!allHashes[hash]) {
+								allHashes[hash] = new Set();
+							}
+							allHashes[hash].add(mod.parent);
+						});
+					}
+				});
+			const validHashes = Object.entries(allHashes).filter(([_, parents]) => parents.size == 1);
+			const collisions = Object.entries(hashes).filter(
+				([hash, paths]) => paths.length > 1 && validHashes.some(([vHash]) => vHash == hash)
+			);
+			let newCols = {} as any;
+			collisions.forEach(([_, paths]) => {
+				const key = paths[0];
+				newCols[key] = (newCols as any)[key] || new Set();
+				paths.slice(1).forEach((p) => {
+					newCols[key].add(p);
+				});
+			});
+			const modsInvolved = {} as Record<string,number>;
+			newCols = Object.keys(newCols).map((key,i) => {
+				const paths = [key, ...[...newCols[key]]]
+				paths.forEach((p) => {
+					modsInvolved[p] = modsInvolved[p] || i;
+				});
+				return paths;
+			});
+			
+			
+
+			if (collisions.length > 0 && JSON.stringify(conflicts.conflicts) !== JSON.stringify(newCols)) {
+				addToast({
+					type: "error",
+					message: `Collisions detected for enabled mods`,
+				});
+				setConflicts({ conflicts: newCols, mods: modsInvolved });
+			}
+			else if (collisions.length == 0 ) {
+				setConflicts({ conflicts: [], mods: {} });
+			}
+		}
+		checkForHashCollisions();
 	}, [modList]);
 	useEffect(() => {
 		filterChangeCount += 1;
-	}, [filter, category, search,sort]);
+	}, [filter, category, search, sort]);
 	useEffect(() => {
 		keyRef.current = `${filter}-${category}-${search}-${modList.length}-${filterChangeCount}-${sort}`;
 		if (prev !== keyRef.current) {
@@ -100,39 +159,39 @@ function MainLocal() {
 		}
 		prev = keyRef.current;
 		let newList: Mod[] = searchDB && search ? searchDB.search(search) : [...modList];
-		
+
 		// let enb = filters.shift() || "All";
 		// if (enb != "All") {
 		// 	newList = newList.filter((mod) => mod.enabled == (enb == "Enabled"));
 		// }
-		
-			filter.forEach((f) => {
-				const [key, value] = f.split(":");
-				let modifier = (mod:Mod)=>!!mod;
-				switch (key) {
-					case "src":
-						modifier=(mod)=>(value == "any" || (value == "has" ? !!mod.source : !mod.source));
-						break;
-					case "st":
-						modifier=(mod)=>(value == "all" || (value == "enabled" ? mod.enabled : !mod.enabled));
-						break;
-					case "tag":
-						const [tag,val] = value.split("=");
-						switch(val){
-							case "has":
-								modifier=(mod)=>((mod.tags||[]).includes(tag));
-								break; 
-							case "lacks":
-								modifier=(mod)=>!((mod.tags||[]).includes(tag));
-								break;
-						}
-						break;
-					default:
-						return;
-				}
-				newList = newList.filter((mod) => modifier(mod));
-			});
-		
+
+		filter.forEach((f) => {
+			const [key, value] = f.split(":");
+			let modifier = (mod: Mod) => !!mod;
+			switch (key) {
+				case "src":
+					modifier = (mod) => value == "any" || (value == "has" ? !!mod.source : !mod.source);
+					break;
+				case "st":
+					modifier = (mod) => value == "all" || (value == "enabled" ? mod.enabled : !mod.enabled);
+					break;
+				case "tag":
+					const [tag, val] = value.split("=");
+					switch (val) {
+						case "has":
+							modifier = (mod) => (mod.tags || []).includes(tag);
+							break;
+						case "lacks":
+							modifier = (mod) => !(mod.tags || []).includes(tag);
+							break;
+					}
+					break;
+				default:
+					return;
+			}
+			newList = newList.filter((mod) => modifier(mod));
+		});
+
 		if (category != "All") {
 			newList = newList.filter((mod) => mod.parent == category);
 		}
@@ -155,7 +214,7 @@ function MainLocal() {
 		}
 
 		setFilteredList(newList);
-	}, [modList, filter, category, search, filterChangeCount,sort]);
+	}, [modList, filter, category, search, filterChangeCount, sort]);
 
 	const handleClick = (e: MouseEvent, mod: Mod) => {
 		const click = e.button;
@@ -186,7 +245,8 @@ function MainLocal() {
 				const scrollTop = containerRef.current.scrollTop;
 				const itemHeight = 320;
 				const itemWidth = 256;
-				const itemsPerRow = Math.floor(box.width / itemWidth);
+				const itemsPerRow = Math.floor((box.width - 10) / itemWidth);
+				console.log(itemsPerRow, itemWidth, box.width - 10);
 				setVisibleRange({
 					start: Math.floor(scrollTop / itemHeight) * itemsPerRow,
 					end: Math.ceil((scrollTop + box.height) / itemHeight) * itemsPerRow - 1,
@@ -237,7 +297,7 @@ function MainLocal() {
 			</div>
 		);
 	}, [modList, source]);
-
+	console.log(conflicts)
 	return (
 		<>
 			<div
@@ -297,6 +357,7 @@ function MainLocal() {
 											lastUpdated={lastUpdated}
 											hasUpdate={updateObj[mod.path]}
 											updateAvl={textData.UpdateAvl}
+											inConflict={conflicts.mods[mod.path] ?? -1}
 										/>
 									)}
 								</motion.div>

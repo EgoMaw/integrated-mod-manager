@@ -1,12 +1,16 @@
 use futures_util::StreamExt;
+use once_cell::sync::Lazy;
+use tauri::Manager;
 use reqwest::Client;
 use serde::Serialize;
 use sevenz_rust2::decompress_file;
+use std::collections::HashMap;
 use std::fs::{remove_file, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Mutex;
 use std::time::Instant;
 use tauri::Emitter;
 use tauri_plugin_deep_link::DeepLinkExt;
@@ -25,6 +29,7 @@ struct DownloadProgress {
     total: f64,
     speed: String,
     eta: String,
+    key: String,
 }
 
 /// Format bytes into human-readable format (KB, MB, GB)
@@ -156,6 +161,8 @@ fn clean_folder_before_extraction(
 }
 
 static SESSION_ID: AtomicU64 = AtomicU64::new(0);
+static DOWNLOAD_COUNTS: Lazy<Mutex<HashMap<String, u64>>> = Lazy::new(|| Mutex::new(HashMap::new()));
+
 const MIME_EXTENSIONS: &[(&str, &str)] = &[
     ("image/jpeg", "jpg"),
     ("image/jpg", "jpg"),
@@ -195,14 +202,122 @@ fn mime_to_extension(mime_type: &str) -> Option<&'static str> {
         .find(|(mime, _)| *mime == clean_mime)
         .map(|(_, ext)| *ext)
 }
+
+/// Extract archive file (zip, rar, or 7z) to the specified path
+#[tauri::command]
+async fn extract_archive(
+    file_path: String,
+    save_path: String,
+    file_name: String,
+    ext: String,
+    del:bool
+) -> Result<(), String> {
+    let file_path = Path::new(&file_path);
+    let save_path = save_path.as_str();
+    let file_name = file_name.as_str();
+    let ext = ext.as_str();
+    
+    if ext == "zip" {
+        // Clean folder before extraction
+        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
+
+        let zip_file = File::open(&file_path).map_err(|e| e.to_string())?;
+        let mut archive = ZipArchive::new(zip_file).map_err(|e| e.to_string())?;
+
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
+            let outpath = Path::new(&save_path).join(file.mangled_name());
+
+            if file.name().ends_with('/') {
+                std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
+            } else {
+                if let Some(p) = outpath.parent() {
+                    if !p.exists() {
+                        std::fs::create_dir_all(&p).map_err(|e| e.to_string())?;
+                    }
+                }
+                let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
+                io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
+            }
+        }
+        if del {
+        safe_remove_file(&file_path)?;
+        }
+    } else if ext == "rar" {
+        // Clean folder before extraction
+        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
+
+        let mut archive = RarArchive::new(&file_path)
+            .open_for_processing()
+            .map_err(|e| e.to_string())?;
+
+        loop {
+            let header = match archive.read_header().map_err(|e| e.to_string())? {
+                Some(header) => header,
+                None => break,
+            };
+
+            let entry = header.entry();
+            let outpath = Path::new(&save_path).join(&entry.filename);
+
+            if entry.is_directory() {
+                std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
+                archive = header.skip().map_err(|e| e.to_string())?;
+            } else if entry.is_file() {
+                if let Some(parent) = outpath.parent() {
+                    if !parent.exists() {
+                        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+                    }
+                }
+                let data = header.read().map_err(|e| e.to_string())?;
+                let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
+                outfile.write_all(&data.0).map_err(|e| e.to_string())?;
+                archive = data.1;
+            } else {
+                archive = header.skip().map_err(|e| e.to_string())?;
+            }
+        }
+        if del {
+        safe_remove_file(&file_path)?;
+        }
+    } else if ext == "7z" {
+        // Clean folder before extraction
+        println!("Cleaning folder before extracting 7z archive");
+        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
+        println!("Starting 7z extraction");
+        let before = Instant::now();
+        let res = decompress_file(file_path.as_os_str(), save_path);
+        let duration = before.elapsed();
+        println!("7z extraction completed in: {:.2?}", duration);
+        if let Err(e) = res {
+            println!("7z extraction error: {}", e);
+        }
+        else {
+            if del {
+                safe_remove_file(&file_path)?;
+            }
+            println!("Archive file removed after extraction");
+        }
+    }
+
+    Ok(())
+}
 #[tauri::command]
 async fn download_and_unzip(
     app_handle: tauri::AppHandle,
     file_name: String,
     download_url: String,
     save_path: String,
+    key: String,
     emit: bool,
 ) -> Result<(), String> {
+    // Increment download count for this key
+    {
+        let mut counts = DOWNLOAD_COUNTS.lock().unwrap();
+        *counts.entry(key.clone()).or_insert(0) += 1;
+        println!("Download count for key '{}': {}", key, counts.get(&key).unwrap());
+    }
+
     let current_sid = SESSION_ID.load(Ordering::SeqCst);
     log::info!(
         "Starting download for session ID: {}, file: {}",
@@ -213,7 +328,7 @@ async fn download_and_unzip(
     println!("Starting download - Session ID: {}", current_sid);
 
     let client = Client::new();
-    let save_path2 = save_path.to_owned();
+    // let save_path2 = save_path.to_owned();
     println!("HTTP client created");
 
     let response = client
@@ -307,6 +422,7 @@ async fn download_and_unzip(
                 total: total_size as f64,
                 speed: format_speed(avg_speed),
                 eta: format_duration(eta_secs),
+                key: key.clone()
             };
 
             // Emit asynchronously to not block download
@@ -357,101 +473,90 @@ async fn download_and_unzip(
         file_name
     );
 
-    if ext == "zip" {
-        // Clean folder before extraction
-        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-
-        let zip_file = File::open(&file_path).map_err(|e| e.to_string())?;
-        let mut archive = ZipArchive::new(zip_file).map_err(|e| e.to_string())?;
-
-        for i in 0..archive.len() {
-            let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
-            let outpath = Path::new(&save_path).join(file.mangled_name());
-
-            if file.name().ends_with('/') {
-                std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
-            } else {
-                if let Some(p) = outpath.parent() {
-                    if !p.exists() {
-                        std::fs::create_dir_all(&p).map_err(|e| e.to_string())?;
-                    }
-                }
-                let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
-                io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
-            }
-        }
-
-        safe_remove_file(&file_path)?;
-    } else if ext == "rar" {
-        // Clean folder before extraction
-        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-
-        let mut archive = RarArchive::new(&file_path)
-            .open_for_processing()
-            .map_err(|e| e.to_string())?;
-
-        loop {
-            let header = match archive.read_header().map_err(|e| e.to_string())? {
-                Some(header) => header,
-                None => break,
-            };
-
-            let entry = header.entry();
-            let outpath = Path::new(&save_path).join(&entry.filename);
-
-            if entry.is_directory() {
-                std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
-                archive = header.skip().map_err(|e| e.to_string())?;
-            } else if entry.is_file() {
-                if let Some(parent) = outpath.parent() {
-                    if !parent.exists() {
-                        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-                    }
-                }
-                let data = header.read().map_err(|e| e.to_string())?;
-                let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
-                outfile.write_all(&data.0).map_err(|e| e.to_string())?;
-                archive = data.1;
-            } else {
-                archive = header.skip().map_err(|e| e.to_string())?;
-            }
-        }
-        safe_remove_file(&file_path)?;
-    } else if ext == "7z" {
-        // Clean folder before extraction
-        clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
-
-        decompress_file(&file_path, save_path).expect("complete");
-        safe_remove_file(&file_path)?;
-    }
-
-    let global_sid = SESSION_ID.load(Ordering::SeqCst);
-    if global_sid != current_sid {
-        log::info!("Session changed during file processing (was: {}, now: {}), not emitting completion for: {}", current_sid, global_sid, file_name);
-        return Err(format!(
-            "Session changed during processing, operation cancelled (file: {})",
-            file_name
-        ));
-    }
-
+    // Emit final progress update showing download complete
     if emit {
+        let final_speed = format_speed(avg_speed);
+        app_handle.emit("ext", DownloadProgress {
+                downloaded: total_size as f64,
+                total: total_size as f64,
+                speed: final_speed,
+                eta: "0s".to_string(),
+                key: key.clone(),
+            }).map_err(|e| e.to_string())?;
+        
+    }
+
+    // Extract archive if it's a supported format
+    extract_archive(
+        file_path.to_string_lossy().to_string(),
+        save_path.clone(),
+        file_name.clone(),
+        ext.clone(),
+        true
+    ).await?;
+
+    
+        let mut valid = false;
+    {   
+        let mut counts = DOWNLOAD_COUNTS.lock().unwrap();
+        if let Some(&count) = counts.get(&key) {
+            if count >= 1 {
+                valid = true;
+                *counts.get_mut(&key).unwrap() -= 1;
+                println!("Decreased download count for key '{}': {}", key, counts.get(&key).unwrap());
+            } 
+        }
+    }
+    if emit {
+        // let global_sid = SESSION_ID.load(Ordering::SeqCst);
         log::info!(
             "Emitting completion event for session {}: {}",
             current_sid,
             file_name
         );
+        if !valid {
+            println!("Session {} invalid after extraction for key '{}'", valid, key);
+            return Err(format!(
+                "Session changed during processing, operation cancelled (file: {})",
+                file_name
+            ));
+        }
         app_handle
-            .emit("fin", save_path2)
+            .emit("fin", serde_json::json!({ "key": key }))
             .map_err(|e| e.to_string())?;
     }
-
     log::info!(
         "Download and extraction completed successfully for session {}: {}",
         current_sid,
         file_name
     );
+    
+
     Ok(())
 }
+
+#[tauri::command]
+fn cancel_extract(key: String) -> Result<(), String> {
+    let mut counts = DOWNLOAD_COUNTS.lock().unwrap();
+    if let Some(count) = counts.get_mut(&key) {
+        if *count > 0 {
+            *count -= 1;
+            println!("Decreased download count for key '{}': {}", key, *count);
+            
+            // Remove key if count reaches 0
+            if *count == 0 {
+                counts.remove(&key);
+                println!("Removed key '{}' from download counts", key);
+            }
+            Ok(())
+        } else {
+            Err(format!("Key '{}' already has count of 0", key))
+        }
+    } else {
+        Err(format!("Key '{}' not found in download counts", key))
+    }
+}
+
 #[tauri::command]
 fn get_username() -> String {
     let new_sid = SESSION_ID.fetch_add(1, Ordering::SeqCst) + 1;
@@ -537,6 +642,32 @@ async fn create_symlink(link_path: String, target_path: String) -> Result<(), St
 
     Ok(())
 }
+
+#[tauri::command]
+async fn set_window_icon(
+    app_handle: tauri::AppHandle,
+    game: String,
+) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let icon_bytes = match game.as_str() {
+            "WW" => include_bytes!("../icons/WW128x128.png").as_slice(),
+            "ZZ" => include_bytes!("../icons/ZZ128x128.png").as_slice(),
+            "GI" => include_bytes!("../icons/GI128x128.png").as_slice(),
+            _ => include_bytes!("../icons/128x128.png").as_slice(),
+        };
+        
+        if let Ok(icon) = tauri::image::Image::from_bytes(icon_bytes) {
+            if let Some(window) = app_handle.get_webview_window("main") {
+                let _ = window.set_icon(icon);
+            }
+        }
+    }
+    Ok(())
+}
+
+
+
 use tauri_plugin_window_state::{Builder, StateFlags};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -587,17 +718,22 @@ pub fn run() {
                     }
                 }
             });
-
+            #[cfg(target_os = "windows")]
+            if let Ok(icon) = tauri::image::Image::from_bytes(include_bytes!("../icons/128x128.png")) { let _ = app.get_webview_window("main").unwrap().set_icon(icon); }
+            // let tray_icon = if cfg!(target_os = "windows") { tauri::image::Image::from_bytes(include_bytes!("../icons/128x128.png"))? } else { app.default_window_icon().unwrap().clone() };
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             exit_app,
             get_username,
             download_and_unzip,
+            cancel_extract,
             get_image_server_url,
             get_session_id,
             execute_with_args,
             create_symlink,
+            extract_archive,
+            set_window_icon,
             hotreload::set_hotreload,
             hotreload::start_window_monitoring,
             hotreload::stop_window_monitoring,

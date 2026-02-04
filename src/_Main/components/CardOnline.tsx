@@ -32,15 +32,26 @@ const Online = React.memo((data: CardOnlineProps) => {
 
 	return (
 		<div className="card-generic card-online ">
-			<img
-				className="fadein flex flex-col items-center justify-center object-cover w-full h-full duration-200 bg-center bg-no-repeat rounded-t-lg pointer-events-none"
-				src={backgroundImage}
-				onError={(e) => handleImageError(e)}
-				style={{
-					filter:
-						data._sInitialVisibility === "hide" && data.blur === true ? "brightness(0.5) blur(4px)" : "brightness(1)",
-				}}
-			/>
+			<div className="min-h-full static">
+				<img
+					className="fadein flex flex-col relative min-h-full top-0 items-center justify-center object-cover w-full duration-200 bg-center bg-no-repeat rounded-t-lg pointer-events-none"
+					src={backgroundImage}
+					onError={(e) => handleImageError(e,true)}
+					style={{
+						filter:
+							data._sInitialVisibility === "hide" && data.blur === true ? "brightness(0.5) blur(4px)" : "brightness(1)",
+					}}
+				/>
+				<img
+					className="w-full fadein min-h-[calc(100%-3.5rem)] relative -translate-y-[100%] -top-14 duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover fadein flex flex-col items-center justify-center bg-center bg-no-repeat"
+					src={backgroundImage}
+					onError={(e) => handleImageError(e)}
+					style={{
+						filter:
+							data._sInitialVisibility === "hide" && data.blur === true ? "brightness(0.5) blur(4px)" : "brightness(1)",
+					}}
+				/>
+			</div>
 			{data._sInitialVisibility === "hide" && data.blur === true && (
 				<div className="max-h-0 fadein mb-45 -mt-45 w-fit z-20 self-center">
 					<Button
@@ -48,7 +59,7 @@ const Online = React.memo((data: CardOnlineProps) => {
 						onClick={(e) => {
 							e.currentTarget.style.opacity = "0";
 							e.currentTarget.style.pointerEvents = "none";
-							let parent = e.currentTarget.parentElement?.previousSibling as HTMLElement;
+							let parent = e.currentTarget.parentElement?.previousSibling?.lastChild as HTMLElement;
 							if (parent) {
 								parent.style.filter = "brightness(1)";
 							}

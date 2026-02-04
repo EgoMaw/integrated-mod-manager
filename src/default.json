@@ -1,5 +1,5 @@
 {
-	"version": "2.2.0",
+	"version": "2.2.1",
 	"updatedAt": 0,
 	"bgOpacity": 1,
 	"winOpacity": 1,
@@ -14,6 +14,6 @@
 	"XXMI": "",
 	"lang": "",
 	"game": "",
-	"chkModUpd":true,
+	"chkModUpd": true,
 	"preReleases": false
 }

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { LANG_LIST } from "@/utils/consts";
 import { resetWithBackup } from "@/utils/filesys";
 import TEXT from "@/textData.json";
-import { LANG, SETTINGS } from "@/utils/vars";
+import { LANG, MAIN_FUNC_STATUS, SETTINGS } from "@/utils/vars";
 import { useAtom, useAtomValue } from "jotai";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +12,7 @@ let timer = null as NodeJS.Timeout | null;
 function Page1({ setPage }: { setPage: (page: number) => void }) {
 	const [selectedIndex, setSelectedIndex] = useState(-1);
 	const [currentLangIndex, setCurrentLangIndex] = useState(-1);
+	const mainFuncStatus = useAtomValue(MAIN_FUNC_STATUS);
 	const escPressRef = useRef({ count: 0, lastTime: 0 });
 	const lang = useAtomValue(LANG);
 	const [settings, setSettings] = useAtom(SETTINGS);
@@ -84,7 +85,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 
 			<div className="fade-in justify-evenly absolute bottom-0 flex flex-col items-center h-64 gap-8">
 				<AnimatePresence mode="wait">
-					{!lang && currentLangIndex > -1 && (
+					{mainFuncStatus === "fin" && !lang && currentLangIndex > -1 && (
 						<motion.div
 							key={currentLangIndex}
 							initial={{ opacity: 0, y: 0 }}
@@ -99,7 +100,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 				</AnimatePresence>
 
 				<AnimatePresence>
-					{!lang && currentLangIndex > -1 && (
+					{mainFuncStatus === "fin" && !lang && currentLangIndex > -1 && (
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
@@ -158,7 +159,7 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 					)}
 				</AnimatePresence>
 				<AnimatePresence mode="wait">
-					{!lang && currentLangIndex > -1 && selectedIndex > 0 && (
+					{mainFuncStatus === "fin" && !lang && currentLangIndex > -1 && selectedIndex > 0 && (
 						<motion.div
 							key={selectedIndex}
 							initial={{ opacity: 0, y: 0 }}
@@ -175,8 +176,8 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 
 				<Button
 					className="w-fit "
-					style={{ opacity: !!lang || currentLangIndex < 0 ? 0 : selectedIndex == -1 ? 0.5 : 1 }}
-					disabled={selectedIndex == -1 || !!lang || currentLangIndex < 0}
+					style={{ opacity: mainFuncStatus !== "fin" || !!lang || currentLangIndex < 0 ? 0 : selectedIndex == -1 ? 0.5 : 1 }}
+					disabled={selectedIndex == -1 || !!lang || currentLangIndex < 0 || mainFuncStatus !== "fin"}
 					onClick={() => {
 						setSettings((prev) => ({ ...prev, global: { ...prev.global, lang: languageKeys[selectedIndex] } }));
 						setPage(1);
@@ -184,6 +185,14 @@ function Page1({ setPage }: { setPage: (page: number) => void }) {
 				>
 					Confirm
 				</Button>
+				<div
+				className="duration-300 opacity-0"
+				style={{
+					opacity:mainFuncStatus === "fin" ? 0:0.5
+				}}
+				>
+					{mainFuncStatus==="fin"?"Initialization complete":mainFuncStatus}
+				</div>
 			</div>
 		</div>
 	);

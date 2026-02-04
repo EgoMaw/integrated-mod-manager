@@ -20,6 +20,7 @@ import {
 	XXMI_DIR,
 	XXMI_MODE,
 	ERR,
+	MAIN_FUNC_STATUS,
 } from "./vars";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 
@@ -52,6 +53,9 @@ const paths = {
 	SR: "",
 	XX: "",
 };
+export function getPaths() {
+	return paths;
+}
 let config: any = { ...defConfig };
 let configXX: any = { ...defConfigXX };
 let dataDir = "";
@@ -83,6 +87,9 @@ export function getPrevGame() {
 	return prevGame;
 }
 export const window = getCurrentWebviewWindow();
+export function changeWindowTitle(title: string) {
+	window.setTitle(title);
+}
 export async function setWindowType(type: number) {
 	if (type == 0) {
 		// if (await window.isMaximized())
@@ -209,9 +216,11 @@ export async function initGame(game: Games) {
 	writeTextFile(`config${game}.json`, JSON.stringify(configXX, null, 2));
 	apiClient.setGame(game as any);
 	await setCategories(game);
+	invoke("set_window_icon", { game });
 	// Validate source and target dirs
 	if (configXX.sourceDir && !(await exists(join(configXX.sourceDir)))) configXX.sourceDir = "";
 	if (configXX.targetDir && !(await exists(configXX.targetDir))) configXX.targetDir = "";
+	store.set(MAIN_FUNC_STATUS, "Validating source and target directories");
 	console.log("[IMM] Validating source and target directories...", configXX.sourceDir, configXX.targetDir);
 	store.set(SOURCE, configXX.sourceDir || "");
 	store.set(TARGET, configXX.targetDir || "");
@@ -247,13 +256,17 @@ store.sub(SETTINGS, async () => {
 });
 export async function setCategories(game = prevGame) {
 	console.log("[IMM] Setting categories...");
+
+	// await new Promise((resolve) => setTimeout(resolve, 10000));
 	if (!game) return;
 	prevGame = game;
 	try {
+		store.set(MAIN_FUNC_STATUS, "Fetching game categories from Gamebanana");
 		categories = await apiClient.categories();
 		//console.log("Fetched categories:", categories);
 		if (!categories || categories.length == 0) throw "No categories found, please verify the directories again";
 	} catch (e) {
+		store.set(MAIN_FUNC_STATUS, "Unable to reach Gamebanana");
 		console.log("[IMM] Failed to fetch categories from API, using local config if available.", e);
 		categories =
 			configXX.categories && configXX.categories.length > 0
@@ -312,6 +325,7 @@ export async function checkWWMM() {
 }
 export async function maintainBackups() {
 	console.log("[IMM] Maintaining backups...");
+	store.set(MAIN_FUNC_STATUS, "Maintaining backups");
 	const files = GAMES.map((g) => `config${g}.json`);
 	files.push("config.json");
 	mkdir("backups", { recursive: true });
@@ -345,6 +359,7 @@ export async function maintainBackups() {
 				}
 			} catch (e) {
 				console.log(`[IMM] Detected corrupted config file: ${file}, restoring from backup...`);
+				store.set(MAIN_FUNC_STATUS, `Config file corrupted, restoring from backup`);
 				if (await exists(backupPath + file + ".bak")) {
 					try {
 						const backupData = JSON.parse(await readTextFile(backupPath + file + ".bak"));
@@ -393,6 +408,7 @@ export function getCwd() {
 	return cwd;
 }
 export async function main() {
+	store.set(MAIN_FUNC_STATUS, "Initializing App");
 	isInitialized = false;
 	console.log("[IMM] Initializing application...");
 	invoke("get_username");
@@ -402,6 +418,7 @@ export async function main() {
 	cwd = join(await path.localDataDir(), "Integrated Mod Manager (IMM)");
 	const XXMI = `${appData}\\XXMI Launcher`;
 	if (!(await exists("config.json"))) {
+		store.set(MAIN_FUNC_STATUS, "Creating default config.json");
 		console.log("[IMM] Creating default config.json...");
 		await writeTextFile("config.json", JSON.stringify(defConfig, null, 2));
 	}
@@ -412,7 +429,9 @@ export async function main() {
 		config.bgType = 1;
 	}
 	console.log("[IMM] Loaded config:", config);
+	store.set(MAIN_FUNC_STATUS, "Config loaded");
 	if (!config.XXMI && !config.game && !config.lang) {
+		store.set(MAIN_FUNC_STATUS, "First time setup detected, checking for WWMM");
 		console.log("[IMM] First time setup detected, checking for WWMM...");
 		store.set(FIRST_LOAD, true);
 		const temp = await checkWWMM();
@@ -432,6 +451,7 @@ export async function main() {
 	console.log("[IMM] Saving config...");
 	writeTextFile("config.json", JSON.stringify(config, null, 2));
 	await readXXMIConfig(config.XXMI || "");
+	store.set(MAIN_FUNC_STATUS, "Initializing game");
 	console.log("[IMM] Initializing game...");
 	if (config.game) configXX = await initGame(config.game);
 	console.log("[IMM] Setting window type...");
@@ -498,4 +518,5 @@ export async function main() {
 		}));
 	}
 	isInitialized = true;
+	store.set(MAIN_FUNC_STATUS, "fin");
 }
