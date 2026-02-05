@@ -82,6 +82,7 @@
     "core:window:allow-toggle-maximize",
     "core:window:allow-unmaximize",
     "core:window:allow-unminimize",
+    "tracing:default",
     "core:app:default",
     "core:resources:default",
     "core:menu:default",

@@ -20,6 +20,8 @@ import Carousel from "./components/Carousel";
 import { preventContextMenu } from "@/utils/utils";
 import { LoaderIcon } from "lucide-react";
 import { OnlineMod } from "@/utils/types";
+import { info } from "@fltsci/tauri-plugin-tracing";
+
 const pageCount = {} as any;
 export function resetPageCounts() {
 	Object.keys(pageCount).forEach((key) => {
@@ -99,7 +101,7 @@ function MainOnline() {
 		}
 	}, [onlinePath, onlineType, onlineSort]);
 
-	const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const scrollTimeoutRef = useRef<number | null>(null);
 	// const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 	const updateVisibilityRange = useCallback(() => {
 		if (!containerRef.current) return;
@@ -242,7 +244,7 @@ function MainOnline() {
 	const transitionConfig = useCallback(
 		(index: number) => ({
 			duration: 0.3,
-			ease: "easeOut",
+			ease: "easeOut" as const,
 			delay: initial ? 0.05 * index : 0,
 		}),
 		[]

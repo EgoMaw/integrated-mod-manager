@@ -29,7 +29,6 @@ tauri-plugin-http = "2"
 reqwest = { version = "0.13.1", features = ["stream"], default-features = false }
 # Use tokio with only required features instead of "full"
 tokio = { version = "1.45.1", features = ["rt-multi-thread", "fs", "io-util", "macros"] }
-tokio-util = "0.7.15"
 zip = "7.3.0"
 futures-util = "0.3.31"
 unrar = "0.5.8"
@@ -62,7 +61,7 @@ tauri-plugin-window-state = "2"
 
 # Testing dependencies for image server
 [dev-dependencies]
-tempfile = "3.8.0"
+tempfile = "3.24.0"
 
 # Add optimization profile for release builds
 [profile.release]
@@ -74,4 +73,8 @@ codegen-units = 1
 panic = "abort"
 # Strip symbols for smaller binary
 strip = true
+# Prioritizes small binary size. Use `3` if you prefer speed.
+opt-level = "s"
 
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.

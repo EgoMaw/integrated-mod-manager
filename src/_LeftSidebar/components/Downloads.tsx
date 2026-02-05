@@ -17,6 +17,8 @@ import {
 } from "@/utils/filesys";
 import { DownloadItem } from "@/utils/types";
 import { UNCATEGORIZED } from "@/utils/consts";
+import { info } from "@fltsci/tauri-plugin-tracing";
+
 let path = "";
 let downloadElement: any = null;
 let extracts = {} as any;

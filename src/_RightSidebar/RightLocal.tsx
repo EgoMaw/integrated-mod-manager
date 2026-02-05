@@ -35,8 +35,7 @@ import { GAME_GB_IDS, managedSRC } from "@/utils/consts";
 import { getImageUrl, handleImageError, handleInAppLink, join } from "@/utils/utils";
 import { Sidebar, SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 // @ts-ignore: no type declarations available for this optional Tauri plugin
-import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
-// import { Button } from "@/components/ui/button";
+import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
@@ -63,6 +62,8 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { main } from "@/utils/init";
 import { addToast } from "@/_Toaster/ToastProvider";
 import ModPreferences from "./components/ModPreferences";
+import { info } from "@fltsci/tauri-plugin-tracing";
+
 let text = "";
 let curUrlIndex = 0;
 function RightLocal() {
@@ -82,7 +83,7 @@ function RightLocal() {
 				const url: any = final.split("/game/");
 				url[1] = url[1].split("/");
 				const urlGame = GAME_GB_IDS[url[1].shift()];
-				info("urlGame:", urlGame, "game: ", game);
+				info(`urlGame: ${urlGame} game: ${game}`);
 				url[1] = url[1].join("/");
 				urls[urls.length - 1] = url.join("/");
 				if (urlGame && urlGame != game) {
@@ -214,7 +215,7 @@ function RightLocal() {
 			if (mod) {
 				const modData = data[mod.path]?.vars;
 				if (modData) {
-					info("Mod data found for selected mod:", modData);
+					info("Mod data found for selected mod:", {modData});
 					mod.keys = mod.keys.map((key) => {
 						if (modData[key.file] && modData[key.file][key.target]) {
 							key.pref = modData[key.file][key.target].pref;

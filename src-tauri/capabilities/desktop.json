@@ -11,6 +11,7 @@
   "permissions": [
     "global-shortcut:default",
     "global-shortcut:default",
+    "tracing:default",
     "updater:default",
     "window-state:default"
   ]
