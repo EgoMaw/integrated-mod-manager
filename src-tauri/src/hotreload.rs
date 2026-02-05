@@ -4,7 +4,6 @@ use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 #[cfg(windows)]
 use std::sync::atomic::{AtomicBool, Ordering};
-#[cfg(windows)]
 use std::sync::RwLock;
 #[cfg(windows)]
 use std::time::Duration;

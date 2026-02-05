@@ -175,12 +175,12 @@ function MainOnline() {
 		setVisibleRange({ start: -1, end: -1 });
 		prevLoaded = 0;
 		setInitial(true);
-		//console.log("fetching1", onlineData,onlinePath);
-		//console.log("fetching2");
-		//console.log("fetching3");
-		//console.log("fetching", onlinePath, types);
+		//info("fetching1", onlineData,onlinePath);
+		//info("fetching2");
+		//info("fetching3");
+		//info("fetching", onlinePath, types);
 		if (!onlineData[onlinePath]) {
-			console.log("fetching", onlinePath);
+			info("fetching", onlinePath);
 			pageCount[onlinePath] = 1;
 			loadingRef.current = true;
 			if (onlinePath.startsWith("home")) {
@@ -256,7 +256,7 @@ function MainOnline() {
 		},
 		[visibleRange]
 	);
-	//console.log(selected);
+	//info(selected);
 	return (
 		<div
 			ref={containerRef}

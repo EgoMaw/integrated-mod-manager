@@ -6,8 +6,8 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
 	plugins: [
-		react(), 
-		tailwindcss()
+		tailwindcss(),
+		react()
 	],
 	resolve: {
 		alias: {

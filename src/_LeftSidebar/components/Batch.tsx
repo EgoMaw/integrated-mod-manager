@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { info } from "@fltsci/tauri-plugin-tracing";
 
 type BatchNode = {
 	children?: BatchNode[];
@@ -212,8 +213,8 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 					setTreeData([...entries]);
 					setExpanded(new Set(entries.filter((entry) => entry.path === managedSRC).map((entry) => entry.path)));
 				}
-			} catch (error) {
-				console.error("[IMM] Error loading batch preview tree:", error);
+			} catch (err) {
+				error("[IMM] Error loading batch preview tree:", error);
 			}
 		};
 		window.addEventListener("keydown", handleKeyDown);
@@ -705,9 +706,9 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 												setCategories();
 												let mods = [...cleanChecked];
 												mods = mods.map((modPath) => `${currentValue}\\${modPath.split("\\").slice(-1)[0]}`);
-												console.log(mods);
+												info('Mods', { mods: mods });
 												let promises = mods.map((modPath, index) => {
-													console.log(cleanChecked[index], modPath, !cleanChecked[index].startsWith(managedSRC));
+													info(cleanChecked[index], modPath, !cleanChecked[index].startsWith(managedSRC));
 													return changeModName(
 														cleanChecked[index].replace(managedSRC + "\\", ""),
 														modPath,
@@ -761,9 +762,9 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 													// setNewCategory(currentValue);
 													let mods = [...cleanChecked];
 													mods = mods.map((modPath) => `${currentValue}\\${modPath.split("\\").slice(-1)[0]}`);
-													console.log(mods);
+													info(mods);
 													let promises = mods.map((modPath, index) => {
-														console.log(cleanChecked[index], modPath, !cleanChecked[index].startsWith(managedSRC));
+														info(cleanChecked[index], modPath, !cleanChecked[index].startsWith(managedSRC));
 														return changeModName(
 															cleanChecked[index].replace(managedSRC + "\\", ""),
 															modPath,

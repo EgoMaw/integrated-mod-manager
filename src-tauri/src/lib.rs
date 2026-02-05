@@ -210,13 +210,13 @@ async fn extract_archive(
     save_path: String,
     file_name: String,
     ext: String,
-    del:bool
+    del: bool,
 ) -> Result<(), String> {
     let file_path = Path::new(&file_path);
     let save_path = save_path.as_str();
     let file_name = file_name.as_str();
     let ext = ext.as_str();
-    
+
     if ext == "zip" {
         // Clean folder before extraction
         clean_folder_before_extraction(Path::new(&save_path), &file_name)?;
@@ -241,7 +241,7 @@ async fn extract_archive(
             }
         }
         if del {
-        safe_remove_file(&file_path)?;
+            safe_remove_file(&file_path)?;
         }
     } else if ext == "rar" {
         // Clean folder before extraction
@@ -278,7 +278,7 @@ async fn extract_archive(
             }
         }
         if del {
-        safe_remove_file(&file_path)?;
+            safe_remove_file(&file_path)?;
         }
     } else if ext == "7z" {
         // Clean folder before extraction
@@ -291,8 +291,7 @@ async fn extract_archive(
         println!("7z extraction completed in: {:.2?}", duration);
         if let Err(e) = res {
             println!("7z extraction error: {}", e);
-        }
-        else {
+        } else {
             if del {
                 safe_remove_file(&file_path)?;
             }
@@ -422,7 +421,7 @@ async fn download_and_unzip(
                 total: total_size as f64,
                 speed: format_speed(avg_speed),
                 eta: format_duration(eta_secs),
-                key: key.clone()
+                key: key.clone(),
             };
 
             // Emit asynchronously to not block download
@@ -477,13 +476,12 @@ async fn download_and_unzip(
     if emit {
         let final_speed = format_speed(avg_speed);
         app_handle.emit("ext", DownloadProgress {
-                downloaded: total_size as f64,
-                total: total_size as f64,
-                speed: final_speed,
-                eta: "0s".to_string(),
-                key: key.clone(),
-            }).map_err(|e| e.to_string())?;
-        
+            downloaded: total_size as f64,
+            total: total_size as f64,
+            speed: final_speed,
+            eta: "0s".to_string(),
+            key: key.clone(),
+        }).map_err(|e| e.to_string())?;
     }
 
     // Extract archive if it's a supported format
@@ -492,19 +490,19 @@ async fn download_and_unzip(
         save_path.clone(),
         file_name.clone(),
         ext.clone(),
-        true
+        true,
     ).await?;
 
-    
-        let mut valid = false;
-    {   
+
+    let mut valid = false;
+    {
         let mut counts = DOWNLOAD_COUNTS.lock().unwrap();
         if let Some(&count) = counts.get(&key) {
             if count >= 1 {
                 valid = true;
                 *counts.get_mut(&key).unwrap() -= 1;
                 println!("Decreased download count for key '{}': {}", key, counts.get(&key).unwrap());
-            } 
+            }
         }
     }
     if emit {
@@ -530,7 +528,7 @@ async fn download_and_unzip(
         current_sid,
         file_name
     );
-    
+
 
     Ok(())
 }
@@ -542,7 +540,7 @@ fn cancel_extract(key: String) -> Result<(), String> {
         if *count > 0 {
             *count -= 1;
             println!("Decreased download count for key '{}': {}", key, *count);
-            
+
             // Remove key if count reaches 0
             if *count == 0 {
                 counts.remove(&key);
@@ -656,7 +654,7 @@ async fn set_window_icon(
             "GI" => include_bytes!("../icons/GI128x128.png").as_slice(),
             _ => include_bytes!("../icons/128x128.png").as_slice(),
         };
-        
+
         if let Ok(icon) = tauri::image::Image::from_bytes(icon_bytes) {
             if let Some(window) = app_handle.get_webview_window("main") {
                 let _ = window.set_icon(icon);
@@ -667,22 +665,27 @@ async fn set_window_icon(
 }
 
 
-
+use tauri_plugin_tracing::{Builder as Tracing, LevelFilter, MaxFileSize};
 use tauri_plugin_window_state::{Builder, StateFlags};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    env_logger::init();
-
     tauri::Builder::default()
+        .plugin(
+            Tracing::new()
+                .with_max_level(LevelFilter::DEBUG)
+                .with_file_logging()
+                .with_max_file_size(MaxFileSize::mb(50))
+                .build()
+        )
         .plugin(
             Builder::default()
                 // sets the flags to only track and restore size
-                .with_state_flags(StateFlags::SIZE) 
+                .with_state_flags(StateFlags::SIZE)
                 .build(),
         )
         .plugin(tauri_plugin_single_instance::init(|_app, argv, _cwd| {
-          println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
-          // when defining deep link schemes at runtime, you must also check `argv` here
+            println!("a new app instance was opened with {argv:?} and the deep link event was already triggered");
+            // when defining deep link schemes at runtime, you must also check `argv` here
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())

@@ -26,6 +26,8 @@
 		/* Performance optimizations */
 		"incremental": true,
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+
+		"types": ["vite/client"],
 		
 		"baseUrl": ".",
 		"paths": {

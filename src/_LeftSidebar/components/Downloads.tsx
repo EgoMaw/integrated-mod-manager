@@ -134,7 +134,7 @@ function Downloads() {
 		listen("fin", async (event) => {
 			const payload = event.payload as any;
 			const key = payload.key as string;
-			console.log("[IMM] Extraction finished for key:", key);
+			info("[IMM] Extraction finished for key:", key);
 			if (extracts[key]) {
 				const finishedElement = extracts[key];
 				delete extracts[key];
@@ -177,7 +177,7 @@ function Downloads() {
 			let count = 0;
 			let category = item.category;
 			for (let key in data) {
-				//console.log(data[key].source, item.source);
+				//info(data[key].source, item.source);
 				if (data[key].source == item.source) {
 					count++;
 					name = key.split("\\")[1];

@@ -248,7 +248,7 @@ function MainLocal() {
 				const itemHeight = 304;
 				const itemWidth = 256;
 				const itemsPerRow = Math.floor((box.width - 10) / itemWidth);
-				console.log(itemsPerRow, itemWidth, box.width - 10);
+				info(itemsPerRow, itemWidth, box.width - 10);
 				setVisibleRange({
 					start: Math.floor(scrollTop / itemHeight) * itemsPerRow,
 					end: Math.ceil((scrollTop + box.height) / itemHeight) * itemsPerRow - 1,
@@ -299,7 +299,7 @@ function MainLocal() {
 			</div>
 		);
 	}, [modList, source]);
-	console.log(conflicts)
+	info(conflicts)
 	return (
 		<>
 			<div
