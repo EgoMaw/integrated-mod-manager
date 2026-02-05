@@ -62,7 +62,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { main } from "@/utils/init";
 import { addToast } from "@/_Toaster/ToastProvider";
 import ModPreferences from "./components/ModPreferences";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 
 let text = "";
 let curUrlIndex = 0;

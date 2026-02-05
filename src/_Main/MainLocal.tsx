@@ -26,7 +26,7 @@ import { managedSRC } from "@/utils/consts";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { Mod } from "@/utils/types";
 import { addToast } from "@/_Toaster/ToastProvider";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 // import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 // import { RefreshCwIcon } from "lucide-react";
 // import { addToast } from "@/_Toaster/ToastProvider";

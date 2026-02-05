@@ -20,7 +20,7 @@ import Carousel from "./components/Carousel";
 import { preventContextMenu } from "@/utils/utils";
 import { LoaderIcon } from "lucide-react";
 import { OnlineMod } from "@/utils/types";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 
 const pageCount = {} as any;
 export function resetPageCounts() {

@@ -12,7 +12,7 @@ import { DATA, MOD_LIST } from "@/utils/vars";
 import { useSetAtom } from "jotai";
 import { ArrowUpRightFromSquareIcon, InfoIcon, IterationCcwIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 
 function ModPreferences({ item }: { item: any }) {
 	// const textData = useAtomValue(TEXT_DATA);

@@ -44,7 +44,7 @@ import {
 	Settings,
 } from "./types";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { error, info } from "@fltsci/tauri-plugin-tracing";
+import { error, info } from "@/lib/logger";
 
 const textMSG = {
 	rem: "Removing current files",

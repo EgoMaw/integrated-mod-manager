@@ -20,7 +20,7 @@ import { apiClient } from "./api";
 import { join } from "./hotreload";
 import { addToast } from "@/_Toaster/ToastProvider";
 import TEXT from "@/textData.json";
-import { error, info } from "@fltsci/tauri-plugin-tracing";
+import { error, info } from "@/lib/logger";
 
 export { join };
 let IMAGE_SERVER_URL = IMAGE_SERVER;

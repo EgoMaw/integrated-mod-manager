@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { JSX, useCallback, useEffect, useMemo, useState } from "react";
-import { error, info } from "@fltsci/tauri-plugin-tracing";
+import { error, info } from "@/lib/logger";
 import { cn } from "@/lib/utils.ts";
 
 type BatchNode = {

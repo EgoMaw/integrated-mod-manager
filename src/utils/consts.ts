@@ -12,7 +12,7 @@ import {
 	Preset,
 	Settings,
 } from "./types";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 
 export const IMAGE_SERVER = "http://127.0.0.1:1469/preview";
 export const OLD_RESTORE = "DISABLED_RESTORE";

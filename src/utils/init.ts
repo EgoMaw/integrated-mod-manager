@@ -44,7 +44,7 @@ import { isOlderThanOneDay, safeLoadJson, setImageServer } from "./utils";
 import { addToast } from "@/_Toaster/ToastProvider";
 import { Category, Games, Preset, Settings } from "./types";
 import { resetPageCounts } from "@/_Main/MainOnline";
-import { info } from "@fltsci/tauri-plugin-tracing";
+import { info } from "@/lib/logger";
 // import { v2_0_4_migration } from "./filesys";
 const paths = {
 	exe: "",

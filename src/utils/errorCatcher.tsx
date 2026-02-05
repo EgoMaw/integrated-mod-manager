@@ -8,7 +8,7 @@ import { getCwd } from "./init";
 import { join } from "./utils";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { open } from "@tauri-apps/plugin-dialog";
-import { error } from "@fltsci/tauri-plugin-tracing";
+import { error } from "@/lib/logger";
 import { invoke } from "@tauri-apps/api/core";
 
 const DISCORD_LINK = "https://discord.gg/QGkKzNapXZ";
