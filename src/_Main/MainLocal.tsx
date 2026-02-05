@@ -6,6 +6,7 @@ import {
 	INSTALLED_ITEMS,
 	LAST_UPDATED,
 	MOD_LIST,
+	openConflict,
 	SEARCH,
 	SELECTED,
 	SETTINGS,
@@ -136,6 +137,7 @@ function MainLocal() {
 				addToast({
 					type: "error",
 					message: `Collisions detected for enabled mods`,
+					onClick: openConflict,
 				});
 				setConflicts({ conflicts: newCols, mods: modsInvolved });
 			}
@@ -243,7 +245,7 @@ function MainLocal() {
 			if (containerRef.current) {
 				const box = containerRef.current.getBoundingClientRect();
 				const scrollTop = containerRef.current.scrollTop;
-				const itemHeight = 320;
+				const itemHeight = 304;
 				const itemWidth = 256;
 				const itemsPerRow = Math.floor((box.width - 10) / itemWidth);
 				console.log(itemsPerRow, itemWidth, box.width - 10);

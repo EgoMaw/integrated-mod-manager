@@ -110,7 +110,7 @@ function MainOnline() {
 			diff = carouselRef.current.getBoundingClientRect().height + 42;
 		}
 		const scrollTop = containerRef.current.scrollTop - diff;
-		const itemHeight = 320;
+		const itemHeight = 304;
 		const itemWidth = 256;
 		const itemsPerRow = Math.floor(box.width / itemWidth);
 

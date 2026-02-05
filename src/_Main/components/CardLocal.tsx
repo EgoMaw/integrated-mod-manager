@@ -37,14 +37,14 @@ const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAv
 			/>
 			<img
 				style={{ filter: item.enabled ? "brightness(1)" : "brightness(0.5) saturate(0.5)" }}
-				className="w-full fadein h-[calc(100%-3.5rem)] -mt-[calc(var(--card-height)-2px)]   duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover"
+				className="w-full fadein h-[calc(100%-2.5rem)] -mt-[calc(var(--card-height)-2px)]   duration-200 rounded-t-lg data-gi:rounded-none pointer-events-none object-cover"
 				src={previewUrl}
 				onError={(e) => handleImageError(e)}
 			/>
 
 			<div
 				className="bg-background/50 rounded-b-xl data-zzz:rounded-bl-3xl fadein backdrop-blur
-			 flex items-center w-full min-h-14 gap-2 px-2 py-1 header-img"
+			 flex items-center w-full min-h-10 gap-2 px-3 header-img"
 			>
 				{inConflict >= 0 ? (
 					<Button
@@ -52,6 +52,7 @@ const CardLocal = React.memo(({ item, selected, lastUpdated, hasUpdate, updateAv
 							openConflict(inConflict);
 						}}
 						variant="ghost"
+						className="max-h-8 max-w-8 -ml-2 -mr-1"
 					>
 						<SwordsIcon className="text-destructive h-4" />
 					</Button>

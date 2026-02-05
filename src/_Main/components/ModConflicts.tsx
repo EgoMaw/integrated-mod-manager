@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { toggleMod } from "@/utils/filesys";
 import { preventContextMenu } from "@/utils/utils";
 
-import { CONFLICT_INDEX, CONFLICTS,  MOD_LIST, TEXT_DATA } from "@/utils/vars";
+import { CONFLICT_INDEX, CONFLICTS,  MOD_LIST } from "@/utils/vars";
 
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {  useState } from "react";

@@ -5,7 +5,7 @@ import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, RectangleHorizontalIcon, XIco
 import { INIT_DONE, LEFT_SIDEBAR_OPEN, ONLINE, RIGHT_SIDEBAR_OPEN, RIGHT_SLIDEOVER_OPEN } from "./vars";
 import Help from "@/_Main/components/Help";
 import Updater from "@/_Main/components/Updater";
-import { createPortal } from "react-dom";
+// import { createPortal } from "react-dom";
 const appWindow = getCurrentWindow();
 
 function Decorations() {

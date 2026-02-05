@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { motion } from "motion/react";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { CHANGES, PROGRESS_OVERLAY, TEXT_DATA } from "@/utils/vars";
-import { applyChanges, cancelRestore, verifyDirStruct } from "@/utils/filesys";
+import { cancelRestore, verifyDirStruct } from "@/utils/filesys";
 function Progress() {
 	const textData = useAtomValue(TEXT_DATA);
 	const [restoreInfo, setRestoreInfo] = useAtom(PROGRESS_OVERLAY);

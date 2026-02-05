@@ -9,13 +9,15 @@ export function addToast({
 	type = "info",
 	message,
 	duration = 3000,
+	onClick = null,
 }: {
 	id?: number;
 	type?: "success" | "error" | "info" | "warning";
 	message: string;
 	duration?: number;
+	onClick?: null | (() => void);
 }) {
-	const toast = { id, type, message, duration };
+	const toast = { id, type, message, onClick };
 	counter++;
 	setTimeout(() => {
 		store.set(TOASTS, (prevToasts) => prevToasts.filter((t) => t.id !== toast.id));
@@ -43,12 +45,14 @@ function ToastProvider() {
 									toast.type === "success"
 										? "var(--success)"
 										: toast.type === "error"
-										? "var(--destructive)"
-										: toast.type === "warning"
-										? "var(--warn)"
-										: "",
+											? "var(--destructive)"
+											: toast.type === "warning"
+												? "var(--warn)"
+												: "",
+								pointerEvents: toast.onClick ? "auto" : "none",
 							}}
 							className="data-wuwa:px-1 game-font polka min-h-20 -mb-22 bg-card data-gi:outline button-like flex items-center justify-center w-full h-20 px-4 py-1 text-center border rounded-md pointer-events-none"
+							onClick={toast.onClick || undefined}
 						>
 							{toast.message}
 						</motion.div>

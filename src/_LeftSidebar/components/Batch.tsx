@@ -456,11 +456,12 @@ function BatchOperations({ leftSidebarOpen }: { leftSidebarOpen: boolean }) {
 					e.currentTarget.blur();
 				}}
 				style={{
-					maxHeight: isMaximized ? "98vh" : "",
-					height: isMaximized ? "98vh" : "",
+					maxHeight: isMaximized ? "calc( 98vh - 32px)" : "calc( 98vh - 32px)",
+					height: isMaximized ? "calc( 98vh - 32px)" : "45rem",
 					maxWidth: isMaximized ? "98vw" : "",
 					width: isMaximized ? "98vw" : "",
 				}}
+				className="duration-300"
 			>
 				<Tooltip>
 					<TooltipTrigger></TooltipTrigger>

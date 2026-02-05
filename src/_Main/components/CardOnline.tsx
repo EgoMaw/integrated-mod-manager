@@ -53,7 +53,7 @@ const Online = React.memo((data: CardOnlineProps) => {
 				/>
 			</div>
 			{data._sInitialVisibility === "hide" && data.blur === true && (
-				<div className="max-h-0 fadein mb-45 -mt-45 w-fit z-20 self-center">
+				<div className="max-h-0 fadein mb-41 -mt-41 w-fit z-20 self-center">
 					<Button
 						className=" bg-background/50 duration-200 pointer-events-auto"
 						onClick={(e) => {
@@ -70,7 +70,7 @@ const Online = React.memo((data: CardOnlineProps) => {
 				</div>
 			)}
 			<div
-				className={`w-fit fadein bg-background/50 text-accent  backdrop-blur -mt-72 flex flex-col items-center px-4 py-1 mb-48 rounded-br-lg pointer-events-none`}
+				className={`w-fit fadein bg-background/50 text-accent  backdrop-blur -mt-68 flex flex-col items-center px-4 py-1 mb-44 rounded-br-lg pointer-events-none`}
 			>
 				{data._sModelName}
 			</div>

@@ -106,7 +106,7 @@
 	--zzz-accent: #efdd00;
 	--zzz-accent-2: #f68f36;
 	--gi-accent: #d1bc8e;
-	--card-height: 18rem;
+	--card-height: 17rem;
 	/* Common values across themes */
 	--foreground: oklch(0.985 0.001 106.423);
 	--card-foreground: oklch(0.985 0.001 106.423);
@@ -656,7 +656,7 @@ a {
 }
 
 .card-grid-online {
-	grid-auto-rows: 18rem;
+	grid-auto-rows: 17rem;
 }
 .card-generic {
 	width: 14rem; /* w-56 */
@@ -676,21 +676,21 @@ a {
 
 .card-online {
 	display: flex;
-	height:18rem;
+	height:17rem;
 	flex-direction: column;
 	justify-content: end;
 }
 [data-theme="zzz"]
 .card-online {
 	display: flex;
-	height:18rem;
+	height:17rem;
 	flex-direction: column;
 	justify-content: end;
 }
 [data-theme="gi"]
 .card-online {
 	display: flex;
-	height:18rem;
+	height:17rem;
 	flex-direction: column;
 	justify-content: end;
 }

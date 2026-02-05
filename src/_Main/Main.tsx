@@ -7,7 +7,7 @@ import BottomBar from "./components/BottomBar";
 import TopBar from "./components/TopBar";
 import { ONLINE_TRANSITION } from "@/utils/consts";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import ModConflicts from "@/_Main/components/ModConflicts";
 
 function Main() {

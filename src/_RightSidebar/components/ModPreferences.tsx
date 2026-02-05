@@ -7,14 +7,14 @@ import { openFile, saveConfigs, updateIniVars } from "@/utils/filesys";
 import { join } from "@/utils/hotreload";
 import { ModHotKeys } from "@/utils/types";
 
-import { DATA, MOD_LIST, TEXT_DATA } from "@/utils/vars";
+import { DATA, MOD_LIST } from "@/utils/vars";
 
-import {  useAtomValue, useSetAtom } from "jotai";
+import {   useSetAtom } from "jotai";
 import { ArrowUpRightFromSquareIcon, InfoIcon, IterationCcwIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 function ModPreferences({ item }: { item: any }) {
-	const textData = useAtomValue(TEXT_DATA);
+	// const textData = useAtomValue(TEXT_DATA);
 	const setData = useSetAtom(DATA);
 	const setModList = useSetAtom(MOD_LIST);
 	const [keys, setKeys] = useState([] as any);

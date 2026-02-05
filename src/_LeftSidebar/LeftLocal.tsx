@@ -330,7 +330,7 @@ function LeftLocal() {
 										key={preset?.name}
 										layout
 										transition={{ duration: 0.2 }}
-										className="min-h-10 flex justify-center w-full"
+										className="min-h-10 flex group justify-center w-full"
 										onClick={async (e) => {
 											if (e.target == e.currentTarget) {
 												setCurrentPreset(index);
@@ -347,9 +347,10 @@ function LeftLocal() {
 										{leftSidebarOpen ? (
 											<div
 												className={
-													"w-full text-accent button-like duration-200 rounded-lg px-2 pointer-events-none items-center flex gap-1 " +
-													(currentPreset == index ? " bg-accent bgaccent text-background" : "zzz-fg-text bg-input/10")
+													"w-full text-accent button-like duration-200 rounded-lg px-2  items-center flex gap-1 " +
+													(currentPreset == index ? " bg-accent bgaccent text-background" : "zzz-fg-text bg-input/10 hover:bg-input/20")
 												}
+												onClick={(e)=>e.currentTarget.parentElement?.click()}
 												style={{
 													transitionProperty: "background-color, border-radius",
 												}}
