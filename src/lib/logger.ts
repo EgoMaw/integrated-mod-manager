@@ -3,7 +3,7 @@ import { error as traceError, info as traceInfo, warn as traceWarn } from "@flts
 const stringify = (...args: unknown[]): string =>
 	args
 		.map((arg) =>
-			typeof arg === "string" ? arg : JSON.stringify(arg, null, 2)
+			typeof arg === "string" ? arg : JSON.stringify(arg)
 		)
 		.join(" ");
 

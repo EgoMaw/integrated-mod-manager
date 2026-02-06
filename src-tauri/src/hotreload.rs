@@ -4,6 +4,7 @@ use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 #[cfg(windows)]
 use std::sync::atomic::{AtomicBool, Ordering};
+use tauri_plugin_tracing::tracing;
 use std::sync::RwLock;
 #[cfg(windows)]
 use std::time::Duration;
